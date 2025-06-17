@@ -1,0 +1,60 @@
+// pages/api/message.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const { thread_id, message } = req.body;
+
+  if (!thread_id || !message) {
+    console.error("❌ Missing thread_id or message in request body:", req.body);
+    return res.status(400).json({ error: "Missing thread_id or message" });
+  }
+
+  try {
+    const response = await openai.beta.threads.messages.create(thread_id, {
+      role: "user",
+      content: message,
+    });
+
+    console.log("📨 Incoming message:", { content: message });
+    res.status(200).json({ success: true, message_id: response.id });
+  } catch (error: any) {
+    console.error("❌ [Message API Error]", error);
+    res.status(500).json({ error: "Failed to send message", details: error.message });
+  }
+}
+import type { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const { thread_id, message } = req.body;
+
+  if (!thread_id || !message) {
+    console.error("❌ Missing thread_id or message:", { thread_id, message });
+    return res.status(400).json({ error: "Missing thread_id or message in request body" });
+  }
+
+  try {
+    console.log("📨 Incoming message:", { content: message });
+
+    await openai.beta.threads.messages.create(thread_id, {
+      role: "user",
+      content: message,
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error: any) {
+    console.error("❌ Failed to send message:", error);
+    res.status(500).json({ error: "Failed to send message", details: error.message });
+  }
+}
+
+

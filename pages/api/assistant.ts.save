@@ -1,0 +1,78 @@
+// pages/api/assistant.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const { thread_id } = req.body;
+
+  if (!thread_id || !thread_id.startsWith("thread_")) {
+    console.error("❌ Missing or invalid thread_id", thread_id);
+    return res.status(400).json({ error: "Missing or invalid thread_id" });
+  }
+
+  try {
+    const run = await openai.beta.threads.runs.create(thread_id, {
+      assistant_id: process.env.OPENAI_ASSISTANT_ID!,
+    });
+
+    res.status(200).json({ run_id: run.id });
+  } catch (error: any) {
+    console.error("❌ [Assistant Trigger Error]", error);
+    res.status(500).json({ error: "Failed to trigger assistant", details: error.message });
+  }
+}
+import type { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const { thread_id } = req.body;
+
+  if (!thread_id || !thread_id.startsWith("thread_")) {
+    console.error("❌ Missing or invalid thread_id", thread_id);
+    return res.status(400).json({ error: "Missing or invalid thread_id" });
+  }
+
+  try {
+    // 🔍 Load previous messages in the thread
+    const messages = await openai.beta.threads.messages.list(thread_id);
+
+    // 🔁 Check if user already gave a password or username
+    let alreadyHasUsername = false;
+    let alreadyHasPassword = false;
+
+    for (const msg of messages.data) {
+      const content = msg.content?.[0]?.text?.value || "";
+      if (/username\s*[:=]/i.test(content)) alreadyHasUsername = true;
+      if (/password\s*[:=]/i.test(content)) alreadyHasPassword = true;
+    }
+
+    // 💡 Dynamic instructions based on message history
+    const instructions = `
+      You are NAO, a digital health assistant. 
+      ${alreadyHasUsername ? "The user has already given a username." : ""}
+      ${alreadyHasPassword ? "The user has already given a password." : ""}
+      Do not repeat prompts. Ask what the user would like to do next if both are provided.
+    `.trim();
+
+    // 🚀 Trigger the assistant run
+    const run = await openai.beta.threads.runs.create(thread_id, {
+      assistant_id: process.env.OPENAI_ASSISTANT_ID!,
+      instructions,
+    });
+
+    res.status(200).json({ run_id: run.id, thread_id });
+  } catch (error: any) {
+    console.error("❌ [Assistant Trigger Error]", error);
+    res.status(500).json({ error: "Failed to trigger assistant", details: error.message });
+  }
+}
+
+

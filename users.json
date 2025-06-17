@@ -1,0 +1,16 @@
+{
+  "ca74ca@gmail.com": {
+    "username": "tito",
+    "email": "ca74ca@gmail.com",
+    "password": "1162",
+    "healthGoals": "loose weight",
+    "connectWearables": true,
+    "walletId": "0x395c988080b59",
+    "passportId": "NFT-q8rc6qpm",
+    "xp": 0,
+    "evolutionLevel": 1,
+    "nftImage": "/nft-preview.png",
+    "nftTitle": "NAO Health NFT",
+    "nftMeta": "Dynamic, evolving health record"
+  }
+}
