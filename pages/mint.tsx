@@ -1,3 +1,13 @@
+import { getSession } from "next-auth/react";
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+  if (!session) {
+    return { redirect: { destination: "/", permanent: false } };
+  }
+  return { props: { session } };
+}
+
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import EchoAssistant from "../components/EchoAssistant";
@@ -211,7 +221,7 @@ function getWhoopAuthUrl() {
   )}&redirect_uri=${encodedRedirect}&state=${state}`;
 }
 
-export default function MintPage() {
+export default function MintPage({ session }: { session: any }) {
   const { rewardState } = useRewardState();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -255,7 +265,7 @@ export default function MintPage() {
   // Try to get the email from query param or localStorage (fallback)
   const email =
     typeof window !== "undefined"
-      ? (router.query.email as string) || localStorage.getItem("userEmail") || ""
+      ? (router.query.email as string) || localStorage.getItem("userEmail") || session?.user?.email || ""
       : "";
 
   useEffect(() => {
@@ -337,11 +347,19 @@ export default function MintPage() {
     setTimeout(() => setAppleSyncStatus(""), 2000);
   };
 
+  // --- AUTH PROTECTION (client-side fallback in case server-side fails) ---
+  useEffect(() => {
+    // If session is not present (should never happen due to getServerSideProps), redirect to home
+    if (!session) {
+      router.replace("/");
+    }
+  }, [session, router]);
+
   if (loading) return <div>Loading your passport...</div>;
   if (!user) return <div>User not found. Please onboard again.</div>;
 
   const passportData = {
-    username: user.username || "User",
+    username: user.username || session?.user?.name || "User",
     passportId: user.passportId || "N/A",
     xp: user.xp ?? 0,
     evolutionLevel: user.evolutionLevel ?? 1,
@@ -519,7 +537,7 @@ export default function MintPage() {
             marginBottom: 8,
           }}
         >
-          {`Welcome, ${passportData.username}!`}
+          {`Welcome, ${passportData.username} (${session?.user?.email || ""})!`}
         </div>
         <div style={{ fontSize: 16, color: WHITE_SOFT, marginBottom: 8 }}>
           {`Today is ${now.toLocaleDateString()} — ${now.toLocaleTimeString()}`}
@@ -897,6 +915,59 @@ export default function MintPage() {
                 <span style={{ color: WHITE_SOFT, fontWeight: 600, letterSpacing: 1 }}>XP</span>
                 <span style={{ color: BLUE, fontWeight: 800 }}>{passportData.xp}</span>
               </div>
+            </div>
+            {/* Placeholder NFT Preview and Celebrate Button */}
+            <div style={{
+              marginTop: 28,
+              marginBottom: 0,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center"
+            }}>
+              <div style={{
+                width: 220,
+                height: 220,
+                background: "linear-gradient(145deg, #00fff9aa, #1267daa0)",
+                borderRadius: 20,
+                boxShadow: "0 0 20px #00fff9aa",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 20,
+                fontWeight: "bold",
+                color: "#fff",
+                textAlign: "center",
+                padding: 20,
+                marginBottom: 22
+              }}>
+                NFT Preview Coming Soon
+              </div>
+              <button
+                onClick={() => alert("🎉 Mint logic coming soon")}
+                style={{
+                  padding: "12px 30px",
+                  fontSize: 16,
+                  borderRadius: 10,
+                  background: "linear-gradient(90deg, #00fff9, #1267da)",
+                  border: "none",
+                  color: "#fff",
+                  fontWeight: 700,
+                  boxShadow: "0 0 12px 3px #00fff9cc",
+                  cursor: "pointer",
+                  transition: "transform 0.2s, box-shadow 0.2s"
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "scale(1.05)";
+                  e.currentTarget.style.boxShadow = "0 0 18px 5px #00fff9cc";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.boxShadow = "0 0 12px 3px #00fff9cc";
+                }}
+              >
+                🚀 Celebrate My Mint
+              </button>
             </div>
           </section>
         </main>

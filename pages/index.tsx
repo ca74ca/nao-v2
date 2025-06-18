@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/router";
+import NaoOnboardingForm from "../components/NaoOnboardingForm";
+
 import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
 import Image from "next/image";
 import { RewardsTracker } from "../components/RewardsTracker";
-import ActionBar from "../commands/ActionBar"; // <-- NEW: import the techy ActionBar
+// ActionBar import REMOVED as requested
+// import ActionBar from "../commands/ActionBar"; // <-- REMOVED as requested
 
 // Simulated NFT tokenId for demo (replace with actual user's NFT token id)
 const NFT_TOKEN_ID = "demo-nft-123";
@@ -32,14 +37,21 @@ async function evolveNFT({
 }
 
 export default function Home() {
+  const { data: session, status } = useSession();
+
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Logo fade-in state
   const [showLogo, setShowLogo] = useState(false);
+
+  // Onboarding state and router
+  const [isOnboarded, setIsOnboarded] = useState(false);
+  const router = useRouter();
+
+  // Glow state for small NextAuth button
+  const [btnHover, setBtnHover] = useState(false);
 
   // Reward state and NFT evolution sync
   const { rewardState, applyRewardEvent } = useRewardState();
@@ -57,6 +69,28 @@ export default function Home() {
   useEffect(() => {
     setShowLogo(true);
   }, []);
+
+  // Onboard user on login
+  useEffect(() => {
+    const onboard = async () => {
+      if (session && !isOnboarded) {
+        try {
+          const res = await fetch("/api/onboardUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: session.user?.email, name: session.user?.name }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+          setIsOnboarded(true);
+          router.push("/mint");
+        } catch (e) {
+          // Optionally handle error (show message, etc)
+        }
+      }
+    };
+    onboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, isOnboarded, router]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,14 +145,106 @@ export default function Home() {
   return (
     <div style={{
       position: "relative",
-      width: "100vw",
-      height: "100vh",
+      width: "200vw",
+      height: "200vh",
       overflow: "hidden",
       color: "#fff"
     }}>
-      <ActionBar />
-      {/* Logo in upper left with fade-in */}
-      
+      <div
+        style={{
+          position: "fixed",
+          top: 20,
+          left: 24,
+          zIndex: 100,
+          fontSize: 18,
+          fontWeight: 500,
+          letterSpacing: 2,
+          color: "#00fff9",
+          textShadow: "0 0 6px rgb(208, 223, 223), 0 0 2px rgb(232, 239, 239)",
+          fontFamily: "inherit",
+          background: "rgba(0, 0, 0, 0.3)",
+          padding: "4px 10px",
+          boxShadow: "0 0 10px rgba(8, 8, 8, 0.67)",
+        }}
+      >
+        N A O HEALTH INTELLIGENCE REWARDED
+      </div>
+
+      {/* Small NextAuth Button on Top Right */}
+      <div
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+          zIndex: 100,
+          background: "rgba(8,24,58,0.68)",
+          borderRadius: 10,
+          padding: "6px 12px",
+          border: "1.5px solid #00fff9",
+          boxShadow: "0 0 12px 1px #00fff9cc",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          backdropFilter: "blur(4px)"
+        }}
+      >
+        {status === "loading" ? (
+          <span>Loading...</span>
+        ) : session ? (
+          <>
+            <span style={{ color: "#00fff9", fontWeight: 700, fontSize: 16, letterSpacing: 1 }}>
+              Signed in as {session.user?.email || session.user?.name}
+            </span>
+            <button
+              onClick={() => signOut()}
+              onMouseEnter={() => setBtnHover(true)}
+              onMouseLeave={() => setBtnHover(false)}
+              style={{
+                marginTop: 10,
+                background: "none",
+                color: "#fff",
+                border: "1.5px solid #00fff9",
+                borderRadius: 10,
+                padding: "7px 26px",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 400,
+                transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+                boxShadow: btnHover
+                  ? "0 0 16px 4px #00fff9, 0 0 6px 2px #00fff9"
+                  : "0 0 8px 2px #00fff9cc"
+              }}
+            >
+              Sign out
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => signIn("google", { callbackUrl: "/mint" })}
+            onMouseEnter={() => setBtnHover(true)}
+            onMouseLeave={() => setBtnHover(false)}
+            style={{
+              background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              padding: "8px 18px",
+              fontWeight: 700,
+              fontSize: 14,
+              letterSpacing: 1,
+              cursor: "pointer",
+              boxShadow: btnHover
+                ? "0 0 24px 8px #00fff9, 0 0 12px 2px #00fff9"
+                : "0 0 8px 2px #00fff9cc",
+              textShadow: "0 0 4px #00fff9, 0 0 1px #00fff9",
+              transition: "box-shadow 0.2s, background 0.2s"
+            }}
+          >
+            Sign up / Sign in with Google
+          </button>
+        )}
+      </div>
+
       {/* Fullscreen Video */}
       <video
         autoPlay
