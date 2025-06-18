@@ -1,36 +1,27 @@
+require('dotenv').config();
 const express = require('express');
-const router = express.Router();
-const db = require('../db'); // Connects to your MongoDB
+const app = express();
 
-// POST /onboard
-router.post('/', async (req, res) => {
-  const { username, email, healthGoals, connectWearables } = req.body;
-  if (!username || !email) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
+const onboardRoute = require('./routes/onboard.js'); // ✅ Correctly imports the fixed onboard route
 
-  try {
-    const database = await db.connect();
-    const users = database.collection('users');
+// Middleware to parse incoming JSON
+app.use(express.json());
 
-    const existingUser = await users.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
+// Mount onboard route at /onboard (so POST /onboard works)
+app.use('/onboard', onboardRoute);
 
-    const newUser = {
-      username,
-      email,
-      healthGoals,
-      connectWearables,
-      createdAt: new Date()
-    };
-
-    await users.insertOne(newUser);
-    res.json({ success: true, user: newUser });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to onboard user', details: error.message });
-  }
+// Health check endpoint (for Render.com)
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
 });
 
-module.exports = router;
+// Catch-all for invalid routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
+
+// Start the Express server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ NAO backend live on port ${PORT}`);
+});
