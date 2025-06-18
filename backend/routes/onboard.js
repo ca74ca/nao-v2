@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db'); // Connects to your MongoDB
+const db = require('../db.js'); // ✅ Explicit extension for safety
 
 // POST /onboard
 router.post('/', async (req, res) => {
   const { username, email, healthGoals, connectWearables } = req.body;
-  if (!username || !email) {
-    return res.status(400).json({ error: 'Missing required fields' });
+
+  // Validate required fields
+  if (!username || !email || typeof healthGoals !== 'string' || typeof connectWearables !== 'boolean') {
+    return res.status(400).json({ error: 'Missing or invalid required fields' });
   }
 
   try {
@@ -27,9 +29,10 @@ router.post('/', async (req, res) => {
     };
 
     await users.insertOne(newUser);
-    res.json({ success: true, user: newUser });
+    return res.status(200).json({ success: true, user: newUser });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to onboard user', details: error.message });
+    console.error("🔥 Onboard Error:", error);
+    return res.status(500).json({ error: 'Failed to onboard user', details: error.message });
   }
 });
 
