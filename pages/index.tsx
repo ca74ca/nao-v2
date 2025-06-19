@@ -36,6 +36,13 @@ async function evolveNFT({
   });
 }
 
+type OnboardFields = {
+  username?: string;
+  name?: string;
+  password?: string;
+  email?: string;
+};
+
 export default function Home() {
   const { data: session, status } = useSession();
 
@@ -56,6 +63,45 @@ export default function Home() {
   // Reward state and NFT evolution sync
   const { rewardState, applyRewardEvent } = useRewardState();
   useNFTSync(rewardState, NFT_TOKEN_ID, evolveNFT, getUpdatedTraits);
+
+  // --- Add State for Awaiting User Choice ---
+  const [awaitingAccountChoice, setAwaitingAccountChoice] = useState(true);
+
+  // Chat-based onboarding state
+  const [onboardingStep, setOnboardingStep] = useState<
+    null | "username" | "name" | "password" | "email" | "creating"
+  >(null);
+  const [onboardFields, setOnboardFields] = useState<OnboardFields>({});
+
+  // Show welcome greeting on initial mount if needed
+  useEffect(() => {
+    if (
+      messages.length === 0 &&
+      awaitingAccountChoice &&
+      !session
+    ) {
+      setMessages([
+        {
+          sender: "NAO",
+          text: "Welcome! I am NAO, your health intelligence. Do you already have a NAO health passport, or would you like to create one?",
+        },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // AI Prompt When Session Is Active
+  useEffect(() => {
+    if (session && awaitingAccountChoice) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "NAO",
+          text: "Do you already have a NAO health passport, or would you like to create one?",
+        },
+      ]);
+    }
+  }, [session, awaitingAccountChoice]);
 
   // Fetch a new threadId when the component mounts
   useEffect(() => {
@@ -92,11 +138,241 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, isOnboarded, router]);
 
+  // INTENT RECOGNITION for smarter onboarding
+  function checkIntentSwitch(input: string) {
+    const lower = input.toLowerCase();
+    if (["sign in", "login", "already", "have account", "i have an account"].some(k => lower.includes(k))) {
+      // user wants to switch to login
+      return "login";
+    }
+    if (["sign up", "create", "register", "new account"].some(k => lower.includes(k))) {
+      // user wants to switch to signup
+      return "signup";
+    }
+    return null;
+  }
+
+  // Chat-based onboarding in sendMessage
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // === DEBUG LOGS FOR NON-RESPONSIVE/REDIRECTING AI CHAT ===
+    console.log("DEBUG: sendMessage called");
+    console.log("DEBUG: input =", input);
+    console.log("DEBUG: awaitingAccountChoice =", awaitingAccountChoice);
+    console.log("DEBUG: onboardingStep =", onboardingStep);
+    console.log("DEBUG: loading =", loading);
+    console.log("DEBUG: threadId =", threadId);
+
     if (!input.trim() || !threadId || loading) return;
     setMessages((msgs) => [...msgs, { sender: "You", text: input }]);
+    setInput(""); // Clear input immediately after sending
     setLoading(true);
+
+    // --- Account Choice Interception ---
+    if (awaitingAccountChoice) {
+      const msg = input.toLowerCase();
+      console.log("DEBUG: In awaitingAccountChoice branch, msg =", msg);
+      if (
+        ["yes", "already", "i have one", "login"].some((phrase) => msg.includes(phrase))
+      ) {
+        console.log("DEBUG: 'YES' branch matched. Navigating to /mint ...");
+        setAwaitingAccountChoice(false);
+        setLoading(false);
+        router.push("/mint");
+        return;
+      } else if (
+        ["no", "create", "sign up", "new"].some((phrase) => msg.includes(phrase))
+      ) {
+        console.log("DEBUG: 'NO' branch matched. Starting onboarding ...");
+        setAwaitingAccountChoice(false);
+        setOnboardingStep("username");
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "NAO",
+            text: "Great! Let's create your NAO health passport. What would you like your username to be?",
+          },
+        ]);
+        setLoading(false);
+        return;
+      } else {
+        console.log("DEBUG: Fallback branch in awaitingAccountChoice.");
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "NAO",
+            text: "Please say 'yes' if you already have a NAO profile, or 'no' to create your health passport.",
+          },
+        ]);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // --- Chat-based onboarding steps with INTENT CHECKS ---
+    if (onboardingStep) {
+      // Check if the user is switching intent during onboarding
+      const detectedIntent = checkIntentSwitch(input);
+      if (detectedIntent === "login") {
+        console.log("DEBUG: Detected intent switch to login during onboardingStep.");
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "NAO",
+            text: "It looks like you want to sign in instead. Please say 'yes' if you already have a NAO profile, or 'no' to create your health passport.",
+          },
+        ]);
+        setAwaitingAccountChoice(true);
+        setOnboardingStep(null);
+        setOnboardFields({});
+        setLoading(false);
+        return;
+      }
+      if (detectedIntent === "signup" && onboardingStep !== "username") {
+        console.log("DEBUG: Detected repeated signup intent during onboardingStep.");
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "NAO",
+            text: "You're already creating a new account. Please answer the current question to continue.",
+          },
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      if (onboardingStep === "username") {
+        if (input.length < 3 || /\s/.test(input)) {
+          console.log("DEBUG: Username validation failed:", input);
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "Please enter a valid username (at least 3 characters, no spaces)." },
+          ]);
+          setLoading(false);
+          return;
+        }
+        console.log("DEBUG: Username accepted:", input);
+        setOnboardFields((fields) => ({ ...fields, username: input }));
+        setOnboardingStep("name");
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "And your full name?" }
+        ]);
+        setLoading(false);
+        return;
+      }
+      if (onboardingStep === "name") {
+        if (input.length < 2) {
+          console.log("DEBUG: Name validation failed:", input);
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "Please enter your full name." },
+          ]);
+          setLoading(false);
+          return;
+        }
+        console.log("DEBUG: Name accepted:", input);
+        setOnboardFields((fields) => ({ ...fields, name: input }));
+        setOnboardingStep("password");
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "Choose a password. (Don't worry, it's encrypted!)" }
+        ]);
+        setLoading(false);
+        return;
+      }
+      if (onboardingStep === "password") {
+        if (input.length < 6) {
+          console.log("DEBUG: Password validation failed:", input);
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "Please choose a password at least 6 characters long." },
+          ]);
+          setLoading(false);
+          return;
+        }
+        console.log("DEBUG: Password accepted.");
+        setOnboardFields((fields) => ({ ...fields, password: input }));
+        setOnboardingStep("email");
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "What email should be associated with your account?" }
+        ]);
+        setLoading(false);
+        return;
+      }
+      if (onboardingStep === "email") {
+        if (!/\S+@\S+\.\S+/.test(input)) {
+          console.log("DEBUG: Email validation failed:", input);
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "That doesn't look like a valid email. Please try again." },
+          ]);
+          setLoading(false);
+          return;
+        }
+        console.log("DEBUG: Email accepted:", input);
+        setOnboardFields((fields) => ({ ...fields, email: input }));
+        setOnboardingStep("creating");
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "Creating your NAO account and secure health wallet..." }
+        ]);
+        // Call backend to create user and wallet
+        try {
+          // Simulated backend call; replace with your real endpoint
+          const res = await fetch("/api/createUserAndWallet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: onboardFields.username,
+              name: onboardFields.name,
+              password: onboardFields.password,
+              email: input, // current input is the email
+            }),
+          });
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.log("DEBUG: Error creating account:", errorText);
+            setMessages((msgs) => [
+              ...msgs,
+              { sender: "System", text: "Error creating account: " + errorText }
+            ]);
+            setOnboardingStep(null);
+            setLoading(false);
+            return;
+          }
+          // You might want to parse the wallet address or user info here
+          // const data = await res.json();
+          setTimeout(() => {
+            console.log("DEBUG: Account and wallet created.");
+            setMessages((msgs) => [
+              ...msgs,
+              {
+                sender: "NAO",
+                text: "Done! Your NAO health passport and wallet are ready. Let's continue onboarding.",
+              },
+            ]);
+            setOnboardingStep(null);
+            setLoading(false);
+            router.push("/final-onboarding");
+          }, 1600); // Small delay for effect
+        } catch (err) {
+          console.log("DEBUG: Network error creating account:", err);
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "System", text: "Network error: " + (err as Error).message }
+          ]);
+          setOnboardingStep(null);
+          setLoading(false);
+        }
+        return;
+      }
+      // Prevent running normal message flow if onboarding step active
+      setLoading(false);
+      return;
+    }
 
     // ⬇️ Example: Command triggers for reward events
     if (/workout/i.test(input)) {
@@ -137,7 +413,6 @@ export default function Home() {
         { sender: "System", text: "Network error: " + (err as Error).message }
       ]);
     }
-    setInput("");
     setLoading(false);
     if (inputRef.current) inputRef.current.focus();
   };
