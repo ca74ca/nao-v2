@@ -17,5 +17,11 @@ export default NextAuth({
   pages: {
     signIn: "/signin", // Custom sign-in page
   },
-  // You can add callbacks, session/jwt config, etc. here as needed
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always redirect to /mint after login
+      return "/mint";
+    },
+  },
+  // You can add more callbacks, session/jwt config, etc. here as needed
 });

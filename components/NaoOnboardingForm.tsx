@@ -1,17 +1,19 @@
 import React, { useState } from "react";
+import { useRouter } from "next/router"; // For Next.js Pages Router
+// If you use App Router, use: import { useRouter } from "next/navigation";
 
 interface Props {
   email: string;
   defaultUsername?: string;
-  onComplete: () => void;
 }
 
-export default function NaoOnboardingForm({ email, defaultUsername = "", onComplete }: Props) {
+export default function NaoOnboardingForm({ email, defaultUsername = "" }: Props) {
   const [username, setUsername] = useState(defaultUsername);
   const [healthGoals, setHealthGoals] = useState("");
   const [connectWearables, setConnectWearables] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +31,8 @@ export default function NaoOnboardingForm({ email, defaultUsername = "", onCompl
         setLoading(false);
         return;
       }
-      onComplete();
+      // Redirect to /mint on successful onboarding
+      router.push("/mint");
     } catch (err: any) {
       setError(err.message || "Onboarding failed");
       setLoading(false);
