@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import NaoOnboardingForm from "../components/NaoOnboardingForm";
 
@@ -7,8 +6,6 @@ import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
 import Image from "next/image";
 import { RewardsTracker } from "../components/RewardsTracker";
-// ActionBar import REMOVED as requested
-// import ActionBar from "../commands/ActionBar"; // <-- REMOVED as requested
 
 // Simulated NFT tokenId for demo (replace with actual user's NFT token id)
 const NFT_TOKEN_ID = "demo-nft-123";
@@ -44,8 +41,6 @@ type OnboardFields = {
 };
 
 export default function Home() {
-  const { data: session, status } = useSession();
-
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string | null>(null);
@@ -57,9 +52,6 @@ export default function Home() {
   const [isOnboarded, setIsOnboarded] = useState(false);
   const router = useRouter();
 
-  // Glow state for small NextAuth button
-  const [btnHover, setBtnHover] = useState(false);
-
   // Reward state and NFT evolution sync
   const { rewardState, applyRewardEvent } = useRewardState();
   useNFTSync(rewardState, NFT_TOKEN_ID, evolveNFT, getUpdatedTraits);
@@ -69,7 +61,7 @@ export default function Home() {
 
   // Chat-based onboarding state
   const [onboardingStep, setOnboardingStep] = useState<
-    null | "username" | "name" | "password" | "email" | "creating"
+    null | "username" | "name" | "password" | "email" | "creating" | "loginUsername" | "loginPassword" | "resetPassword"
   >(null);
   const [onboardFields, setOnboardFields] = useState<OnboardFields>({});
 
@@ -77,8 +69,7 @@ export default function Home() {
   useEffect(() => {
     if (
       messages.length === 0 &&
-      awaitingAccountChoice &&
-      !session
+      awaitingAccountChoice
     ) {
       setMessages([
         {
@@ -89,19 +80,6 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // AI Prompt When Session Is Active
-  useEffect(() => {
-    if (session && awaitingAccountChoice) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "NAO",
-          text: "Do you already have a NAO health passport, or would you like to create one?",
-        },
-      ]);
-    }
-  }, [session, awaitingAccountChoice]);
 
   // Fetch a new threadId when the component mounts
   useEffect(() => {
@@ -115,28 +93,6 @@ export default function Home() {
   useEffect(() => {
     setShowLogo(true);
   }, []);
-
-  // Onboard user on login
-  useEffect(() => {
-    const onboard = async () => {
-      if (session && !isOnboarded) {
-        try {
-          const res = await fetch("/api/onboardUser", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: session.user?.email, name: session.user?.name }),
-          });
-          if (!res.ok) throw new Error(await res.text());
-          setIsOnboarded(true);
-          router.push("/mint");
-        } catch (e) {
-          // Optionally handle error (show message, etc)
-        }
-      }
-    };
-    onboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, isOnboarded, router]);
 
   // INTENT RECOGNITION for smarter onboarding
   function checkIntentSwitch(input: string) {
@@ -156,14 +112,6 @@ export default function Home() {
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // === DEBUG LOGS FOR NON-RESPONSIVE/REDIRECTING AI CHAT ===
-    console.log("DEBUG: sendMessage called");
-    console.log("DEBUG: input =", input);
-    console.log("DEBUG: awaitingAccountChoice =", awaitingAccountChoice);
-    console.log("DEBUG: onboardingStep =", onboardingStep);
-    console.log("DEBUG: loading =", loading);
-    console.log("DEBUG: threadId =", threadId);
-
     if (!input.trim() || !threadId || loading) return;
     setMessages((msgs) => [...msgs, { sender: "You", text: input }]);
     setInput(""); // Clear input immediately after sending
@@ -172,19 +120,20 @@ export default function Home() {
     // --- Account Choice Interception ---
     if (awaitingAccountChoice) {
       const msg = input.toLowerCase();
-      console.log("DEBUG: In awaitingAccountChoice branch, msg =", msg);
       if (
         ["yes", "already", "i have one", "login"].some((phrase) => msg.includes(phrase))
       ) {
-        console.log("DEBUG: 'YES' branch matched. Navigating to /mint ...");
         setAwaitingAccountChoice(false);
+        setOnboardingStep("loginUsername");
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "Please enter your username or email to sign in." }
+        ]);
         setLoading(false);
-        router.push("/mint");
         return;
       } else if (
         ["no", "create", "sign up", "new"].some((phrase) => msg.includes(phrase))
       ) {
-        console.log("DEBUG: 'NO' branch matched. Starting onboarding ...");
         setAwaitingAccountChoice(false);
         setOnboardingStep("username");
         setMessages((msgs) => [
@@ -197,7 +146,6 @@ export default function Home() {
         setLoading(false);
         return;
       } else {
-        console.log("DEBUG: Fallback branch in awaitingAccountChoice.");
         setMessages((msgs) => [
           ...msgs,
           {
@@ -215,7 +163,6 @@ export default function Home() {
       // Check if the user is switching intent during onboarding
       const detectedIntent = checkIntentSwitch(input);
       if (detectedIntent === "login") {
-        console.log("DEBUG: Detected intent switch to login during onboardingStep.");
         setMessages((msgs) => [
           ...msgs,
           {
@@ -230,7 +177,6 @@ export default function Home() {
         return;
       }
       if (detectedIntent === "signup" && onboardingStep !== "username") {
-        console.log("DEBUG: Detected repeated signup intent during onboardingStep.");
         setMessages((msgs) => [
           ...msgs,
           {
@@ -242,9 +188,101 @@ export default function Home() {
         return;
       }
 
+      // --- HANDLE loginUsername step ---
+      if (onboardingStep === "loginUsername") {
+        if (!input.includes("@") && input.length < 3) {
+          setMessages((msgs) => [
+            ...msgs,
+            {
+              sender: "NAO",
+              text: "Please enter a valid email address or username.",
+            },
+          ]);
+          setLoading(false);
+          return;
+        }
+        setOnboardFields((fields) => ({ ...fields, email: input }));
+        setOnboardingStep("loginPassword");
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "Please enter your password." }
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // --- HANDLE loginPassword step with "forgot" logic ---
+      if (onboardingStep === "loginPassword") {
+        // Check for "forgot password" intent
+        if (
+          ["forgot", "don't know", "do not know", "cant remember", "can't remember", "reset"].some(phrase =>
+            input.toLowerCase().includes(phrase)
+          )
+        ) {
+          setMessages((msgs) => [
+            ...msgs,
+            {
+              sender: "NAO",
+              text: "No worries! (In production, you'd get a password reset email.) For testing, please enter a new password you'd like to set for your account.",
+            },
+          ]);
+          setOnboardingStep("resetPassword");
+          setLoading(false);
+          return;
+        }
+
+        if (input.length < 6) {
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "Please enter a valid password (at least 6 characters)." }
+          ]);
+          setLoading(false);
+          return;
+        }
+        setOnboardFields((fields) => ({ ...fields, password: input }));
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "Signing you in..." }
+        ]);
+        setTimeout(() => {
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "Welcome back! You are now signed in!" }
+          ]);
+          localStorage.setItem("userEmail", onboardFields.email ?? "");
+router.push("/mint");          setLoading(false);
+        }, 1600);
+        return;
+      }
+
+      // --- HANDLE resetPassword step ---
+      if (onboardingStep === "resetPassword") {
+        if (input.length < 6) {
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "Please enter a new password at least 6 characters long." }
+          ]);
+          setLoading(false);
+          return;
+        }
+        setOnboardFields((fields) => ({ ...fields, password: input }));
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "NAO", text: "Password reset successful! Signing you in..." }
+        ]);
+        setTimeout(() => {
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "NAO", text: "Welcome back! You are now signed in!" }
+          ]);
+          localStorage.setItem("userEmail", onboardFields.email ?? "");
+router.push("/mint");          setLoading(false);
+        }, 1600);
+        return;
+      }
+
       if (onboardingStep === "username") {
         if (input.length < 3 || /\s/.test(input)) {
-          console.log("DEBUG: Username validation failed:", input);
           setMessages((msgs) => [
             ...msgs,
             { sender: "NAO", text: "Please enter a valid username (at least 3 characters, no spaces)." },
@@ -252,7 +290,6 @@ export default function Home() {
           setLoading(false);
           return;
         }
-        console.log("DEBUG: Username accepted:", input);
         setOnboardFields((fields) => ({ ...fields, username: input }));
         setOnboardingStep("name");
         setMessages((msgs) => [
@@ -264,7 +301,6 @@ export default function Home() {
       }
       if (onboardingStep === "name") {
         if (input.length < 2) {
-          console.log("DEBUG: Name validation failed:", input);
           setMessages((msgs) => [
             ...msgs,
             { sender: "NAO", text: "Please enter your full name." },
@@ -272,7 +308,6 @@ export default function Home() {
           setLoading(false);
           return;
         }
-        console.log("DEBUG: Name accepted:", input);
         setOnboardFields((fields) => ({ ...fields, name: input }));
         setOnboardingStep("password");
         setMessages((msgs) => [
@@ -284,7 +319,6 @@ export default function Home() {
       }
       if (onboardingStep === "password") {
         if (input.length < 6) {
-          console.log("DEBUG: Password validation failed:", input);
           setMessages((msgs) => [
             ...msgs,
             { sender: "NAO", text: "Please choose a password at least 6 characters long." },
@@ -292,7 +326,6 @@ export default function Home() {
           setLoading(false);
           return;
         }
-        console.log("DEBUG: Password accepted.");
         setOnboardFields((fields) => ({ ...fields, password: input }));
         setOnboardingStep("email");
         setMessages((msgs) => [
@@ -304,7 +337,6 @@ export default function Home() {
       }
       if (onboardingStep === "email") {
         if (!/\S+@\S+\.\S+/.test(input)) {
-          console.log("DEBUG: Email validation failed:", input);
           setMessages((msgs) => [
             ...msgs,
             { sender: "NAO", text: "That doesn't look like a valid email. Please try again." },
@@ -312,7 +344,6 @@ export default function Home() {
           setLoading(false);
           return;
         }
-        console.log("DEBUG: Email accepted:", input);
         setOnboardFields((fields) => ({ ...fields, email: input }));
         setOnboardingStep("creating");
         setMessages((msgs) => [
@@ -334,7 +365,6 @@ export default function Home() {
           });
           if (!res.ok) {
             const errorText = await res.text();
-            console.log("DEBUG: Error creating account:", errorText);
             setMessages((msgs) => [
               ...msgs,
               { sender: "System", text: "Error creating account: " + errorText }
@@ -346,7 +376,6 @@ export default function Home() {
           // You might want to parse the wallet address or user info here
           // const data = await res.json();
           setTimeout(() => {
-            console.log("DEBUG: Account and wallet created.");
             setMessages((msgs) => [
               ...msgs,
               {
@@ -359,7 +388,6 @@ export default function Home() {
             router.push("/final-onboarding");
           }, 1600); // Small delay for effect
         } catch (err) {
-          console.log("DEBUG: Network error creating account:", err);
           setMessages((msgs) => [
             ...msgs,
             { sender: "System", text: "Network error: " + (err as Error).message }
@@ -443,81 +471,6 @@ export default function Home() {
         }}
       >
         N A O HEALTH INTELLIGENCE REWARDED
-      </div>
-
-      {/* Small NextAuth Button on Top Right */}
-      <div
-        style={{
-          position: "fixed",
-          top: 20,
-          right: 20,
-          zIndex: 100,
-          background: "rgba(8,24,58,0.68)",
-          borderRadius: 10,
-          padding: "6px 12px",
-          border: "1.5px solid #00fff9",
-          boxShadow: "0 0 12px 1px #00fff9cc",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          backdropFilter: "blur(4px)"
-        }}
-      >
-        {status === "loading" ? (
-          <span>Loading...</span>
-        ) : session ? (
-          <>
-            <span style={{ color: "#00fff9", fontWeight: 700, fontSize: 16, letterSpacing: 1 }}>
-              Signed in as {session.user?.email || session.user?.name}
-            </span>
-            <button
-              onClick={() => signOut()}
-              onMouseEnter={() => setBtnHover(true)}
-              onMouseLeave={() => setBtnHover(false)}
-              style={{
-                marginTop: 10,
-                background: "none",
-                color: "#fff",
-                border: "1.5px solid #00fff9",
-                borderRadius: 10,
-                padding: "7px 26px",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 400,
-                transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
-                boxShadow: btnHover
-                  ? "0 0 16px 4px #00fff9, 0 0 6px 2px #00fff9"
-                  : "0 0 8px 2px #00fff9cc"
-              }}
-            >
-              Sign out
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={() => signIn("google", { callbackUrl: "/mint" })}
-            onMouseEnter={() => setBtnHover(true)}
-            onMouseLeave={() => setBtnHover(false)}
-            style={{
-              background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 10,
-              padding: "8px 18px",
-              fontWeight: 700,
-              fontSize: 14,
-              letterSpacing: 1,
-              cursor: "pointer",
-              boxShadow: btnHover
-                ? "0 0 24px 8px #00fff9, 0 0 12px 2px #00fff9"
-                : "0 0 8px 2px #00fff9cc",
-              textShadow: "0 0 4px #00fff9, 0 0 1px #00fff9",
-              transition: "box-shadow 0.2s, background 0.2s"
-            }}
-          >
-            Sign up / Sign in with Google
-          </button>
-        )}
       </div>
 
       {/* Fullscreen Video */}

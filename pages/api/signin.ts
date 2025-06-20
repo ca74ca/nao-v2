@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { MongoClient } from "mongodb";
 import bcrypt from "bcryptjs";
+import { serialize } from "cookie";
 
 const MONGO_URI = process.env.MONGODB_URI!; // Set in .env.local
 
@@ -37,7 +38,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // TODO: set a cookie or session here if needed
+    // Set HTTP-only session cookie (1 week expiry)
+    res.setHeader(
+      "Set-Cookie",
+      serialize("nao_session", user._id.toString(), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 1 week in seconds
+        sameSite: "lax",
+      })
+    );
 
     return res.status(200).json({ status: "success", message: "Login successful" });
   } catch (err: any) {
