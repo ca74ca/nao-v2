@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import EchoAssistant from "@/components/EchoAssistant";
-import { useSession } from "next-auth/react";
 
 export default function FinalOnboarding() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [wearableConnected, setWearableConnected] = useState(false);
   const [coinbaseLinked, setCoinbaseLinked] = useState(false);
@@ -13,34 +11,46 @@ export default function FinalOnboarding() {
   const [loadingWearable, setLoadingWearable] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Redirect unauthenticated users
-  useEffect(() => {
-    if (status === "loading") return; // Wait for session to resolve
-    if (!session) router.push("/signin");
-  }, [session, status, router]);
+  const [user, setUser] = useState<any>(null); // Holds full user object
 
-  // Check Whoop/Apple Health connection status from backend
+  useEffect(() => {
+    const stored = typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
+    if (stored) {
+      try {
+        const parsedUser = JSON.parse(stored);
+        setUser(parsedUser);
+      } catch (e) {
+        console.error("Failed to parse nao_user from localStorage:", e);
+        router.push("/");
+      }
+    } else {
+      router.push("/"); // Redirect if no user stored
+    }
+  }, [router]);
+
   useEffect(() => {
     const checkWearable = async () => {
-      if (!session?.user?.email) return;
+      if (!user?.email) return;
       setLoadingWearable(true);
       try {
-        const res = await fetch(`/api/getUser?email=${encodeURIComponent(session.user.email)}`);
+        const res = await fetch(`/api/getUser?email=${encodeURIComponent(user.email)}`);
         if (!res.ok) throw new Error("Could not fetch user status");
         const data = await res.json();
-        // Adjust the property name as needed to match your DB
-        if (data?.whoopLinked) setWearableConnected(true);
-        else setWearableConnected(false);
+        if (data?.whoopLinked || data?.appleHealthLinked) {
+          setWearableConnected(true);
+        } else {
+          setWearableConnected(false);
+        }
       } catch (e) {
         setError("Could not check wearable status.");
       } finally {
         setLoadingWearable(false);
       }
     };
-    checkWearable();
-  }, [session]);
 
-  // Enable continue when all are connected
+    checkWearable();
+  }, [user]);
+
   useEffect(() => {
     setAllowContinue(wearableConnected && coinbaseLinked && applePaySynced);
   }, [wearableConnected, coinbaseLinked, applePaySynced]);
@@ -100,7 +110,7 @@ export default function FinalOnboarding() {
       <div className="w-full max-w-3xl mt-8">
         <h2 className="text-xl mb-2">NAO AI Companion</h2>
         <div className="border border-gray-600 rounded-2xl p-4">
-          <EchoAssistant session={session} prompt="Begin your intelligence by typing here." />
+          <EchoAssistant prompt="Begin your intelligence by typing here." />
         </div>
       </div>
 

@@ -1,4 +1,3 @@
-import { getSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import EchoAssistant from "../components/EchoAssistant";
@@ -10,15 +9,13 @@ import ActionBar from "../components/ActionBar";
 // --- Evolve NFT Action Trigger (original, unchanged) ---
 function EvolveActionBar({ onEvolve, evolving }: { onEvolve: () => void, evolving: boolean }) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        right: 32,
-        bottom: 32,
-        zIndex: 50,
-        pointerEvents: "auto"
-      }}
-    >
+    <div style={{
+      position: "fixed",
+      right: 32,
+      bottom: 32,
+      zIndex: 50,
+      pointerEvents: "auto"
+    }}>
       <button
         onClick={onEvolve}
         disabled={evolving}
@@ -58,46 +55,40 @@ function EvolveMeterActionBar({
 }) {
   const percent = Math.min(100, Math.round((xp / xpGoal) * 100));
   return (
-    <div
-      style={{
-        position: "fixed",
-        right: 32,
-        bottom: 110,
-        zIndex: 51,
-        pointerEvents: "auto",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-      }}
-    >
+    <div style={{
+      position: "fixed",
+      right: 32,
+      bottom: 110,
+      zIndex: 51,
+      pointerEvents: "auto",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-end",
+    }}>
       <div style={{ marginBottom: 14, width: 260 }}>
         <div style={{ color: "#fff", marginBottom: 4, fontWeight: 700 }}>
           {xp} / {xpGoal} XP until next evolution
         </div>
-        <div
-          style={{
-            height: 13,
-            width: "100%",
+        <div style={{
+          height: 13,
+          width: "100%",
+          borderRadius: 7,
+          background: "#132c48",
+          overflow: "hidden",
+          boxShadow: "0 0 8px #60C6FF33",
+        }}>
+          <div style={{
+            height: "100%",
+            width: `${percent}%`,
+            background: ready
+              ? "linear-gradient(90deg, #00ffc8 0%, #2D9CFF 100%)"
+              : "linear-gradient(90deg, #2D9CFF 0%, #60C6FF 100%)",
             borderRadius: 7,
-            background: "#132c48",
-            overflow: "hidden",
-            boxShadow: "0 0 8px #60C6FF33",
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              width: `${percent}%`,
-              background: ready
-                ? "linear-gradient(90deg, #00ffc8 0%, #2D9CFF 100%)"
-                : "linear-gradient(90deg, #2D9CFF 0%, #60C6FF 100%)",
-              borderRadius: 7,
-              transition: "width 0.3s, background 0.3s",
-              boxShadow: ready
-                ? "0 0 24px 6px #00ffc8"
-                : "0 0 12px 1px #60C6FF",
-            }}
-          />
+            transition: "width 0.3s, background 0.3s",
+            boxShadow: ready
+              ? "0 0 24px 6px #00ffc8"
+              : "0 0 12px 1px #60C6FF",
+          }}/>
         </div>
       </div>
       <button
@@ -212,11 +203,12 @@ function getWhoopAuthUrl() {
   )}&redirect_uri=${encodedRedirect}&state=${state}`;
 }
 
-export default function MintPage({ session }: { session: any }) {
-  const { rewardState } = useRewardState();
+export default function MintPage() {
   const router = useRouter();
+  const { rewardState } = useRewardState();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [weather, setWeather] = useState<string>("");
   const [now, setNow] = useState<Date>(new Date());
   const [whoopSyncStatus, setWhoopSyncStatus] = useState<string>("");
@@ -230,6 +222,36 @@ export default function MintPage({ session }: { session: any }) {
   const [whoopData, setWhoopData] = useState<any>(null);
   const [whoopLoading, setWhoopLoading] = useState(true);
   const [whoopError, setWhoopError] = useState<string | null>(null);
+
+  // --- AUTH & LOCAL USER LOAD ---
+  useEffect(() => {
+    const storedUser = localStorage.getItem("nao_user");
+    if (!storedUser) {
+      setError("User not found. Please onboard again.");
+      router.push("/");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(storedUser);
+      if (!parsed?.email) {
+        setError("User not found. Please onboard again.");
+        router.push("/");
+      } else {
+        setUser(parsed);
+      }
+    } catch (e) {
+      console.error("Failed to parse stored user", e);
+      setError("Invalid user data. Please re-onboard.");
+      router.push("/");
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  // Try to get the email from user object
+  const email = user?.email || "";
 
   useEffect(() => {
     async function fetchWhoop() {
@@ -248,17 +270,7 @@ export default function MintPage({ session }: { session: any }) {
     fetchWhoop();
   }, []);
 
-  // VO2 Max value and source (mock, later replace with real)
-  const vo2Max = user?.vo2Max ?? 47.2;
-  const vo2MaxSource = user?.vo2MaxSource ?? "Apple HealthKit → VO₂Max quantity type";
-  const vo2Reward = getVo2MaxReward(vo2Max);
-
-  // Try to get the email from query param or localStorage (fallback)
-  const email =
-    typeof window !== "undefined"
-      ? (router.query.email as string) || localStorage.getItem("userEmail") || session?.user?.email || ""
-      : "";
-
+  // Fetch user info from backend by email
   useEffect(() => {
     if (!email) {
       setLoading(false);
@@ -338,19 +350,12 @@ export default function MintPage({ session }: { session: any }) {
     setTimeout(() => setAppleSyncStatus(""), 2000);
   };
 
-  // --- AUTH PROTECTION (client-side fallback in case server-side fails) ---
-  useEffect(() => {
-    // If session is not present (should never happen due to getServerSideProps), redirect to home
-    if (!session) {
-      router.replace("/");
-    }
-  }, [session, router]);
-
   if (loading) return <div>Loading your passport...</div>;
+  if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
   if (!user) return <div>User not found. Please onboard again.</div>;
 
   const passportData = {
-    username: user.username || session?.user?.name || "User",
+    username: user.username || "User",
     passportId: user.passportId || "N/A",
     xp: user.xp ?? 0,
     evolutionLevel: user.evolutionLevel ?? 1,
@@ -528,7 +533,7 @@ export default function MintPage({ session }: { session: any }) {
             marginBottom: 8,
           }}
         >
-          {`Welcome, ${passportData.username} (${session?.user?.email || ""})!`}
+          {`Welcome, ${passportData.username} (${user?.email || ""})!`}
         </div>
         <div style={{ fontSize: 16, color: WHITE_SOFT, marginBottom: 8 }}>
           {`Today is ${now.toLocaleDateString()} — ${now.toLocaleTimeString()}`}
@@ -669,7 +674,7 @@ export default function MintPage({ session }: { session: any }) {
             <div style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
               <span style={{ fontSize: 28, marginRight: 12 }}>🫁</span>
               <span style={{ fontWeight: 700, fontSize: 21 }}>VO₂ Max</span>
-              {vo2Max >= 50 && (
+              {user?.vo2Max >= 50 && (
                 <span
                   style={{
                     marginLeft: 12,
@@ -685,37 +690,37 @@ export default function MintPage({ session }: { session: any }) {
               )}
             </div>
             <div style={{ fontSize: 16, marginBottom: 2 }}>
-              Score: <span style={{ color: "#2D9CFF", fontWeight: 600 }}>{vo2Max ?? "--"}</span>
+              Score: <span style={{ color: "#2D9CFF", fontWeight: 600 }}>{user?.vo2Max ?? "--"}</span>
             </div>
             <div style={{ fontSize: 13, color: "#2D9CFFDD", fontStyle: "italic", marginBottom: 5 }}>
-              {vo2MaxSource}
+              {user?.vo2MaxSource ?? "Apple HealthKit → VO₂Max quantity type"}
             </div>
             <div style={{ fontSize: 15, marginBottom: 2 }}>
               Fitness Rating:{" "}
               <span
                 style={{
                   color:
-                    vo2Max >= 50
+                    user?.vo2Max >= 50
                       ? "#00ffc8"
-                      : vo2Max >= 40
+                      : user?.vo2Max >= 40
                       ? "#60C6FF"
-                      : vo2Max >= 30
+                      : user?.vo2Max >= 30
                       ? "#FFD600"
                       : "#FF4A4A",
                   fontWeight: 700,
                 }}
               >
-                {vo2Reward.rating}
+                {getVo2MaxReward(user?.vo2Max).rating}
               </span>
             </div>
             <div style={{ fontSize: 15, marginBottom: 10, fontWeight: 600 }}>
               Reward:{" "}
               <span
                 style={{
-                  color: vo2Max >= 50 ? "#00ffc8" : "#2D9CFF",
+                  color: user?.vo2Max >= 50 ? "#00ffc8" : "#2D9CFF",
                 }}
               >
-                {vo2Reward.reward}
+                {getVo2MaxReward(user?.vo2Max).reward}
               </span>
             </div>
             <div
@@ -732,18 +737,18 @@ export default function MintPage({ session }: { session: any }) {
               <div
                 style={{
                   height: "100%",
-                  width: `${Math.min(100, Math.round((vo2Max / 60) * 100))}%`,
+                  width: `${Math.min(100, Math.round(((user?.vo2Max ?? 0) / 60) * 100))}%`,
                   borderRadius: 8,
                   background:
-                    vo2Max >= 50
+                    user?.vo2Max >= 50
                       ? "#00ffc8"
-                      : vo2Max >= 40
+                      : user?.vo2Max >= 40
                       ? "#60C6FF"
-                      : vo2Max >= 30
+                      : user?.vo2Max >= 30
                       ? "#FFD600"
                       : "#FF4A4A",
                   boxShadow:
-                    vo2Max >= 50
+                    user?.vo2Max >= 50
                       ? "0 0 16px #00ffc8"
                       : "0 0 12px #2D9CFF",
                   transition: "width 0.3s, background 0.3s",

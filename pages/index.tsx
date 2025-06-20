@@ -42,6 +42,14 @@ type OnboardFields = {
 
 export default function Home() {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
+
+  // Scroll chat to bottom when messages change
+  useEffect(() => {
+    const chatContainer = document.querySelector('[style*="overflow-y: auto"]');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [messages]);
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -65,9 +73,11 @@ export default function Home() {
   >(null);
   const [onboardFields, setOnboardFields] = useState<OnboardFields>({});
 
-  // Show welcome greeting on initial mount if needed
+  // --- BEGIN: FIXED WELCOME EFFECT (only on first page load) ---
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
   useEffect(() => {
     if (
+      !hasShownWelcome &&
       messages.length === 0 &&
       awaitingAccountChoice
     ) {
@@ -77,9 +87,11 @@ export default function Home() {
           text: "Welcome! I am NAO, your health intelligence. Do you already have a NAO health passport, or would you like to create one?",
         },
       ]);
+      setHasShownWelcome(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasShownWelcome, messages.length, awaitingAccountChoice]);
+  // --- END: FIXED WELCOME EFFECT ---
 
   // Fetch a new threadId when the component mounts
   useEffect(() => {
@@ -249,8 +261,13 @@ export default function Home() {
             ...msgs,
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
-          localStorage.setItem("userEmail", onboardFields.email ?? "");
-router.push("/mint");          setLoading(false);
+          localStorage.setItem("nao_user", JSON.stringify({
+            email: onboardFields.email ?? "",
+            username: onboardFields.username ?? "",
+            // ...add other fields if needed
+          }));
+          router.push("/mint");
+          setLoading(false);
         }, 1600);
         return;
       }
@@ -275,8 +292,13 @@ router.push("/mint");          setLoading(false);
             ...msgs,
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
-          localStorage.setItem("userEmail", onboardFields.email ?? "");
-router.push("/mint");          setLoading(false);
+          localStorage.setItem("nao_user", JSON.stringify({
+            email: onboardFields.email ?? "",
+            username: onboardFields.username ?? "",
+            // ...add other fields if needed
+          }));
+          router.push("/mint");
+          setLoading(false);
         }, 1600);
         return;
       }
@@ -479,6 +501,7 @@ router.push("/mint");          setLoading(false);
         muted
         loop
         playsInline
+        aria-hidden="true"
         style={{
           position: "fixed",
           top: 0,
