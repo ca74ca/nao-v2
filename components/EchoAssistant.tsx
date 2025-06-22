@@ -6,13 +6,15 @@ interface EchoAssistantProps {
   initialThreadId?: string | null;
   videoSrc?: string;
   inputPlaceholder?: string;
+  onSend?: (input: string) => Promise<string>; // <-- ADDED THIS LINE
 }
 
 export default function EchoAssistant({
   initialMessage,
   initialThreadId = null,
   videoSrc,
-  inputPlaceholder = "Type your command..."
+  inputPlaceholder = "Type your command...",
+  onSend, // <-- ADDED THIS ARGUMENT
 }: EchoAssistantProps) {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
     initialMessage
@@ -36,9 +38,9 @@ export default function EchoAssistant({
     }
   }, [threadId]);
 
-  const sendMessage = async (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !threadId || loading) return;
+    if (!input.trim() || loading) return;
 
     // Capture the user's email if it looks like one
     if (!userEmail && /\S+@\S+\.\S+/.test(input.trim())) {
@@ -47,37 +49,54 @@ export default function EchoAssistant({
 
     setMessages((msgs) => [...msgs, { sender: "You", text: input }]);
     setLoading(true);
+
     try {
-      const res = await fetch("/api/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ threadId, message: input }),
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        setMessages((msgs) => [
-          ...msgs,
-          { sender: "System", text: "Error from server: " + errorText }
-        ]);
-        setLoading(false);
-        return;
+      let reply: string | undefined;
+      if (onSend) {
+        reply = await onSend(input);
+      } else {
+        if (!threadId) {
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "System", text: "NAO is initializing, please wait..." }
+          ]);
+          setLoading(false);
+          setInput("");
+          return;
+        }
+        const res = await fetch("/api/message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ threadId, message: input }),
+        });
+        if (!res.ok) {
+          const errorText = await res.text();
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "System", text: "Error from server: " + errorText }
+          ]);
+          setLoading(false);
+          setInput("");
+          return;
+        }
+        const data = await res.json();
+        reply = data.reply;
       }
-      const data = await res.json();
-      setMessages((msgs) => [...msgs, { sender: "NAO", text: data.reply }]);
+      setMessages((msgs) => [...msgs, { sender: "NAO", text: reply || "NAO is thinking..." }]);
 
       // ---- Redirection logic: if onboarding is complete ----
       if (
-        typeof data.reply === "string" &&
+        reply &&
         (
-          data.reply.toLowerCase().includes("you're all set") ||
-          data.reply.toLowerCase().includes("onboarding complete")
+          reply.toLowerCase().includes("you're all set") ||
+          reply.toLowerCase().includes("onboarding complete")
         )
       ) {
         if (userEmail) {
           router.push({ pathname: "/mint", query: { email: userEmail } });
-        } else {
+        } else if (reply) {
           // fallback: try to extract from reply, if ever included
-          const match = data.reply.match(/[\w\-.]+@[\w\-.]+\.\w+/);
+          const match = reply.match(/[\w\-.]+@[\w\-.]+\.\w+/);
           if (match) {
             router.push({ pathname: "/mint", query: { email: match[0] } });
           }
@@ -183,7 +202,7 @@ export default function EchoAssistant({
             ))}
           </div>
           <form
-            onSubmit={sendMessage}
+            onSubmit={handleSend}
             style={{
               display: "flex",
               gap: 8,

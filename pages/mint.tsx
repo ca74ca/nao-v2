@@ -180,27 +180,9 @@ function generateRandomState(length = 16) {
 }
 
 function getWhoopAuthUrl() {
-  const clientId = process.env.NEXT_PUBLIC_WHOOP_CLIENT_ID || "YOUR_CLIENT_ID";
-  const redirectUri =
-    process.env.NEXT_PUBLIC_WHOOP_REDIRECT_URI ||
-    "https://your-ngrok-or-prod-url/api/whoop-callback";
-  const encodedRedirect = encodeURIComponent(redirectUri);
-  const scope = [
-    "offline",
-    "read:profile",
-    "read:recovery",
-    "read:cycles",
-    "read:sleep",
-    "read:workout",
-    "read:body_measurement"
-  ].join(" ");
-  const state = generateRandomState(16);
-  if (typeof window !== "undefined") {
-    localStorage.setItem("whoop_oauth_state", state);
-  }
-  return `https://api.prod.whoop.com/oauth/oauth2/auth?client_id=${clientId}&response_type=code&scope=${encodeURIComponent(
-    scope
-  )}&redirect_uri=${encodedRedirect}&state=${state}`;
+  const clientId = process.env.NEXT_PUBLIC_WHOOP_CLIENT_ID!;
+  const redirectUri = process.env.NEXT_PUBLIC_WHOOP_REDIRECT_URI!;
+  return `https://api.prod.whoop.com/oauth/oauth2/authenticate?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=read`;
 }
 
 export default function MintPage() {
@@ -349,6 +331,40 @@ export default function MintPage() {
     setAppleSyncStatus("✅ Apple Health sync complete!");
     setTimeout(() => setAppleSyncStatus(""), 2000);
   };
+
+  // --- BEGIN: NAO SMART CHAT ADDITION ---
+  const [threadId, setThreadId] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/thread", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => setThreadId(data.threadId))
+      .catch(() => setThreadId(null));
+  }, []);
+  // Smart message handler for EchoAssistant
+  const sendMessage = async (input: string) => {
+    if (!threadId) return "NAO is initializing, please wait...";
+    try {
+      const res = await fetch("/api/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          threadId,
+          message: input,
+          page: "mint",
+          onboardingComplete: true,
+        }),
+      });
+      const data = await res.json();
+      if (data?.reply) {
+        return data.reply;
+      } else {
+        return "NAO is thinking...";
+      }
+    } catch (err: any) {
+      return "Network error: " + (err?.message || "Unknown error");
+    }
+  };
+  // --- END: NAO SMART CHAT ADDITION ---
 
   if (loading) return <div>Loading your passport...</div>;
   if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
@@ -999,6 +1015,7 @@ export default function MintPage() {
               `Here is your health passport. You're doing great! You're on level ${passportData.evolutionLevel} with ${passportData.xp} reward points and your streak is 5 days.`
             }
             inputPlaceholder="Awaken NAO"
+            onSend={sendMessage} // <-- ADDED: connect smart chat!
           />
         </div>
       </div>
