@@ -1,9 +1,13 @@
 import { openai } from "@/app/openai";
+import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 
-// Create a new assistant run
-export async function POST(req: Request, { params }: { params: { threadId: string } }) {
+// ✅ CORRECT HANDLER SIGNATURE for Vercel + App Router
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { threadId: string } }
+) {
   const { threadId } = params;
 
   const run = await openai.beta.threads.runs.create(threadId, {
