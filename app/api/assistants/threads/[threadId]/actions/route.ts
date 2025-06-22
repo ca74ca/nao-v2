@@ -5,9 +5,9 @@ export const runtime = "nodejs";
 
 export async function POST(
   req: NextRequest,
-  context: { params: Record<string, string> }
+  { params }: { params: { threadId: string } }
 ) {
-  const threadId = context.params.threadId;
+  const threadId = params.threadId;
   const run = await openai.beta.threads.runs.create(threadId, {
     assistant_id: process.env.OPENAI_ASSISTANT_ID!,
   });
