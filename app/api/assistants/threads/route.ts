@@ -3,12 +3,12 @@ import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 
-// ✅ CORRECT HANDLER SIGNATURE for Vercel + App Router
+// Correct dynamic route handler for App Router
 export async function POST(
   req: NextRequest,
-  { params }: { params: { threadId: string } }
+  context: { params: { threadId: string } }
 ) {
-  const { threadId } = params;
+  const { threadId } = context.params;
 
   const run = await openai.beta.threads.runs.create(threadId, {
     assistant_id: process.env.OPENAI_ASSISTANT_ID!,
