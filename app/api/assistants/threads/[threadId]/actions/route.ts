@@ -3,10 +3,10 @@ import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 
-// Do not use a separate context type, destructure params in the handler argument
+// ✅ Use Record<string, string> for params for Next.js 15+ compatibility!
 export async function POST(
   req: NextRequest,
-  { params }: { params: { threadId: string } }
+  { params }: { params: Record<string, string> }
 ) {
   const { threadId } = params;
 
