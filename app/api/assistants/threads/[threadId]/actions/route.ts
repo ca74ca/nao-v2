@@ -1,19 +1,18 @@
 import { openai } from "@/app/openai";
 import { NextRequest } from "next/server";
 
-// Next.js 14+ API Route Handler signature
+export const runtime = "nodejs";
+
+// Do not use a separate context type, destructure params in the handler argument
 export async function POST(
-  request: NextRequest,
+  req: NextRequest,
   { params }: { params: { threadId: string } }
 ) {
   const { threadId } = params;
-  const { toolCallOutputs, runId } = await request.json();
 
-  const stream = openai.beta.threads.runs.submitToolOutputsStream(
-    threadId,
-    runId,
-    { tool_outputs: toolCallOutputs }
-  );
+  const run = await openai.beta.threads.runs.create(threadId, {
+    assistant_id: process.env.OPENAI_ASSISTANT_ID!,
+  });
 
-  return new Response(stream.toReadableStream());
+  return Response.json({ runId: run.id });
 }
