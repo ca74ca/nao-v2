@@ -1,12 +1,12 @@
 import { openai } from "@/app/openai";
 import { NextRequest } from "next/server";
 
-// Send a new message to a thread
+// Next.js 14+ API Route Handler signature
 export async function POST(
   request: NextRequest,
-  context: { params: { threadId: string } }
+  { params }: { params: { threadId: string } }
 ) {
-  const { threadId } = context.params;
+  const { threadId } = params;
   const { toolCallOutputs, runId } = await request.json();
 
   const stream = openai.beta.threads.runs.submitToolOutputsStream(
