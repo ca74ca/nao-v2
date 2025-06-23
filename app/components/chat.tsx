@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "./chat.module.css";
 import { AssistantStream } from "openai/lib/AssistantStream";
 import Markdown from "react-markdown";
-// @ts-expect-error - no types for this yet
+// @ts-expect-error
 import { AssistantStreamEvent } from "openai/resources/beta/assistants/assistants";
 import { RequiredActionFunctionToolCall } from "openai/resources/beta/threads/runs/runs";
 
@@ -54,12 +54,12 @@ type ChatProps = {
 };
 
 const Chat = ({
-  functionCallHandler = () => Promise.resolve(""),
+  functionCallHandler = async () => "",
 }: ChatProps) => {
-  const [userInput, setUserInput] = useState("");
+  const [userInput, setUserInput] = useState<string>("");
   const [messages, setMessages] = useState<MessageProps[]>([]);
-  const [inputDisabled, setInputDisabled] = useState(false);
-  const [threadId, setThreadId] = useState("");
+  const [inputDisabled, setInputDisabled] = useState<boolean>(false);
+  const [threadId, setThreadId] = useState<string>("");
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollToBottom = () => {
@@ -69,9 +69,7 @@ const Chat = ({
 
   useEffect(() => {
     const createThread = async () => {
-      const res = await fetch(`/api/assistants/threads`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/assistants/threads`, { method: "POST" });
       const data = await res.json();
       setThreadId(data.threadId);
     };
@@ -87,7 +85,9 @@ const Chat = ({
       }
     );
 
-    if (!response.body) throw new Error("No response body from /messages");
+    if (!response.body) {
+      throw new Error("No response body from /messages");
+    }
 
     const stream = AssistantStream.fromReadableStream(response.body);
     handleReadableStream(stream);
@@ -106,7 +106,9 @@ const Chat = ({
       }
     );
 
-    if (!response.body) throw new Error("No response body from /actions");
+    if (!response.body) {
+      throw new Error("No response body from /actions");
+    }
 
     const stream = AssistantStream.fromReadableStream(response.body);
     handleReadableStream(stream);
@@ -134,10 +136,11 @@ const Chat = ({
   };
 
   const toolCallCreated = (toolCall: any) => {
-    if (toolCall.type === "code_interpreter") appendMessage("code", "");
+    if (toolCall.type !== "code_interpreter") return;
+    appendMessage("code", "");
   };
 
-  const toolCallDelta = (delta: any, snapshot: any) => {
+  const toolCallDelta = (delta: any) => {
     if (delta.type !== "code_interpreter") return;
     if (!delta.code_interpreter.input) return;
     appendToLastMessage(delta.code_interpreter.input);
@@ -166,7 +169,7 @@ const Chat = ({
     stream.on("imageFileDone", handleImageFileDone);
     stream.on("toolCallCreated", toolCallCreated);
     stream.on("toolCallDelta", toolCallDelta);
-    stream.on("event", (event) => {
+    stream.on("event", (event: any) => {
       if (event.event === "thread.run.requires_action")
         handleRequiresAction(event);
       if (event.event === "thread.run.completed") handleRunCompleted();
@@ -176,11 +179,12 @@ const Chat = ({
   const appendToLastMessage = (text: string) => {
     setMessages((prev) => {
       const last = prev[prev.length - 1];
-      return [...prev.slice(0, -1), { ...last, text: last.text + text }];
+      const updated = { ...last, text: last.text + text };
+      return [...prev.slice(0, -1), updated];
     });
   };
 
-  const appendMessage = (role: "user" | "assistant" | "code", text: string) => {
+  const appendMessage = (role: MessageProps["role"], text: string) => {
     setMessages((prev) => [...prev, { role, text }]);
   };
 
@@ -213,4 +217,15 @@ const Chat = ({
           type="text"
           className={styles.input}
           value={userInput}
-          onChange={(e) => setUs
+          onChange={(e) => setUserInput(e.target.value)}
+          placeholder="Enter your question"
+        />
+        <button type="submit" className={styles.button} disabled={inputDisabled}>
+          Send
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default Chat;
