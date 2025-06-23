@@ -17,7 +17,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // 1. Prevent overlapping runs
     const runs = await openai.beta.threads.runs.list(threadId, { limit: 1 });
     const latestRun = runs.data[0];
     if (
@@ -30,13 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 2. Add user's message to thread
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
       content: message,
     });
 
-    // 3. Build context-aware instructions
     let instructions = `You are NAO, a futuristic AI health assistant.`;
     if (page) instructions += ` The user is currently on the "${page}" page.`;
     if (typeof onboardingComplete === "boolean") {
@@ -46,13 +43,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     instructions += ` Respond intelligently and avoid repeating onboarding prompts.`;
 
-    // 4. Start assistant run
     const run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: process.env.OPENAI_ASSISTANT_ID!,
       instructions,
     });
 
-    // 5. Handle tool calls
     let runStatus = run.status;
     let lastRun = run;
     while (["queued", "in_progress", "cancelling", "requires_action"].includes(runStatus)) {
@@ -123,10 +118,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 6. Get latest assistant message
     const messages = await openai.beta.threads.messages.list(threadId, { limit: 10 });
     const lastAssistantMessage = messages.data.find((msg) => msg.role === "assistant");
-    const textBlock = lastAssistantMessage?.content?.find((block: any) => block.type === "text");
+
+    const textBlock = lastAssistantMessage?.content?.find(
+      (block: any) => block.type === "text"
+    ) as { type: "text"; text: { value: string } } | undefined;
 
     res.status(200).json({
       reply: textBlock?.text?.value || "NAO is thinking...",
