@@ -1,31 +1,45 @@
-require("dotenv").config({ path: ".env.local" });
-
+import "dotenv/config"; // Cleaner dotenv usage
 import { MongoClient } from "mongodb";
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-// Debug: Print loaded env variables
-console.log("Loaded MONGODB_URI:", process.env.MONGODB_URI);
-console.log("Loaded MONGODB_DB:", process.env.MONGODB_DB);
-
+// ✅ Verify environment variables
 const uri = process.env.MONGODB_URI;
-if (!uri) throw new Error("MONGODB_URI is not set in environment variables");
 const dbName = process.env.MONGODB_DB || "nao";
+
+if (!uri) {
+  console.error("❌ MONGODB_URI is not defined in your .env.local");
+  process.exit(1);
+}
+
 const usersFile = path.join(process.cwd(), "users.json");
 
 async function migrate() {
-  if (!fs.existsSync(usersFile)) throw new Error("users.json not found");
-  const users = JSON.parse(fs.readFileSync(usersFile, "utf8"));
-  const client = new MongoClient(uri);
-  await client.connect();
-  const db = client.db(dbName);
-  const userDocs = Array.isArray(users) ? users : Object.values(users);
-  if (!userDocs.length) throw new Error("No users to migrate.");
-  await db.collection("users").insertMany(userDocs as any[]);
-  console.log(`Migrated ${userDocs.length} users.`);
-  await client.close();
+  try {
+    // ✅ Check if users.json exists
+    if (!fs.existsSync(usersFile)) {
+      throw new Error("❌ users.json not found in project root.");
+    }
+
+    const raw = fs.readFileSync(usersFile, "utf8");
+    const users = JSON.parse(raw);
+
+    const client = new MongoClient(uri);
+    await client.connect();
+    const db = client.db(dbName);
+
+    const userDocs = Array.isArray(users) ? users : Object.values(users);
+    if (userDocs.length === 0) {
+      throw new Error("❌ No user records found in users.json.");
+    }
+
+    const result = await db.collection("users").insertMany(userDocs as any[]);
+    console.log(`✅ Migrated ${result.insertedCount} users into '${dbName}.users'`);
+    await client.close();
+  } catch (error) {
+    console.error("🚨 Migration failed:", error);
+    process.exit(1);
+  }
 }
-migrate().catch(e => {
-  console.error(e);
-  process.exit(1);
-});
+
+migrate();
