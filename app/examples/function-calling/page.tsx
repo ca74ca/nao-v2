@@ -55,6 +55,3 @@ const FunctionCalling = () => {
 };
 
 export default FunctionCalling;
-
-
-export default FunctionCalling;
