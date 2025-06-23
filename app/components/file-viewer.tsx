@@ -51,9 +51,12 @@ const FileViewer = () => {
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = event.target.files;
+    if (!fileList || fileList.length === 0) return;
+
     const data = new FormData();
-    if (event.target.files?.length === 0) return;
-    data.append("file", event.target.files[0]);
+    data.append("file", fileList[0]);
+
     await fetch("/api/assistants/files", {
       method: "POST",
       body: data,
@@ -62,11 +65,7 @@ const FileViewer = () => {
 
   return (
     <div className={styles.fileViewer}>
-      <div
-        className={`${styles.filesList} ${
-          files.length !== 0 ? styles.grow : ""
-        }`}
-      >
+      <div className={`${styles.filesList} ${files.length !== 0 ? styles.grow : ""}`}>
         {files.length === 0 ? (
           <div className={styles.title}>Attach files to test file search</div>
         ) : (
@@ -101,4 +100,3 @@ const FileViewer = () => {
 };
 
 export default FileViewer;
-
