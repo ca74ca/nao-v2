@@ -115,4 +115,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (runStatus !== "completed") {
-      console.error("❌ Assistant
+      console.error("❌ Assistant run failed:", lastRun);
+      return res.status(500).json({
+        error: "Assistant run failed or cancelled.",
+        runStatus,
+        lastRun,
+      });
+    }
+
+    // 6. Get latest assistant message
+    const messages = await openai.beta.threads.messages.list(threadId, { limit: 10 });
+    const lastAssistantMessage = messages.data.find((msg) => msg.role === "assistant");
+    const textBlock = lastAssistantMessage?.content?.find((block: any) => block.type === "text");
+
+    res.status(200).json({
+      reply: textBlock?.text?.value || "NAO is thinking...",
+      threadId,
+    });
+  } catch (error: any) {
+    console.error("❌ Error in /api/message:", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+      details: error?.message || JSON.stringify(error),
+      stack: error?.stack,
+    });
+  }
+}
