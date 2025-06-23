@@ -2,8 +2,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import { Wallet } from "ethers";
 
-const signer = Wallet.fromPrivateKey(process.env.SIGNER_PK!);
-const sdk = ThirdwebSDK.fromWallet(signer, process.env.NETWORK!);
+// Check env vars
+if (!process.env.SIGNER_PK || !process.env.NETWORK || !process.env.NFT_CONTRACT_ADDRESS) {
+  throw new Error("Missing required environment variables");
+}
+
+const signer = new Wallet(process.env.SIGNER_PK);
+const sdk = ThirdwebSDK.fromWallet(signer, process.env.NETWORK);
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,13 +24,13 @@ export default async function handler(
 
   try {
     const contract = await sdk.getContract(
-      process.env.NFT_CONTRACT_ADDRESS!,
+      process.env.NFT_CONTRACT_ADDRESS,
       "signature-drop"
     );
 
     const payload = {
       to: userAddress,
-      metadata, // e.g. { name, description, image, properties }
+      metadata,
     };
 
     const signedPayload = await contract.signature.generate(payload);
