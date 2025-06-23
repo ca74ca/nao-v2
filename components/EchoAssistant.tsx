@@ -7,6 +7,7 @@ interface EchoAssistantProps {
   videoSrc?: string;
   inputPlaceholder?: string;
   onSend?: (input: string) => Promise<string>; // <-- ADDED THIS LINE
+  prompt?: string; // ✅ NEW LINE
 }
 
 export default function EchoAssistant({
@@ -15,10 +16,13 @@ export default function EchoAssistant({
   videoSrc,
   inputPlaceholder = "Type your command...",
   onSend, // <-- ADDED THIS ARGUMENT
+  prompt, // ✅ NEW
 }: EchoAssistantProps) {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
     initialMessage
       ? [{ sender: "NAO", text: initialMessage }]
+      : prompt
+      ? [{ sender: "NAO", text: prompt }]
       : []
   );
   const [input, setInput] = useState("");
