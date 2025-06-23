@@ -57,7 +57,7 @@ const Chat = ({
   functionCallHandler = () => Promise.resolve(""),
 }: ChatProps) => {
   const [userInput, setUserInput] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
   const [inputDisabled, setInputDisabled] = useState(false);
   const [threadId, setThreadId] = useState("");
 
@@ -78,7 +78,7 @@ const Chat = ({
     createThread();
   }, []);
 
-  const sendMessage = async (text) => {
+  const sendMessage = async (text: string) => {
     const response = await fetch(
       `/api/assistants/threads/${threadId}/messages`,
       {
@@ -87,15 +87,16 @@ const Chat = ({
       }
     );
 
-    if (!response.body) {
-      throw new Error("No response body from /messages");
-    }
+    if (!response.body) throw new Error("No response body from /messages");
 
     const stream = AssistantStream.fromReadableStream(response.body);
     handleReadableStream(stream);
   };
 
-  const submitActionResult = async (runId, toolCallOutputs) => {
+  const submitActionResult = async (
+    runId: string,
+    toolCallOutputs: { output: string; tool_call_id: string }[]
+  ) => {
     const response = await fetch(
       `/api/assistants/threads/${threadId}/actions`,
       {
@@ -105,15 +106,13 @@ const Chat = ({
       }
     );
 
-    if (!response.body) {
-      throw new Error("No response body from /actions");
-    }
+    if (!response.body) throw new Error("No response body from /actions");
 
     const stream = AssistantStream.fromReadableStream(response.body);
     handleReadableStream(stream);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim()) return;
     sendMessage(userInput);
@@ -125,20 +124,20 @@ const Chat = ({
 
   const handleTextCreated = () => appendMessage("assistant", "");
 
-  const handleTextDelta = (delta) => {
+  const handleTextDelta = (delta: any) => {
     if (delta.value != null) appendToLastMessage(delta.value);
     if (delta.annotations != null) annotateLastMessage(delta.annotations);
   };
 
-  const handleImageFileDone = (image) => {
+  const handleImageFileDone = (image: any) => {
     appendToLastMessage(`\n![${image.file_id}](/api/files/${image.file_id})\n`);
   };
 
-  const toolCallCreated = (toolCall) => {
+  const toolCallCreated = (toolCall: any) => {
     if (toolCall.type === "code_interpreter") appendMessage("code", "");
   };
 
-  const toolCallDelta = (delta, snapshot) => {
+  const toolCallDelta = (delta: any, snapshot: any) => {
     if (delta.type !== "code_interpreter") return;
     if (!delta.code_interpreter.input) return;
     appendToLastMessage(delta.code_interpreter.input);
@@ -174,21 +173,18 @@ const Chat = ({
     });
   };
 
-  const appendToLastMessage = (text) => {
+  const appendToLastMessage = (text: string) => {
     setMessages((prev) => {
       const last = prev[prev.length - 1];
-      return [
-        ...prev.slice(0, -1),
-        { ...last, text: last.text + text },
-      ];
+      return [...prev.slice(0, -1), { ...last, text: last.text + text }];
     });
   };
 
-  const appendMessage = (role, text) => {
+  const appendMessage = (role: "user" | "assistant" | "code", text: string) => {
     setMessages((prev) => [...prev, { role, text }]);
   };
 
-  const annotateLastMessage = (annotations) => {
+  const annotateLastMessage = (annotations: any[]) => {
     setMessages((prev) => {
       const last = prev[prev.length - 1];
       const updated = { ...last };
@@ -217,15 +213,4 @@ const Chat = ({
           type="text"
           className={styles.input}
           value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          placeholder="Enter your question"
-        />
-        <button type="submit" className={styles.button} disabled={inputDisabled}>
-          Send
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default Chat;
+          onChange={(e) => setUs
