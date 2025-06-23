@@ -3,17 +3,17 @@ import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import { Wallet } from "ethers";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
-// Ensure env vars exist
+// Ensure required environment variables exist
 if (!process.env.SIGNER_PK || !process.env.NETWORK || !process.env.NFT_CONTRACT_ADDRESS) {
   throw new Error("Missing required environment variables");
 }
 
-// Create a signer with a provider
+// Set up provider and signer
 const provider = new JsonRpcProvider(process.env.NETWORK);
 const signer = new Wallet(process.env.SIGNER_PK, provider);
 
-// Pass signer directly to ThirdwebSDK (this version accepts Ethers signers)
-const sdk = ThirdwebSDK.fromSigner(signer, "ethereum");
+// Initialize Thirdweb SDK
+const sdk = ThirdwebSDK.fromSigner(signer, process.env.CHAIN || "ethereum");
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,10 +28,10 @@ export default async function handler(
   }
 
   try {
-    const contract = await sdk.getContract(
-      process.env.NFT_CONTRACT_ADDRESS,
-      "signature-drop"
-    );
+    const contractAddress = process.env.NFT_CONTRACT_ADDRESS;
+    if (!contractAddress) throw new Error("NFT_CONTRACT_ADDRESS is undefined");
+
+    const contract = await sdk.getContract(contractAddress, "signature-drop");
 
     const payload = {
       to: userAddress,
@@ -46,3 +46,4 @@ export default async function handler(
     return res.status(500).json({ error: "Failed to generate signature" });
   }
 }
+
