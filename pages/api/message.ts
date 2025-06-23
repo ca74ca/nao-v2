@@ -58,7 +58,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     while (["queued", "in_progress", "cancelling", "requires_action"].includes(runStatus)) {
       if (runStatus === "requires_action" && lastRun.required_action?.submit_tool_outputs) {
         const toolCalls = lastRun.required_action.submit_tool_outputs.tool_calls;
-        const toolOutputs = [];
+
+        const toolOutputs: { tool_call_id: string; output: string }[] = [];
 
         for (const call of toolCalls) {
           if (call.type === "function" && call.function.name === "onboardUser") {
@@ -144,3 +145,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
