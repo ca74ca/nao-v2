@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styles from "./file-viewer.module.css";
 
+type FileEntry = {
+  file_id: string;
+  filename: string;
+  status: string;
+};
+
 const TrashIcon = () => (
   <svg
     className={styles.fileDeleteIcon}
@@ -19,7 +25,7 @@ const TrashIcon = () => (
 );
 
 const FileViewer = () => {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState<FileEntry[]>([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -37,16 +43,16 @@ const FileViewer = () => {
     setFiles(data);
   };
 
-  const handleFileDelete = async (fileId) => {
+  const handleFileDelete = async (fileId: string) => {
     await fetch("/api/assistants/files", {
       method: "DELETE",
       body: JSON.stringify({ fileId }),
     });
   };
 
-  const handleFileUpload = async (event) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = new FormData();
-    if (event.target.files.length < 0) return;
+    if (event.target.files?.length === 0) return;
     data.append("file", event.target.files[0]);
     await fetch("/api/assistants/files", {
       method: "POST",
@@ -95,3 +101,4 @@ const FileViewer = () => {
 };
 
 export default FileViewer;
+
