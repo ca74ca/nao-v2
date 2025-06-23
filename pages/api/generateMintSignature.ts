@@ -1,14 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import { Wallet } from "ethers";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
-// Check env vars
+// Ensure env vars exist
 if (!process.env.SIGNER_PK || !process.env.NETWORK || !process.env.NFT_CONTRACT_ADDRESS) {
   throw new Error("Missing required environment variables");
 }
 
-const signer = new Wallet(process.env.SIGNER_PK);
-const sdk = ThirdwebSDK.fromWallet(signer, process.env.NETWORK);
+// Create a signer with a provider
+const provider = new JsonRpcProvider(process.env.NETWORK);
+const signer = new Wallet(process.env.SIGNER_PK, provider);
+
+// Pass signer directly to ThirdwebSDK (this version accepts Ethers signers)
+const sdk = ThirdwebSDK.fromSigner(signer, "ethereum");
 
 export default async function handler(
   req: NextApiRequest,
