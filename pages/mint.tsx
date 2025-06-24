@@ -180,16 +180,19 @@ function generateRandomState(length = 16) {
 }
 
 function getWhoopAuthUrl(wallet?: string) {
-  const clientId = process.env.NEXT_PUBLIC_WHOOP_CLIENT_ID!;
-  const redirectUri = process.env.NEXT_PUBLIC_WHOOP_REDIRECT_URI!;
-
   const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
+    client_id: process.env.NEXT_PUBLIC_WHOOP_CLIENT_ID!,
+    redirect_uri: process.env.NEXT_PUBLIC_WHOOP_REDIRECT_URI!,
     response_type: "code",
     scope: "read",
   });
 
+  if (wallet) {
+    params.append("state", wallet);
+  }
+
+  return `https://api.whoop.com/oauth/oauth2/authenticate?${params.toString()}`;
+}
   if (wallet) {
     params.append("state", wallet);
   }
