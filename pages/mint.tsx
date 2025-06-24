@@ -236,21 +236,30 @@ export default function MintPage() {
   const email = user?.email || "";
 
   useEffect(() => {
-    async function fetchWhoop() {
-      setWhoopLoading(true);
-      setWhoopError(null);
-      try {
-        const res = await fetch("/api/whoop-data");
-        if (!res.ok) throw new Error("Failed to fetch WHOOP data.");
-        const json = await res.json();
-        setWhoopData(json);
-      } catch (e: any) {
-        setWhoopError(e.message || "Unknown error");
-      }
+  if (!user?.walletId) return; // 🛑 Prevent early fetch
+
+  const fetchWhoop = async () => {
+    setWhoopLoading(true);
+    setWhoopError(null);
+    try {
+      const res = await fetch("/api/whoop-data", {
+        headers: {
+          "x-user-wallet": user.walletId.toLowerCase(), // ✅ lowercase for match
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch WHOOP data.");
+      const json = await res.json();
+      setWhoopData(json);
+    } catch (e: any) {
+      setWhoopError(e.message || "Unknown error");
+    } finally {
       setWhoopLoading(false);
     }
-    fetchWhoop();
-  }, []);
+  };
+
+  fetchWhoop();
+}, [user?.walletId]); // 🔁 Run when walletId is available
+
 
   // Fetch user info from backend by email
   useEffect(() => {
