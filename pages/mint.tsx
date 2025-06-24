@@ -310,11 +310,19 @@ export default function MintPage() {
   }
 
   const handleWhoopSync = () => {
-    setWhoopSyncStatus("Opening WHOOP...");
-    window.open(getWhoopAuthUrl(), "_blank", "width=500,height=700");
-    setTimeout(() => setWhoopSyncStatus(""), 1800);
-  };
+  const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
+  if (!user?.wallet) {
+    alert("No wallet found. Please log in again.");
+    return;
+  }
 
+  // Optional: set wallet as cookie for fallback (can remain commented)
+  // document.cookie = `wallet=${user.wallet}; path=/; SameSite=Lax`;
+
+  setWhoopSyncStatus("Opening WHOOP...");
+  window.open(getWhoopAuthUrl(user.wallet), "_blank", "width=500,height=700");
+  setTimeout(() => setWhoopSyncStatus(""), 1800);
+};
   useEffect(() => {
     function handleWhoopMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
