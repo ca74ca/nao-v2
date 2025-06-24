@@ -1047,4 +1047,4 @@ export default function MintPage() {
     </div>
   );
 }
-}
+
