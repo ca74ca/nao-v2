@@ -8,8 +8,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ✅ Safely parse cookies
   const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
-  const wallet = cookies.wallet;
-
+const wallet =
+  (req.headers["x-user-wallet"] as string | undefined) ||  // optional header fallback
+  cookies.wallet ||                                         // current method
+  (req.query.state as string | undefined);                  // new fallback from `mint.tsx`
   if (!code || !wallet) {
     res.setHeader('Content-Type', 'text/html');
     res.end(`
