@@ -179,6 +179,7 @@ function generateRandomState(length = 16) {
   return state;
 }
 
+// --- REPLACEMENT: getWhoopAuthUrl function ---
 function getWhoopAuthUrl(wallet?: string) {
   const params = new URLSearchParams({
     client_id: process.env.NEXT_PUBLIC_WHOOP_CLIENT_ID!,
@@ -193,13 +194,6 @@ function getWhoopAuthUrl(wallet?: string) {
 
   return `https://api.whoop.com/oauth/oauth2/authenticate?${params.toString()}`;
 }
-  if (wallet) {
-    params.append("state", wallet);
-  }
-
-  return `https://api.prod.whoop.com/oauth/oauth2/authenticate?${params.toString()}`;
-}
-
 
 export default function MintPage() {
   const router = useRouter();
@@ -252,30 +246,29 @@ export default function MintPage() {
   const email = user?.email || "";
 
   useEffect(() => {
-  if (!user?.walletId) return; // 🛑 Prevent early fetch
+    if (!user?.walletId) return; // 🛑 Prevent early fetch
 
-  const fetchWhoop = async () => {
-    setWhoopLoading(true);
-    setWhoopError(null);
-    try {
-      const res = await fetch("/api/whoop-data", {
-        headers: {
-          "x-user-wallet": user.walletId.toLowerCase(), // ✅ lowercase for match
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch WHOOP data.");
-      const json = await res.json();
-      setWhoopData(json);
-    } catch (e: any) {
-      setWhoopError(e.message || "Unknown error");
-    } finally {
-      setWhoopLoading(false);
-    }
-  };
+    const fetchWhoop = async () => {
+      setWhoopLoading(true);
+      setWhoopError(null);
+      try {
+        const res = await fetch("/api/whoop-data", {
+          headers: {
+            "x-user-wallet": user.walletId.toLowerCase(), // ✅ lowercase for match
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch WHOOP data.");
+        const json = await res.json();
+        setWhoopData(json);
+      } catch (e: any) {
+        setWhoopError(e.message || "Unknown error");
+      } finally {
+        setWhoopLoading(false);
+      }
+    };
 
-  fetchWhoop();
-}, [user?.walletId]); // 🔁 Run when walletId is available
-
+    fetchWhoop();
+  }, [user?.walletId]); // 🔁 Run when walletId is available
 
   // Fetch user info from backend by email
   useEffect(() => {
@@ -326,19 +319,18 @@ export default function MintPage() {
   }
 
   const handleWhoopSync = () => {
-  const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
-  if (!user?.wallet) {
-    alert("No wallet found. Please log in again.");
-    return;
-  }
+    const localUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
+    // Unify on walletId, fallback to wallet if needed
+    const wallet = localUser.walletId || localUser.wallet;
+    if (!wallet) {
+      alert("No wallet found. Please log in again.");
+      return;
+    }
+    setWhoopSyncStatus("Opening WHOOP...");
+    window.open(getWhoopAuthUrl(wallet), "_blank", "width=500,height=700");
+    setTimeout(() => setWhoopSyncStatus(""), 1800);
+  };
 
-  // Optional: set wallet as cookie for fallback (can remain commented)
-  // document.cookie = `wallet=${user.wallet}; path=/; SameSite=Lax`;
-
-  setWhoopSyncStatus("Opening WHOOP...");
-  window.open(getWhoopAuthUrl(user.wallet), "_blank", "width=500,height=700");
-  setTimeout(() => setWhoopSyncStatus(""), 1800);
-};
   useEffect(() => {
     function handleWhoopMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
@@ -1054,4 +1046,5 @@ export default function MintPage() {
       </div>
     </div>
   );
+}
 }
