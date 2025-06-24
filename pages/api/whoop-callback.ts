@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const tokenRes = await axios.post('https://api.prod.whoop.com/oauth/oauth2/token', {
       grant_type: 'authorization_code',
       code,
-      redirect_uri: 'https://1bdd-2600-1007-a011-c984-f1ef-ebeb-97dc-c44a.ngrok-free.app/api/whoop-callback',
+redirect_uri: 'https://nao-v2.onrender.com/api/whoop-callback',
       client_id: process.env.WHOOP_CLIENT_ID,
       client_secret: process.env.WHOOP_CLIENT_SECRET,
     });
