@@ -179,11 +179,24 @@ function generateRandomState(length = 16) {
   return state;
 }
 
-function getWhoopAuthUrl() {
+function getWhoopAuthUrl(wallet?: string) {
   const clientId = process.env.NEXT_PUBLIC_WHOOP_CLIENT_ID!;
   const redirectUri = process.env.NEXT_PUBLIC_WHOOP_REDIRECT_URI!;
-  return `https://api.prod.whoop.com/oauth/oauth2/authenticate?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=read`;
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "read",
+  });
+
+  if (wallet) {
+    params.append("state", wallet);
+  }
+
+  return `https://api.prod.whoop.com/oauth/oauth2/authenticate?${params.toString()}`;
 }
+
 
 export default function MintPage() {
   const router = useRouter();
