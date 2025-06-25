@@ -314,17 +314,22 @@ export default function MintPage() {
   }
 
   const handleWhoopSync = () => {
-    const localUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
-    // Unify on walletId, fallback to wallet if needed
-    const wallet = localUser.walletId || localUser.wallet;
-    if (!wallet) {
-      alert("No wallet found. Please log in again.");
-      return;
-    }
-    setWhoopSyncStatus("Opening WHOOP...");
-    window.open(getWhoopAuthUrl(wallet), "_blank", "width=500,height=700");
-    setTimeout(() => setWhoopSyncStatus(""), 1800);
-  };
+  const localUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
+
+  const wallet = localUser.walletId || localUser.wallet;
+  if (!wallet) {
+    alert("No wallet found. Please log in again.");
+    return;
+  }
+
+  // ✅ Set cookie so /api/whoop-auth can access wallet
+  document.cookie = `wallet=${wallet}; path=/; SameSite=Lax`;
+
+  setWhoopSyncStatus("Opening WHOOP...");
+  window.open(getWhoopAuthUrl(wallet), "_blank", "width=500,height=700");
+  setTimeout(() => setWhoopSyncStatus(""), 1800);
+};
+
 
   useEffect(() => {
     function handleWhoopMessage(event: MessageEvent) {
