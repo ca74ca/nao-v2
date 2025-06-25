@@ -61,7 +61,7 @@ export default async function handler(
       return res.status(200).json({
         status: 'exists',
         message: 'User already exists',
-        redirectUrl: '/login?email=' + encodeURIComponent(email)
+redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
       });
     }
 
@@ -79,7 +79,7 @@ export default async function handler(
     return res.status(200).json({
       status: 'success',
       message: 'User onboarded successfully',
-      redirectUrl: `/onboarding/final?userId=${encodeURIComponent(email)}`
+redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
     });
 
   } catch (error: any) {
