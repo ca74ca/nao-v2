@@ -64,16 +64,17 @@ export default function FinalOnboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-8 py-10 flex flex-col items-start justify-start space-y-6">
-      {/* Place the video background at the top-level of the page for proper coverage */}
-      <video
-        className="fixed top-0 left-0 w-full h-full object-cover z-0"
-        src="/sign_up_sign_in_vidd_1.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-      />
+  <div className="min-h-screen bg-black text-white px-8 py-10 flex flex-col items-start justify-start space-y-6">
+    {/* Place the video background at the top-level of the page for proper coverage */}
+    <video
+      className="fixed top-1/2 left-1/2 w-screen h-screen object-cover -translate-x-1/2 -translate-y-1/2 z-0"
+      src="/sign_u_sign_in_vidd_1.mp4"
+      autoPlay
+      loop
+      muted
+      playsInline
+    />
+    
       <div className="relative z-10 w-full">
         <h1 className="text-4xl font-bold">Welcome to NAO: Your Health Intelligence Passport</h1>
         <p className="text-lg max-w-2xl">
