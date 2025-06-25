@@ -51,7 +51,7 @@ export default async function handler(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
 
-const backendRes = await fetch('https://nao-v2.onrender.com/onboard', {
+const backendRes = await fetch('https://nao-v2.onrender.com/api/onboardUser', { ... })
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
