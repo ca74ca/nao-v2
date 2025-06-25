@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-// Type definitions
 type OnboardRequest = {
   username?: string;
   name?: string;
@@ -22,7 +21,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<BackendResponse>
 ) {
-  // 1. Method Validation
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).json({ 
@@ -31,7 +29,6 @@ export default async function handler(
     });
   }
 
-  // 2. Data Normalization
   const {
     username: rawUsername,
     name,
@@ -43,7 +40,6 @@ export default async function handler(
   const username = rawUsername || name;
   const email = rawEmail?.toLowerCase().trim();
 
-  // 3. Input Validation
   if (!username || !email || typeof connectWearables !== 'boolean') {
     return res.status(400).json({
       status: 'error',
@@ -52,9 +48,8 @@ export default async function handler(
   }
 
   try {
-    // 4. Call NAO Backend
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
     const backendRes = await fetch('https://nao-sdk-api.onrender.com/onboard', {
       method: 'POST',
@@ -74,14 +69,13 @@ export default async function handler(
 
     clearTimeout(timeout);
 
-    // 5. Handle Backend Response
     const backendData = await safeParseJson(backendRes);
 
+    // Fixed syntax error here - removed extra parenthesis
     if (!backendRes.ok) {
-      // Special case: Existing user
       if (backendRes.status === 400 && 
-          (backendData.error?.includes("already exists") || 
-           backendData.message?.includes("already exists")) {
+         (backendData.error?.includes("already exists") || 
+          backendData.message?.includes("already exists"))) {
         return res.status(200).json({
           status: 'exists',
           message: 'User already exists',
@@ -92,7 +86,6 @@ export default async function handler(
       throw new Error(backendData.message || `Backend error: ${backendRes.status}`);
     }
 
-    // 6. Success Response
     return res.status(200).json({
       status: 'success',
       message: 'User onboarded successfully',
@@ -103,37 +96,31 @@ export default async function handler(
                    `&nft=${encodeURIComponent(backendData.nftId)}`
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = isErrorWithMessage(error) ? error.message : 'Unknown error';
     console.error('Onboarding Error:', {
-      error: error.message,
-      stack: error.stack,
-      requestBody: req.body,
+      error: errorMessage,
       timestamp: new Date().toISOString()
     });
 
     return res.status(500).json({
       status: 'error',
       message: process.env.NODE_ENV === 'development' 
-        ? error.message 
+        ? errorMessage 
         : 'Internal Server Error',
       redirectUrl: '/onboarding/error?code=500'
     });
   }
 }
 
-// Helper for safe JSON parsing
 async function safeParseJson(response: Response) {
   try {
     return await response.json();
-  } catch (e) {
-    return { 
-      message: 'Invalid JSON response',
-      error: e instanceof Error ? e.message : 'Unknown parse error'
-    };
+  } catch {
+    return { message: 'Invalid JSON response' };
   }
 }
 
-// Type guard for error handling
 function isErrorWithMessage(error: unknown): error is { message: string } {
   return typeof error === 'object' && error !== null && 'message' in error;
 }
