@@ -375,7 +375,7 @@ export default function Home() {
         // Call backend to create user and wallet
         try {
           // Simulated backend call; replace with your real endpoint
-          const res = await fetch("/api/createUserAndWallet", {
+const res = await fetch("/api/onboardUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
