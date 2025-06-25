@@ -385,30 +385,45 @@ const res = await fetch("/api/onboardUser", {
               email: input, // current input is the email
             }),
           });
-          if (!res.ok) {
-            const errorText = await res.text();
-            setMessages((msgs) => [
-              ...msgs,
-              { sender: "System", text: "Error creating account: " + errorText }
-            ]);
-            setOnboardingStep(null);
-            setLoading(false);
-            return;
-          }
-          // You might want to parse the wallet address or user info here
-          // const data = await res.json();
-          setTimeout(() => {
-            setMessages((msgs) => [
-              ...msgs,
-              {
-                sender: "NAO",
-                text: "Done! Your NAO health passport and wallet are ready. Let's continue onboarding.",
-              },
-            ]);
-            setOnboardingStep(null);
-            setLoading(false);
-            router.push("/final-onboarding");
-          }, 1600); // Small delay for effect
+         const data = await res.json();
+
+if (data.status === "success" && data.redirectUrl) {
+  setTimeout(() => {
+    setMessages((msgs) => [
+      ...msgs,
+      {
+        sender: "NAO",
+        text: "Done! Your NAO health passport and wallet are ready. Let's continue onboarding.",
+      },
+    ]);
+    setOnboardingStep(null);
+    setLoading(false);
+    // Redirect to the provided URL
+    router.push(data.redirectUrl);
+  }, 1600);
+  return;
+}
+
+if (data.status === "exists" && data.redirectUrl) {
+  setMessages((msgs) => [
+    ...msgs,
+    { sender: "System", text: "User already exists. Redirecting to login..." }
+  ]);
+  setOnboardingStep(null);
+  setLoading(false);
+  setTimeout(() => router.push(data.redirectUrl), 1000);
+  return;
+}
+
+// Catch-all error handler for API
+setMessages((msgs) => [
+  ...msgs,
+  { sender: "System", text: "Error creating account: " + (data.message || "Unknown error.") }
+]);
+setOnboardingStep(null);
+setLoading(false);
+return;
+
         } catch (err) {
           setMessages((msgs) => [
             ...msgs,
