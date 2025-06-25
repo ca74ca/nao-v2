@@ -1,77 +1,139 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+// Type definitions
+type OnboardRequest = {
+  username?: string;
+  name?: string;
+  email?: string;
+  healthGoals?: string;
+  connectWearables?: boolean;
+};
+
+type BackendResponse = {
+  status: 'success' | 'exists' | 'error';
+  message: string;
+  walletAddress?: string;
+  healthPassportNFT?: string;
+  redirectUrl?: string;
+  error?: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<BackendResponse>
 ) {
+  // 1. Method Validation
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).json({ 
+      status: 'error',
+      message: 'Method Not Allowed' 
+    });
   }
 
-  // Extract user data
-  let { username, email, healthGoals, connectWearables } = req.body;
+  // 2. Data Normalization
+  const {
+    username: rawUsername,
+    name,
+    email: rawEmail,
+    healthGoals = "General wellness",
+    connectWearables = false
+  } = req.body as OnboardRequest;
 
-  if (!username && typeof req.body.name === 'string') username = req.body.name;
-  if (!email && typeof req.body.email === 'string') email = req.body.email;
+  const username = rawUsername || name;
+  const email = rawEmail?.toLowerCase().trim();
 
-  if (!healthGoals) healthGoals = "General wellness";
-  if (typeof connectWearables !== 'boolean') connectWearables = false;
-
-  if (
-    typeof username !== 'string' ||
-    typeof email !== 'string' ||
-    typeof healthGoals !== 'string' ||
-    typeof connectWearables !== 'boolean'
-  ) {
-    return res
-      .status(400)
-      .json({ message: 'Missing or invalid required fields' });
+  // 3. Input Validation
+  if (!username || !email || typeof connectWearables !== 'boolean') {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Missing or invalid required fields'
+    });
   }
 
   try {
-    console.log("Onboarding: Sending to NAO backend:", {
-      username, email, healthGoals, connectWearables
-    });
+    // 4. Call NAO Backend
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
     const backendRes = await fetch('https://nao-sdk-api.onrender.com/onboard', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-NAO-Secret': process.env.NAO_API_SECRET || '',
+        'X-Client-IP': req.socket.remoteAddress || ''
+      },
       body: JSON.stringify({
         username,
         email,
         healthGoals,
-        connectWearables,
+        connectWearables
       }),
+      signal: controller.signal
     });
 
-    let backendData: any = {};
-    try {
-      backendData = await backendRes.json();
-    } catch (e) {
-      console.error("Onboarding: Could not parse backend JSON:", e);
-      backendData = { message: "Invalid JSON from backend" };
-    }
+    clearTimeout(timeout);
 
-    // PATCH: Detect "already exists" and return status: "exists" with 200
+    // 5. Handle Backend Response
+    const backendData = await safeParseJson(backendRes);
+
     if (!backendRes.ok) {
-      if (
-        backendRes.status === 400 &&
-        (backendData.error === "User already exists" ||
-         backendData.message === "User already exists")
-      ) {
-        return res.status(200).json({ status: "exists", message: "User already exists" });
+      // Special case: Existing user
+      if (backendRes.status === 400 && 
+          (backendData.error?.includes("already exists") || 
+           backendData.message?.includes("already exists")) {
+        return res.status(200).json({
+          status: 'exists',
+          message: 'User already exists',
+          redirectUrl: '/login?email=' + encodeURIComponent(email)
+        });
       }
-      console.error("Onboarding: NAO backend error:", backendRes.status, backendData);
-      return res
-        .status(backendRes.status)
-        .json({ message: backendData.message || 'Backend error', details: backendData });
+      
+      throw new Error(backendData.message || `Backend error: ${backendRes.status}`);
     }
 
-    console.log("Onboarding: Success response from NAO backend:", backendData);
+    // 6. Success Response
+    return res.status(200).json({
+      status: 'success',
+      message: 'User onboarded successfully',
+      walletAddress: backendData.walletAddress,
+      healthPassportNFT: backendData.nftId,
+      redirectUrl: `/onboarding/final?userId=${encodeURIComponent(backendData.userId)}` +
+                   `&wallet=${encodeURIComponent(backendData.walletAddress)}` +
+                   `&nft=${encodeURIComponent(backendData.nftId)}`
+    });
 
-    return res.status(200).json({ status: "success", message: 'User onboarded successfully', ...backendData });
   } catch (error: any) {
-    console.error("Onboarding: Internal Server Error:", error);
-    return res.status(500).json({ message: error.message || 'Internal Server Error' });
+    console.error('Onboarding Error:', {
+      error: error.message,
+      stack: error.stack,
+      requestBody: req.body,
+      timestamp: new Date().toISOString()
+    });
+
+    return res.status(500).json({
+      status: 'error',
+      message: process.env.NODE_ENV === 'development' 
+        ? error.message 
+        : 'Internal Server Error',
+      redirectUrl: '/onboarding/error?code=500'
+    });
   }
+}
+
+// Helper for safe JSON parsing
+async function safeParseJson(response: Response) {
+  try {
+    return await response.json();
+  } catch (e) {
+    return { 
+      message: 'Invalid JSON response',
+      error: e instanceof Error ? e.message : 'Unknown parse error'
+    };
+  }
+}
+
+// Type guard for error handling
+function isErrorWithMessage(error: unknown): error is { message: string } {
+  return typeof error === 'object' && error !== null && 'message' in error;
 }
