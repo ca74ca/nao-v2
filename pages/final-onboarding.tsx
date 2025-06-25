@@ -12,17 +12,7 @@ export default function FinalOnboarding() {
   const [error, setError] = useState<string | null>(null);
 
   const [user, setUser] = useState<any>(null); // Holds full user object
-<video
-  className="fixed top-0 left-0 w-full h-full object-cover z-0"
-  src="/sign_up_sign_in_vidd_1.mp4"
-  autoPlay
-  loop
-  muted
-  playsInline
-/>
-<div className="relative z-10 ...">
-  {/* Your page content here */}
-</div>
+
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
@@ -85,6 +75,17 @@ export default function FinalOnboarding() {
       <div className="space-y-4">
         {/* WHOOP/Apple Health connect */}
         <button
+          <video
+  className="fixed top-0 left-0 w-full h-full object-cover z-0"
+  src="/sign_up_sign_in_vidd_1.mp4"
+  autoPlay
+  loop
+  muted
+  playsInline
+/>
+<div className="relative z-10 ...">
+  {/* Your page content here */}
+</div>
           className={`px-5 py-3 rounded-2xl border ${wearableConnected ? 'border-green-400' : 'border-white'} bg-transparent`}
           onClick={handleWhoopConnect}
           disabled={loadingWearable || wearableConnected}
