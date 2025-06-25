@@ -246,29 +246,24 @@ export default function MintPage() {
   const email = user?.email || "";
 
   useEffect(() => {
-    if (!user?.walletId) return; // 🛑 Prevent early fetch
+  if (!user?.walletId) return;
 
-    const fetchWhoop = async () => {
-      setWhoopLoading(true);
-      setWhoopError(null);
-      try {
-        const res = await fetch("/api/whoop-data", {
-          headers: {
-            "x-user-wallet": user.walletId.toLowerCase(), // ✅ lowercase for match
-          },
-        });
-        if (!res.ok) throw new Error("Failed to fetch WHOOP data.");
-        const json = await res.json();
-        setWhoopData(json);
-      } catch (e: any) {
-        setWhoopError(e.message || "Unknown error");
-      } finally {
-        setWhoopLoading(false);
-      }
-    };
+  const refreshUser = async () => {
+    try {
+      const res = await fetch(`/api/getUser?wallet=${user.walletId.toLowerCase()}`);
+      if (!res.ok) throw new Error("User refresh failed");
+      const fresh = await res.json();
+      setUser(fresh);                       // contains latest WHOOP fields
+    } catch (err) {
+      console.error("User refresh error:", err);
+    }
+  };
 
-    fetchWhoop();
-  }, [user?.walletId]); // 🔁 Run when walletId is available
+  refreshUser();                            // initial pull
+  const id = setInterval(refreshUser, 60_000); // refresh every 60 s
+  return () => clearInterval(id);
+}, [user?.walletId]);
+
 
   // Fetch user info from backend by email
   useEffect(() => {
