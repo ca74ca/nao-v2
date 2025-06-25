@@ -13,7 +13,6 @@ export default function FinalOnboarding() {
 
   const [user, setUser] = useState<any>(null); // Holds full user object
 
-
   useEffect(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
     if (stored) {
@@ -66,73 +65,73 @@ export default function FinalOnboarding() {
 
   return (
     <div className="min-h-screen bg-black text-white px-8 py-10 flex flex-col items-start justify-start space-y-6">
-      <h1 className="text-4xl font-bold">Welcome to NAO: Your Health Intelligence Passport</h1>
-      <p className="text-lg max-w-2xl">
-        You’re about to mint your Health dNFT and unlock a system that tracks your wellness, powers your AI insights,
-        and allows real-world stablecoin rewards. To continue, please connect the following:
-      </p>
+      {/* Place the video background at the top-level of the page for proper coverage */}
+      <video
+        className="fixed top-0 left-0 w-full h-full object-cover z-0"
+        src="/sign_up_sign_in_vidd_1.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+      <div className="relative z-10 w-full">
+        <h1 className="text-4xl font-bold">Welcome to NAO: Your Health Intelligence Passport</h1>
+        <p className="text-lg max-w-2xl">
+          You’re about to mint your Health dNFT and unlock a system that tracks your wellness, powers your AI insights,
+          and allows real-world stablecoin rewards. To continue, please connect the following:
+        </p>
 
-      <div className="space-y-4">
-        {/* WHOOP/Apple Health connect */}
-        <button
-          <video
-  className="fixed top-0 left-0 w-full h-full object-cover z-0"
-  src="/sign_up_sign_in_vidd_1.mp4"
-  autoPlay
-  loop
-  muted
-  playsInline
-/>
-<div className="relative z-10 ...">
-  {/* Your page content here */}
-</div>
-          className={`px-5 py-3 rounded-2xl border ${wearableConnected ? 'border-green-400' : 'border-white'} bg-transparent`}
-          onClick={handleWhoopConnect}
-          disabled={loadingWearable || wearableConnected}
-        >
-          {loadingWearable
-            ? "Checking wearable status..."
-            : wearableConnected
-            ? "✅ Wearable Connected (Whoop/Apple Health)"
-            : "Connect Wearable Device"}
-        </button>
+        <div className="space-y-4">
+          {/* WHOOP/Apple Health connect */}
+          <button
+            className={`px-5 py-3 rounded-2xl border ${wearableConnected ? 'border-green-400' : 'border-white'} bg-transparent`}
+            onClick={handleWhoopConnect}
+            disabled={loadingWearable || wearableConnected}
+          >
+            {loadingWearable
+              ? "Checking wearable status..."
+              : wearableConnected
+              ? "✅ Wearable Connected (Whoop/Apple Health)"
+              : "Connect Wearable Device"}
+          </button>
 
-        {/* Coinbase + Apple Pay (toggle for now) */}
-        <button
-          className={`px-5 py-3 rounded-2xl border ${coinbaseLinked ? 'border-green-400' : 'border-white'} bg-transparent`}
-          onClick={() => setCoinbaseLinked(true)}
-          disabled={coinbaseLinked}
-        >
-          {coinbaseLinked ? "✅ Coinbase Linked" : "Link Coinbase Wallet"}
-        </button>
+          {/* Coinbase + Apple Pay (toggle for now) */}
+          <button
+            className={`px-5 py-3 rounded-2xl border ${coinbaseLinked ? 'border-green-400' : 'border-white'} bg-transparent`}
+            onClick={() => setCoinbaseLinked(true)}
+            disabled={coinbaseLinked}
+          >
+            {coinbaseLinked ? "✅ Coinbase Linked" : "Link Coinbase Wallet"}
+          </button>
 
-        <button
-          className={`px-5 py-3 rounded-2xl border ${applePaySynced ? 'border-green-400' : 'border-white'} bg-transparent`}
-          onClick={() => setApplePaySynced(true)}
-          disabled={applePaySynced}
-        >
-          {applePaySynced ? "✅ Apple Pay Synced" : "Sync Apple Pay for Stablecoin Usage"}
-        </button>
-      </div>
-
-      {error && (
-        <div className="text-red-400 font-semibold">{error}</div>
-      )}
-
-      <div className="w-full max-w-3xl mt-8">
-        <h2 className="text-xl mb-2">NAO AI Companion</h2>
-        <div className="border border-gray-600 rounded-2xl p-4">
-          <EchoAssistant prompt="Begin your intelligence by typing here." />
+          <button
+            className={`px-5 py-3 rounded-2xl border ${applePaySynced ? 'border-green-400' : 'border-white'} bg-transparent`}
+            onClick={() => setApplePaySynced(true)}
+            disabled={applePaySynced}
+          >
+            {applePaySynced ? "✅ Apple Pay Synced" : "Sync Apple Pay for Stablecoin Usage"}
+          </button>
         </div>
-      </div>
 
-      <button
-        className="mt-8 px-6 py-3 bg-blue-500 rounded-2xl text-white font-semibold disabled:opacity-40"
-        disabled={!allowContinue}
-        onClick={handleFinish}
-      >
-        Continue to Health Passport
-      </button>
+        {error && (
+          <div className="text-red-400 font-semibold">{error}</div>
+        )}
+
+        <div className="w-full max-w-3xl mt-8">
+          <h2 className="text-xl mb-2">NAO AI Companion</h2>
+          <div className="border border-gray-600 rounded-2xl p-4">
+            <EchoAssistant prompt="Begin your intelligence by typing here." />
+          </div>
+        </div>
+
+        <button
+          className="mt-8 px-6 py-3 bg-blue-500 rounded-2xl text-white font-semibold disabled:opacity-40"
+          disabled={!allowContinue}
+          onClick={handleFinish}
+        >
+          Continue to Health Passport
+        </button>
+      </div>
     </div>
   );
 }
