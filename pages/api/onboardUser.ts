@@ -50,6 +50,9 @@ export default async function handler(
   }
 
   try {
+    // Debug log to verify API handler is hit
+    console.log("SUBMIT HANDLER FIRED!"); // <--- LOG ADDED HERE
+
     // 2. Connect to Mongo
     const client = await clientPromise;
     const db = client.db(); // or your db name
@@ -61,7 +64,7 @@ export default async function handler(
       return res.status(200).json({
         status: 'exists',
         message: 'User already exists',
-redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
+        redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
       });
     }
 
@@ -79,7 +82,7 @@ redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
     return res.status(200).json({
       status: 'success',
       message: 'User onboarded successfully',
-redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
+      redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
     });
 
   } catch (error: any) {
