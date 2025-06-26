@@ -66,6 +66,21 @@ export default function FinalOnboarding() {
   }, [user]);
 
   // ────────────────────────────────────
+  // Prevent page scrolling while component is mounted
+  // ────────────────────────────────────
+  useEffect(() => {
+    // Store the original overflow style
+    const originalOverflow = document.body.style.overflow;
+    
+    // Prevent scrolling
+    document.body.style.overflow = "hidden";
+    
+    // Restore original overflow when component unmounts
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+  // ────────────────────────────────────
   // Enable “Continue” only when all three syncs are complete
   // ────────────────────────────────────
   useEffect(() => {
