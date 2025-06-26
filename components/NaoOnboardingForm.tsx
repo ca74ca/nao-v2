@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+iimport React, { useState } from "react";
 import { useRouter } from "next/router"; // For Next.js Pages Router
 // If you use App Router, use: import { useRouter } from "next/navigation";
 
@@ -31,8 +31,8 @@ export default function NaoOnboardingForm({ email, defaultUsername = "" }: Props
         setLoading(false);
         return;
       }
-      // Redirect to /mint on successful onboarding
-      router.push("/mint");
+      // Redirect to /final-onboarding on successful onboarding (instead of /mint)
+      router.push("/final-onboarding");
     } catch (err: any) {
       setError(err.message || "Onboarding failed");
       setLoading(false);
