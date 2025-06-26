@@ -1,12 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-// Import your user and token lookup logic
-import { findNaoUserByWhoopId } from "../../lib/findNaoUserByWhoopId";
-
-// STUB: Replace with your real token store/lookup for demo
-const demoTokens: Record<string, { access_token: string }> = {
-  "0x123...abc": { access_token: "YOUR_WHOOP_ACCESS_TOKEN" },
-  // Add more demo wallet/token pairs as needed
-};
+import { getValidWhoopAccessToken } from "../../lib/userMap";
 
 /**
  * Fetches Whoop data for a given access token and date.
@@ -34,22 +27,19 @@ async function getWhoopData(accessToken: string, date: string) {
   return { profile, recovery, strain, sleep };
 }
 
-// STEP 1: Add this function
-async function getWhoopTokensForWallet(wallet: string) {
-  // Replace this with your persistent store in production!
-  return demoTokens[wallet];
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    // Get wallet address from cookie, query, or session (adjust as needed)
-    const wallet = (req.query.wallet as string) || req.cookies.wallet || "0x123...abc"; // Fallback for demo
+    // Get wallet address from query, cookie, or session (adjust as needed)
+    const wallet = (req.query.wallet as string) || req.cookies.wallet;
+    if (!wallet) {
+      return res.status(400).json({ error: "Wallet address required" });
+    }
 
-    // STEP 2: Use the real lookup function here!
-    const tokens = await getWhoopTokensForWallet(wallet);
+    // Use the real lookup function from userMap
+    const accessToken = await getValidWhoopAccessToken(wallet);
 
-    if (!tokens?.access_token) {
-      return res.status(401).json({ error: "Not authenticated with Whoop" });
+    if (!accessToken) {
+      return res.status(401).json({ error: "No valid Whoop access token found" });
     }
 
     // Determine the date to fetch (from query or default to today)
@@ -58,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       : new Date().toISOString().slice(0, 10);
 
     // Fetch Whoop data
-    const data = await getWhoopData(tokens.access_token, date);
+    const data = await getWhoopData(accessToken, date);
 
     res.status(200).json(data);
   } catch (err: any) {
