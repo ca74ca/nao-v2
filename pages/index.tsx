@@ -38,12 +38,12 @@ type OnboardFields = {
   name?: string;
   password?: string;
   email?: string;
+  healthGoals?: string;
+  connectWearables?: boolean;
 };
 
 export default function Home() {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
-
-  // Scroll chat to bottom when messages change
   useEffect(() => {
     const chatContainer = document.querySelector('[style*="overflow-y: auto"]');
     if (chatContainer) {
@@ -69,7 +69,7 @@ export default function Home() {
 
   // Chat-based onboarding state
   const [onboardingStep, setOnboardingStep] = useState<
-    null | "username" | "name" | "password" | "email" | "creating" | "loginUsername" | "loginPassword" | "resetPassword"
+    null | "username" | "name" | "password" | "email" | "healthGoals" | "connectWearables" | "creating" | "loginUsername" | "loginPassword" | "resetPassword"
   >(null);
   const [onboardFields, setOnboardFields] = useState<OnboardFields>({});
 
@@ -110,11 +110,9 @@ export default function Home() {
   function checkIntentSwitch(input: string) {
     const lower = input.toLowerCase();
     if (["sign in", "login", "already", "have account", "i have an account"].some(k => lower.includes(k))) {
-      // user wants to switch to login
       return "login";
     }
     if (["sign up", "create", "register", "new account"].some(k => lower.includes(k))) {
-      // user wants to switch to signup
       return "signup";
     }
     return null;
@@ -225,7 +223,6 @@ export default function Home() {
 
       // --- HANDLE loginPassword step with "forgot" logic ---
       if (onboardingStep === "loginPassword") {
-        // Check for "forgot password" intent
         if (
           ["forgot", "don't know", "do not know", "cant remember", "can't remember", "reset"].some(phrase =>
             input.toLowerCase().includes(phrase)
@@ -264,7 +261,6 @@ export default function Home() {
           localStorage.setItem("nao_user", JSON.stringify({
             email: onboardFields.email ?? "",
             username: onboardFields.username ?? "",
-            // ...add other fields if needed
           }));
           router.push("/mint");
           setLoading(false);
@@ -295,13 +291,14 @@ export default function Home() {
           localStorage.setItem("nao_user", JSON.stringify({
             email: onboardFields.email ?? "",
             username: onboardFields.username ?? "",
-            // ...add other fields if needed
           }));
           router.push("/mint");
           setLoading(false);
         }, 1600);
         return;
       }
+
+      // --- SIGNUP FLOW ---
 
       if (onboardingStep === "username") {
         if (input.length < 3 || /\s/.test(input)) {
@@ -357,6 +354,7 @@ export default function Home() {
         setLoading(false);
         return;
       }
+      // 🟡 NEW: Ask for health goals after email
       if (onboardingStep === "email") {
         if (!/\S+@\S+\.\S+/.test(input)) {
           setMessages((msgs) => [
@@ -367,63 +365,88 @@ export default function Home() {
           return;
         }
         setOnboardFields((fields) => ({ ...fields, email: input }));
+        setOnboardingStep("healthGoals");
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "NAO",
+            text: "What are your main health goals with NAO? (e.g., lose weight, improve sleep, general wellness, etc.)"
+          }
+        ]);
+        setLoading(false);
+        return;
+      }
+      // 🟢 NEW: Ask for connectWearables after health goals
+      if (onboardingStep === "healthGoals") {
+        setOnboardFields((fields) => ({ ...fields, healthGoals: input }));
+        setOnboardingStep("connectWearables");
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "NAO",
+            text: "Would you like to connect any wearable devices such as Fitbit or Apple Watch? (yes/no)"
+          }
+        ]);
+        setLoading(false);
+        return;
+      }
+      // 🟣 NEW: After connectWearables, POST everything to backend
+      if (onboardingStep === "connectWearables") {
+        const wantsWearables = /^y(es)?$/i.test(input.trim());
+        setOnboardFields((fields) => ({ ...fields, connectWearables: wantsWearables }));
         setOnboardingStep("creating");
         setMessages((msgs) => [
           ...msgs,
           { sender: "NAO", text: "Creating your NAO account and secure health wallet..." }
         ]);
-        // Call backend to create user and wallet
+        setLoading(true);
+
         try {
-          // Simulated backend call; replace with your real endpoint
-const res = await fetch("/api/onboardUser", {
+          const res = await fetch("/api/onboardUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               username: onboardFields.username,
               name: onboardFields.name,
               password: onboardFields.password,
-              email: input, // current input is the email
+              email: onboardFields.email,
+              healthGoals: onboardFields.healthGoals,
+              connectWearables: wantsWearables,
             }),
           });
-         const data = await res.json();
-
-if (data.status === "success" && data.redirectUrl) {
-  setTimeout(() => {
-    setMessages((msgs) => [
-      ...msgs,
-      {
-        sender: "NAO",
-        text: "Done! Your NAO health passport and wallet are ready. Let's continue onboarding.",
-      },
-    ]);
-    setOnboardingStep(null);
-    setLoading(false);
-    // Redirect to the provided URL
-    router.push(data.redirectUrl);
-  }, 1600);
-  return;
-}
-
-if (data.status === "exists" && data.redirectUrl) {
-  setMessages((msgs) => [
-    ...msgs,
-    { sender: "System", text: "User already exists. Redirecting to login..." }
-  ]);
-  setOnboardingStep(null);
-  setLoading(false);
-  setTimeout(() => router.push(data.redirectUrl), 1000);
-  return;
-}
-
-// Catch-all error handler for API
-setMessages((msgs) => [
-  ...msgs,
-  { sender: "System", text: "Error creating account: " + (data.message || "Unknown error.") }
-]);
-setOnboardingStep(null);
-setLoading(false);
-return;
-
+          const data = await res.json();
+          if (data.status === "success" && data.redirectUrl) {
+            setTimeout(() => {
+              setMessages((msgs) => [
+                ...msgs,
+                {
+                  sender: "NAO",
+                  text: "Done! Your NAO health passport and wallet are ready. Let's continue onboarding.",
+                },
+              ]);
+              setOnboardingStep(null);
+              setLoading(false);
+              router.push(data.redirectUrl);
+            }, 1600);
+            return;
+          }
+          if (data.status === "exists" && data.redirectUrl) {
+            setMessages((msgs) => [
+              ...msgs,
+              { sender: "System", text: "User already exists. Redirecting to login..." }
+            ]);
+            setOnboardingStep(null);
+            setLoading(false);
+            setTimeout(() => router.push(data.redirectUrl), 1000);
+            return;
+          }
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "System", text: "Error creating account: " + (data.message || "Unknown error.") }
+          ]);
+          setOnboardingStep(null);
+          setLoading(false);
+          return;
         } catch (err) {
           setMessages((msgs) => [
             ...msgs,
@@ -434,7 +457,6 @@ return;
         }
         return;
       }
-      // Prevent running normal message flow if onboarding step active
       setLoading(false);
       return;
     }
@@ -509,8 +531,6 @@ return;
       >
         N A O HEALTH INTELLIGENCE REWARDED
       </div>
-
-      {/* Fullscreen Video */}
       <video
         autoPlay
         muted
@@ -530,8 +550,6 @@ return;
         <source src="/ai_intro_video1.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-
-      {/* Floating Chat at Bottom Third */}
       <div
         style={{
           position: "fixed",
