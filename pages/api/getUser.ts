@@ -2,18 +2,24 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { connectToDatabase } from "../../lib/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  let { email } = req.query;
-  if (!email || typeof email !== "string") {
-    return res.status(400).json({ error: "Missing email" });
+  let { email, wallet } = req.query;
+
+  if ((!email || typeof email !== "string") && (!wallet || typeof wallet !== "string")) {
+    return res.status(400).json({ error: "Missing email or wallet" });
   }
 
-  // Clean input and use case-insensitive search
-  email = email.trim();
-
   const { db } = await connectToDatabase();
-  const user = await db.collection("users").findOne({
-    email: { $regex: `^${email}$`, $options: "i" }
-  });
+
+  let user = null;
+  if (email && typeof email === "string") {
+    user = await db.collection("users").findOne({
+      email: { $regex: `^${email.trim()}$`, $options: "i" }
+    });
+  } else if (wallet && typeof wallet === "string") {
+    user = await db.collection("users").findOne({
+      wallet: { $regex: `^${wallet.trim()}$`, $options: "i" }
+    });
+  }
 
   if (!user) return res.status(404).json({ error: "User not found" });
 
