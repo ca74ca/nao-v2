@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 // Import your user and token lookup logic
 import { findNaoUserByWhoopId } from "../../lib/findNaoUserByWhoopId";
-// import { getWhoopTokensForWallet } from "../../lib/userMap"; // You should implement this
 
 // STUB: Replace with your real token store/lookup for demo
 const demoTokens: Record<string, { access_token: string }> = {
@@ -35,14 +34,19 @@ async function getWhoopData(accessToken: string, date: string) {
   return { profile, recovery, strain, sleep };
 }
 
+// STEP 1: Add this function
+async function getWhoopTokensForWallet(wallet: string) {
+  // Replace this with your persistent store in production!
+  return demoTokens[wallet];
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // Get wallet address from cookie, query, or session (adjust as needed)
     const wallet = (req.query.wallet as string) || req.cookies.wallet || "0x123...abc"; // Fallback for demo
 
-    // Look up Whoop tokens for the wallet (replace with real store/DB in prod)
-    // const tokens = await getWhoopTokensForWallet(wallet);
-    const tokens = demoTokens[wallet];
+    // STEP 2: Use the real lookup function here!
+    const tokens = await getWhoopTokensForWallet(wallet);
 
     if (!tokens?.access_token) {
       return res.status(401).json({ error: "Not authenticated with Whoop" });
