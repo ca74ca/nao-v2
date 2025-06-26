@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router"; // For Next.js Pages Router
-// If you use App Router, use: import { useRouter } from "next/navigation";
 
 interface Props {
   email: string;
@@ -25,14 +24,14 @@ export default function NaoOnboardingForm({ email, defaultUsername = "" }: Props
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, healthGoals, connectWearables }),
       });
-      if (!res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+      if (!res.ok || !data) {
         setError(data.message || "Onboarding failed");
         setLoading(false);
         return;
       }
-      // Redirect to /final-onboarding on successful onboarding (instead of /mint)
-      router.push("/final-onboarding");
+      // Redirect to the backend's suggested URL (handles both /mint and /final-onboarding)
+      router.push(data.redirectUrl || "/final-onboarding");
     } catch (err: any) {
       setError(err.message || "Onboarding failed");
       setLoading(false);
