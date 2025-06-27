@@ -30,6 +30,10 @@ export default function NaoOnboardingForm({ email, defaultUsername = "" }: Props
         setLoading(false);
         return;
       }
+      // --- Store wallet address in localStorage if present ---
+      if (data.walletAddress) {
+        localStorage.setItem("wallet", data.walletAddress);
+      }
       // Redirect to the backend's suggested URL (handles both /mint and /final-onboarding)
       router.push(data.redirectUrl || "/final-onboarding");
     } catch (err: any) {
