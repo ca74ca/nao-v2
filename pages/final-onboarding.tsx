@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import EchoAssistant from "@/components/EchoAssistant";
+import { useWallet } from "../context/WalletContext"; // <-- ADD THIS LINE
 
 export default function FinalOnboarding() {
   const router = useRouter();
+  const { setWallet } = useWallet(); // <-- ADD THIS LINE
 
   // ────────────────────────────────────
   // Local state
@@ -18,7 +20,7 @@ export default function FinalOnboarding() {
   const [user, setUser] = useState<any>(null);
 
   // ────────────────────────────────────
-  // Pull user from localStorage
+  // Pull user from localStorage and hydrate wallet context
   // ────────────────────────────────────
   useEffect(() => {
     const stored =
@@ -26,7 +28,13 @@ export default function FinalOnboarding() {
 
     if (stored) {
       try {
-        setUser(JSON.parse(stored));
+        const parsedUser = JSON.parse(stored);
+        setUser(parsedUser);
+
+        // Hydrate wallet context if wallet exists
+        if (parsedUser.wallet) {
+          setWallet(parsedUser.wallet);
+        }
       } catch (e) {
         console.error("Failed to parse nao_user from localStorage:", e);
         router.push("/");
@@ -34,7 +42,7 @@ export default function FinalOnboarding() {
     } else {
       router.push("/");
     }
-  }, [router]);
+  }, [router, setWallet]);
 
   // ────────────────────────────────────
   // Check wearable status once we have a user
