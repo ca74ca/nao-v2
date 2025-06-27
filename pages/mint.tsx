@@ -180,9 +180,6 @@ function generateRandomState(length = 16) {
   return state;
 }
 
-  // Use the correct endpoint
-  return `https://api.prod.whoop.com/oauth/oauth2/auth?${params.toString()}`;
-}
 export default function MintPage() {
   const router = useRouter();
   const { rewardState } = useRewardState();
@@ -234,23 +231,23 @@ export default function MintPage() {
   const email = user?.email || "";
 
   useEffect(() => {
-  if (!user?.walletId) return;
+    if (!user?.walletId) return;
 
-  const refreshUser = async () => {
-    try {
-      const res = await fetch(`/api/getUser?wallet=${user.walletId.toLowerCase()}`);
-      if (!res.ok) throw new Error("User refresh failed");
-      const fresh = await res.json();
-      setUser(fresh);                       // contains latest WHOOP fields
-    } catch (err) {
-      console.error("User refresh error:", err);
-    }
-  };
+    const refreshUser = async () => {
+      try {
+        const res = await fetch(`/api/getUser?wallet=${user.walletId.toLowerCase()}`);
+        if (!res.ok) throw new Error("User refresh failed");
+        const fresh = await res.json();
+        setUser(fresh);                       // contains latest WHOOP fields
+      } catch (err) {
+        console.error("User refresh error:", err);
+      }
+    };
 
-  refreshUser();                            // initial pull
-  const id = setInterval(refreshUser, 60_000); // refresh every 60 s
-  return () => clearInterval(id);
-}, [user?.walletId]);
+    refreshUser();                            // initial pull
+    const id = setInterval(refreshUser, 60_000); // refresh every 60 s
+    return () => clearInterval(id);
+  }, [user?.walletId]);
 
 
   // Fetch user info from backend by email
@@ -302,21 +299,21 @@ export default function MintPage() {
   }
 
   const handleWhoopSync = () => {
-  const localUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
+    const localUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
 
-  const wallet = localUser.walletId || localUser.wallet;
-  if (!wallet) {
-    alert("No wallet found. Please log in again.");
-    return;
-  }
+    const wallet = localUser.walletId || localUser.wallet;
+    if (!wallet) {
+      alert("No wallet found. Please log in again.");
+      return;
+    }
 
-  // ✅ Set cookie so /api/whoop-auth can access wallet
-  document.cookie = `wallet=${wallet}; path=/; SameSite=Lax`;
+    // ✅ Set cookie so /api/whoop-auth can access wallet
+    document.cookie = `wallet=${wallet}; path=/; SameSite=Lax`;
 
-  setWhoopSyncStatus("Opening WHOOP...");
-  window.open(getWhoopAuthUrl(wallet), "_blank", "width=500,height=700");
-  setTimeout(() => setWhoopSyncStatus(""), 1800);
-};
+    setWhoopSyncStatus("Opening WHOOP...");
+    window.open(getWhoopAuthUrl(wallet), "_blank", "width=500,height=700");
+    setTimeout(() => setWhoopSyncStatus(""), 1800);
+  };
 
 
   useEffect(() => {
@@ -1035,4 +1032,3 @@ export default function MintPage() {
     </div>
   );
 }
-
