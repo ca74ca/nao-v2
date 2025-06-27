@@ -8,10 +8,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ✅ Safely parse cookies
   const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
-const wallet =
-  (req.headers["x-user-wallet"] as string | undefined) ||  // optional header fallback
-  cookies.wallet ||                                         // current method
-  (req.query.state as string | undefined);                  // new fallback from `mint.tsx`
+
+  // 1. Read wallet from state param (OAuth best practice)
+  // 2. Then try header
+  // 3. Then try cookie
+  const wallet =
+    (req.query.state as string | undefined) ||
+    (req.headers["x-user-wallet"] as string | undefined) ||
+    cookies.wallet;
+
   if (!code || !wallet) {
     res.setHeader('Content-Type', 'text/html');
     res.end(`
@@ -28,7 +33,7 @@ const wallet =
     const tokenRes = await axios.post('https://api.prod.whoop.com/oauth/oauth2/token', {
       grant_type: 'authorization_code',
       code,
-redirect_uri: 'https://nao-v2.onrender.com/api/whoop-callback',
+      redirect_uri: 'https://nao-v2.onrender.com/api/whoop-callback',
       client_id: process.env.WHOOP_CLIENT_ID,
       client_secret: process.env.WHOOP_CLIENT_SECRET,
     });

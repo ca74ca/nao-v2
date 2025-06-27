@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
 
-export default function WhoopLiveData() {
+export default function WhoopLiveData({ wallet }: { wallet: string }) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!wallet) {
+      setError("Wallet not detected. Please log in.");
+      setLoading(false);
+      return;
+    }
+
     async function fetchWhoop() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/whoop-data");
+        // Always send wallet as a query param!
+        const res = await fetch(`/api/whoop-data?wallet=${encodeURIComponent(wallet)}`);
         if (!res.ok) throw new Error("Failed to fetch WHOOP data.");
         const json = await res.json();
         setData(json);
@@ -23,7 +30,7 @@ export default function WhoopLiveData() {
     // Optionally poll every N seconds for "live"
     // const interval = setInterval(fetchWhoop, 60000);
     // return () => clearInterval(interval);
-  }, []);
+  }, [wallet]);
 
   if (loading) return <div>Loading WHOOP data...</div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
