@@ -180,7 +180,7 @@ function generateRandomState(length = 16) {
 }
 
 // --- REPLACEMENT: getWhoopAuthUrl function ---
-function getWhoopAuthUrl(wallet?: string) {
+export function getWhoopAuthUrl(wallet?: string) {
   const params = new URLSearchParams({
     client_id: process.env.NEXT_PUBLIC_WHOOP_CLIENT_ID!,
     redirect_uri: process.env.NEXT_PUBLIC_WHOOP_REDIRECT_URI!,
@@ -192,9 +192,9 @@ function getWhoopAuthUrl(wallet?: string) {
     params.append("state", wallet);
   }
 
-  return `https://api.whoop.com/oauth/oauth2/authenticate?${params.toString()}`;
+  // Use the correct endpoint
+  return `https://api.prod.whoop.com/oauth/oauth2/auth?${params.toString()}`;
 }
-
 export default function MintPage() {
   const router = useRouter();
   const { rewardState } = useRewardState();
