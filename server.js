@@ -1,20 +1,13 @@
-import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import onboardRoutes from './backend/routes/onboard.js'; // Add .js for ES modules
-
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-app.use(cors());
-app.use(bodyParser.json());
-
-app.get('/', (_, res) => {
-  res.send('✅ NAO API running');
-});
-
-app.use('/onboard', onboardRoutes);
-
-app.listen(PORT, () => {
-  console.log(`✅ NAO backend live on port ${PORT}`);
-});
+{
+  "name": "nao-sdk-api",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
