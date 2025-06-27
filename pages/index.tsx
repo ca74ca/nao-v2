@@ -258,9 +258,12 @@ export default function Home() {
             ...msgs,
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
+          // --- PATCH: Merge and preserve walletId and other fields ---
+          const prev = JSON.parse(localStorage.getItem("nao_user") || "{}");
           localStorage.setItem("nao_user", JSON.stringify({
-            email: onboardFields.email ?? "",
-            username: onboardFields.username ?? "",
+            ...prev,
+            email: onboardFields.email ?? prev.email ?? "",
+            username: onboardFields.username ?? prev.username ?? "",
           }));
           router.push("/mint");
           setLoading(false);
@@ -288,9 +291,12 @@ export default function Home() {
             ...msgs,
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
+          // --- PATCH: Merge and preserve walletId and other fields ---
+          const prev = JSON.parse(localStorage.getItem("nao_user") || "{}");
           localStorage.setItem("nao_user", JSON.stringify({
-            email: onboardFields.email ?? "",
-            username: onboardFields.username ?? "",
+            ...prev,
+            email: onboardFields.email ?? prev.email ?? "",
+            username: onboardFields.username ?? prev.username ?? "",
           }));
           router.push("/mint");
           setLoading(false);
