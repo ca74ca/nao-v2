@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectToDatabase } from "../../lib/db";
+import type { WithId, Document } from "mongodb"; // import types for user
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   let { email, wallet } = req.query;
@@ -10,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { db } = await connectToDatabase();
 
-  let user = null;
+  let user: WithId<Document> | null = null; // Properly typed user
   if (email && typeof email === "string") {
     user = await db.collection("users").findOne({
       email: { $regex: `^${email.trim()}$`, $options: "i" }
