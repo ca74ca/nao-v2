@@ -30,13 +30,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const tokenRes = await axios.post('https://api.prod.whoop.com/oauth/oauth2/token', {
+    // 🔥 FIX: Use URLSearchParams for form-urlencoded body
+    const params = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
       redirect_uri: 'https://nao-v2.onrender.com/api/whoop-callback',
-      client_id: process.env.WHOOP_CLIENT_ID,
-      client_secret: process.env.WHOOP_CLIENT_SECRET,
+      client_id: process.env.WHOOP_CLIENT_ID!,
+      client_secret: process.env.WHOOP_CLIENT_SECRET!,
     });
+
+    const tokenRes = await axios.post(
+      'https://api.prod.whoop.com/oauth/oauth2/token',
+      params.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
 
     const { access_token, refresh_token, expires_in } = tokenRes.data;
     const expiresAt = new Date(Date.now() + expires_in * 1000);
