@@ -1,8 +1,7 @@
-// server.js
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const onboardRoutes = require('./backend/routes/onboard'); // Make sure path is correct
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import onboardRoutes from './backend/routes/onboard.js'; // Add .js for ES modules
 
 const app = express();
 const PORT = process.env.PORT || 3001;
