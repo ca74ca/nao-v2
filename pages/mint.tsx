@@ -5,6 +5,7 @@ import DailyOutlook from "../src/components/DailyOutlook";
 import { RewardsTracker } from "../components/RewardsTracker";
 import { useRewardState } from "../src/hooks/useRewardState";
 import ActionBar from "../components/ActionBar";
+import { getWhoopAuthUrl } from '../utils/getWhoopAuthUrl';
 
 // --- Evolve NFT Action Trigger (original, unchanged) ---
 function EvolveActionBar({ onEvolve, evolving }: { onEvolve: () => void, evolving: boolean }) {
