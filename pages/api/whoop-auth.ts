@@ -8,7 +8,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const redirectUri =
     process.env.WHOOP_REDIRECT_URI ||
     process.env.NEXT_PUBLIC_WHOOP_REDIRECT_URI;
-  const scope = "read:profile"; // Minimal scope for WHOOP OAuth
+const scope = "read:recovery read:cycles read:sleep read:workout read:profile";
 
   if (!clientId || !redirectUri) {
     return res.status(500).json({
