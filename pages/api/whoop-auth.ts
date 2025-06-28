@@ -1,4 +1,4 @@
-iimport type { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   // Read client ID and redirect URI from environment variables (supporting NEXT_PUBLIC_ fallback)
