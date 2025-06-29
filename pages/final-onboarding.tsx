@@ -144,54 +144,59 @@ Say goodbye to generic plans and embrace truly personalized wellness with reward
 
 Ready to unlock a new era of proactive well-being where your fitness journey is uniquely yours, financially rewarding, and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set your first AI-driven goal, and link your card. Your first $1 reward is waiting – tap below to begin your healthier, wealthier journey!`}
 </div>
-        {/* Sync buttons */}
-        <div className="space-y-4 w-full">
-          {/* Apple Health Link Button */}
-          <button
-            className={`px-5 py-3 rounded-2xl border ${
-              wearableConnected ? "border-green-400" : "border-white"
-            } bg-transparent w-full`}
-            onClick={handleAppleHealthLink}
-            disabled={loadingWearable || wearableConnected}
-          >
-            {loadingWearable
-              ? "Checking wearable status..."
-              : wearableConnected
-              ? "✅ Apple Health Linked"
-              : "Link Apple Health"}
-          </button>
+     {/* Sync buttons */}
+<div className="space-y-4 w-full mt-6">
+  <h2 className="text-lg font-semibold text-cyan-400 mb-2">
+    Sync Your Systems
+  </h2>
 
-          {/* Coinbase Wallet */}
-          <button
-            className={`px-5 py-3 rounded-2xl border ${
-              coinbaseLinked ? "border-green-400" : "border-white"
-            } bg-transparent w-full`}
-            onClick={() => setCoinbaseLinked(true)} // TODO: replace with real wallet connect
-            disabled={coinbaseLinked}
-          >
-            {coinbaseLinked ? "✅ Coinbase Linked" : "Link Coinbase Wallet"}
-          </button>
+  {/* Apple Health */}
+  <button
+    className={`relative px-5 py-4 rounded-2xl w-full text-white transition-all duration-200
+      ${wearableConnected ? "bg-green-600/70" : "bg-white/10 hover:bg-white/20"}
+      shadow-lg backdrop-blur-md border border-white/20`}
+    onClick={handleAppleHealthLink}
+    disabled={loadingWearable || wearableConnected}
+  >
+    {loadingWearable
+      ? "🔄 Checking wearable status..."
+      : wearableConnected
+      ? "✅ Apple Health Linked"
+      : "📲 Link Apple Health"}
+  </button>
 
-          {/* Apple Pay */}
-          <button
-            className={`px-5 py-3 rounded-2xl border ${
-              applePaySynced ? "border-green-400" : "border-white"
-            } bg-transparent w-full`}
-            onClick={() => setApplePaySynced(true)} // TODO: replace with real Apple Pay sync
-            disabled={applePaySynced}
-          >
-            {applePaySynced
-              ? "✅ Apple Pay Synced"
-              : "Sync Apple Pay for Stablecoin Usage"}
-          </button>
-        </div>
+  {/* Coinbase Wallet */}
+  <button
+    className={`relative px-5 py-4 rounded-2xl w-full text-white transition-all duration-200
+      ${coinbaseLinked ? "bg-green-600/70" : "bg-white/10 hover:bg-white/20"}
+      shadow-lg backdrop-blur-md border border-white/20`}
+    onClick={() => setCoinbaseLinked(true)}
+    disabled={coinbaseLinked}
+  >
+    {coinbaseLinked ? "✅ Coinbase Linked" : "💰 Link Coinbase Wallet"}
+  </button>
 
-        {/* Error notice */}
-        {error && (
-          <div className="text-red-400 font-semibold mt-2 animate-pulse">
-            {error}
-          </div>
-        )}
+  {/* Apple Pay */}
+  <button
+    className={`relative px-5 py-4 rounded-2xl w-full text-white transition-all duration-200
+      ${applePaySynced ? "bg-green-600/70" : "bg-white/10 hover:bg-white/20"}
+      shadow-lg backdrop-blur-md border border-white/20`}
+    onClick={() => setApplePaySynced(true)}
+    disabled={applePaySynced}
+  >
+    {applePaySynced
+      ? "✅ Apple Pay Synced"
+      : "💳 Sync Apple Pay for Stablecoin Usage"}
+  </button>
+</div>
+
+{/* Error notice */}
+{error && (
+  <div className="text-red-400 font-semibold mt-2 animate-pulse">
+    {error}
+  </div>
+)}
+
 
         {/* AI Companion */}
         <div className="w-full max-w-3xl mt-8">
