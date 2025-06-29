@@ -135,12 +135,15 @@ export default function FinalOnboarding() {
           Welcome to NAO: Your Health Intelligence Passport
         </h1>
 
-        <p className="text-lg">
-          You’re about to mint your Health dNFT and unlock a system that tracks
-          your wellness, powers your AI insights, and earns real-world
-          stablecoin rewards. To continue, please connect the following:
-        </p>
+        <div className="overflow-y-auto max-h-[65vh] w-full text-sm leading-6 whitespace-pre-line text-gray-200 border border-gray-700/40 rounded-2xl p-6 backdrop-blur-sm bg-black/40">
+{`Fantastic! Let's incorporate those powerful points about fitness, adaptability, and the evolving nature of your stablecoin rewards.
 
+Welcome to NAO, the first Health Intelligence Passport that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized guidance for your unique well-being journey and rewarding your efforts with real cash. Our advanced AI constantly analyzes your sleep, activity levels, and biomarkers (via Whoop/Apple Health), delivering actionable insights. Whether it's suggesting optimal workout intensity, recommending recovery protocols like "Your workout recovery is 92%—ideal day for strength training," or nudging you with "Your stress levels spiked today—try 5 mins of breathwork now," NAO evolves with your progress. This dynamic learning ensures your fitness journey is always challenging, achievable, and truly yours. Hit your health goals, and you'll earn $NAO – a USD-pegged stablecoin that's truly usable anywhere, just like cash! Spend your rewards instantly via Apple Pay or Mastercard at your favorite gym, grocery store, or even for that post-workout smoothie. As your health improves, so do your earning opportunities, with higher rewards for consistent progress and milestones.
+
+Say goodbye to generic plans and embrace truly personalized wellness with rewards that grow with you. Your comprehensive health data becomes a secure, living NFT you own on the blockchain, empowering you with unparalleled control and privacy. This means seamless doctor visits by sharing a simple QR code, and robust security for all your health information. The $NAO stablecoin itself is designed for future-proof value: built on a robust blockchain framework, its stability and utility are continually enhanced through community governance and potential algorithmic improvements, ensuring it remains a reliable, spendable asset as the Web3 ecosystem evolves. This means your earnings are always secure and ready for use.
+
+Ready to unlock a new era of proactive well-being where your fitness journey is uniquely yours, financially rewarding, and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set your first AI-driven goal, and link your card. Your first $1 reward is waiting – tap below to begin your healthier, wealthier journey!`}
+</div>
         {/* Sync buttons */}
         <div className="space-y-4 w-full">
           {/* Apple Health Link Button */}
