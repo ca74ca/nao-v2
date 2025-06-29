@@ -221,7 +221,7 @@ Ready to unlock a new era of proactive well-being where your fitness journey is 
 
         {/* Continue button */}
         <button
-          className="mt-4 px-6 py-3 bg-blue-500 rounded-2xl text-white font-semibold disabled:opacity-40"
+className="mt-4 px-6 py-3 bg-cyan-500 hover:bg-cyan-600 rounded-2xl text-white font-semibold disabled:opacity-40 transition"
           disabled={!allowContinue}
           onClick={handleFinish}
         >
