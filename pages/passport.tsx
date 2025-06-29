@@ -1,7 +1,6 @@
-// pages/passport.tsx – v1.0 futuristic NAO Health Passport
+// pages/passport.tsx – v1.1 NAO Health Passport (no QR)
 
 import { useEffect, useState } from "react";
-import QRCode from "qrcode.react";
 import copy from "copy-to-clipboard";
 
 /* -------------------------------------------------------
@@ -10,10 +9,9 @@ const i18n = {
   en: {
     head: "🧬 Your Health Passport",
     intro:
-      "Secure, on‑chain record of your fitness metrics & NFT identity. Share with a physician via the glowing QR.",
+      "Secure, on‑chain record of your fitness metrics & NFT identity. Share with a physician using your link below.",
     wallet: "Wallet ID",
     passport: "Passport ID",
-    qrCaption: "Doctor‑scan QR",
     copyBtn: "Copy Share Link",
     copied: "Copied!",
     cards: { vo2: "VO₂ Max", cal: "Active Calories", steps: "Steps", hr: "Heart Rate" },
@@ -25,10 +23,9 @@ const i18n = {
   es: {
     head: "🧬 Tu Pasaporte de Salud",
     intro:
-      "Registro seguro en cadena de tus métricas y NFT. Compártelo con tu médico usando el QR iluminado.",
+      "Registro seguro en cadena de tus métricas y NFT. Compártelo con tu médico usando el enlace abajo.",
     wallet: "ID de Wallet",
     passport: "ID de Pasaporte",
-    qrCaption: "QR para Doctor",
     copyBtn: "Copiar enlace de acceso",
     copied: "¡Copiado!",
     cards: { vo2: "VO₂ Máx", cal: "Calorías activas", steps: "Pasos", hr: "Frecuencia cardíaca" },
@@ -90,15 +87,13 @@ export default function HealthPassport() {
         <p className="break-all text-sm">{user?.passportId ?? "—"}</p>
       </div>
 
-      {/* QR + share row */}
-      <div className="flex flex-col sm:flex-row items-start gap-6 mb-12">
-        <div className="relative">
-          {/* pulsing ring  */}
-          <span className="absolute -inset-2 rounded-xl border-2 border-cyan-400/40 animate-pulse" />
-          <QRCode value={user?.passportId || "NAO-UNKNOWN"} size={180} bgColor="#000" fgColor="#00FFFF" />
-        </div>
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-gray-400">{t.qrCaption}</p>
+      {/* share link row (no QR) */}
+      <div className="flex flex-col items-start gap-4 mb-12">
+        <div>
+          <p className="text-sm text-gray-400 mb-2">Doctor‑share link</p>
+          <div className="bg-cyan-900/70 rounded-lg px-4 py-3 font-mono text-cyan-300 text-xs break-all mb-2 border border-cyan-400/20">
+            {shareUrl || <span className="text-gray-500">—</span>}
+          </div>
           <button
             onClick={handleCopy}
             className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 rounded-xl text-sm font-medium transition"
