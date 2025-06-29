@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import EchoAssistant from "@/components/EchoAssistant";
-import { useWallet } from "../context/WalletContext"; // <-- ADD THIS LINE
+import { useWallet } from "../context/WalletContext";
 
 export default function FinalOnboarding() {
   const router = useRouter();
-  const { setWallet } = useWallet(); // <-- ADD THIS LINE
+  const { setWallet } = useWallet();
 
-  // ────────────────────────────────────
-  // Local state
-  // ────────────────────────────────────
   const [wearableConnected, setWearableConnected] = useState(false);
   const [coinbaseLinked, setCoinbaseLinked] = useState(false);
   const [applePaySynced, setApplePaySynced] = useState(false);
@@ -19,9 +16,7 @@ export default function FinalOnboarding() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
 
-  // ────────────────────────────────────
   // Pull user from localStorage and hydrate wallet context
-  // ────────────────────────────────────
   useEffect(() => {
     const stored =
       typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
@@ -30,11 +25,7 @@ export default function FinalOnboarding() {
       try {
         const parsedUser = JSON.parse(stored);
         setUser(parsedUser);
-
-        // Hydrate wallet context if wallet exists
-        if (parsedUser.wallet) {
-          setWallet(parsedUser.wallet);
-        }
+        if (parsedUser.wallet) setWallet(parsedUser.wallet);
       } catch (e) {
         console.error("Failed to parse nao_user from localStorage:", e);
         router.push("/");
@@ -44,9 +35,7 @@ export default function FinalOnboarding() {
     }
   }, [router, setWallet]);
 
-  // ────────────────────────────────────
   // Check wearable status once we have a user
-  // ────────────────────────────────────
   useEffect(() => {
     const checkWearable = async () => {
       if (!user?.email) return;
@@ -57,7 +46,6 @@ export default function FinalOnboarding() {
           `/api/getUser?email=${encodeURIComponent(user.email)}`
         );
         if (!res.ok) throw new Error("Could not fetch user status");
-
         const data = await res.json();
         setWearableConnected(
           Boolean(data?.whoopLinked || data?.appleHealthLinked)
@@ -73,30 +61,49 @@ export default function FinalOnboarding() {
     checkWearable();
   }, [user]);
 
-  // ────────────────────────────────────
   // Enable “Continue” only when all three syncs are complete
-  // ────────────────────────────────────
   useEffect(() => {
     setAllowContinue(wearableConnected && coinbaseLinked && applePaySynced);
   }, [wearableConnected, coinbaseLinked, applePaySynced]);
 
-  // ────────────────────────────────────
   // Handlers
-  // ────────────────────────────────────
   const handleWhoopConnect = () => {
     window.location.href = "/api/whoop-auth";
+  };
+
+  const handleAppleHealthLink = async () => {
+    if (!user?.email) return;
+
+    setLoadingWearable(true);
+    try {
+      const res = await fetch("https://nao-health-sync.onrender.com/api/link-apple", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+
+      const data = await res.json();
+      if (data.status === "linked") {
+        setWearableConnected(true);
+        setError(null);
+      } else {
+        setError(data.error || "Apple Health link failed.");
+      }
+    } catch (err) {
+      console.error("Apple Health link error:", err);
+      setError("Error linking Apple Health.");
+    } finally {
+      setLoadingWearable(false);
+    }
   };
 
   const handleFinish = () => {
     router.push("/mint");
   };
 
-  // ────────────────────────────────────
-  // JSX
-  // ────────────────────────────────────
   return (
     <div className="min-h-screen bg-black text-white flex flex-row relative">
-      {/* ─── Video background ─────────────────────────────────────── */}
+      {/* Video background */}
       <video
         className="fixed top-1/2 left-1/2 w-screen h-screen object-cover -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
         src="/sign_u_sign_in_vidd_1.mp4"
@@ -106,10 +113,9 @@ export default function FinalOnboarding() {
         playsInline
       />
 
-      {/* ─── LEFT: Sticky NAO model (hidden on mobile) ───────────── */}
+      {/* LEFT: Sticky NAO model (hidden on mobile) */}
       <div className="hidden md:flex relative z-10 flex-shrink-0 w-[420px] flex-col items-center justify-center">
         <div className="sticky top-0 flex flex-col items-center w-full h-screen justify-center">
-          {/* Swap this placeholder with your actual model / Lottie / Three.js */}
           <div className="w-[320px] h-[480px] bg-gradient-to-b from-gray-800 to-gray-900 rounded-3xl shadow-2xl flex items-center justify-center border border-gray-700">
             <span className="text-5xl font-bold text-cyan-400 tracking-tighter">
               NAO
@@ -123,7 +129,7 @@ export default function FinalOnboarding() {
         </div>
       </div>
 
-      {/* ─── RIGHT: Onboarding content ───────────────────────────── */}
+      {/* RIGHT: Onboarding content */}
       <div className="relative z-10 flex-1 flex flex-col items-start justify-start px-8 py-10 space-y-6 max-w-2xl ml-auto">
         <h1 className="text-4xl font-bold">
           Welcome to NAO: Your Health Intelligence Passport
@@ -135,21 +141,21 @@ export default function FinalOnboarding() {
           stablecoin rewards. To continue, please connect the following:
         </p>
 
-        {/* ─── Sync buttons ─────────────────────────────────────── */}
+        {/* Sync buttons */}
         <div className="space-y-4 w-full">
-          {/* WHOOP / Apple Health */}
+          {/* Apple Health Link Button */}
           <button
             className={`px-5 py-3 rounded-2xl border ${
               wearableConnected ? "border-green-400" : "border-white"
             } bg-transparent w-full`}
-            onClick={handleWhoopConnect}
+            onClick={handleAppleHealthLink}
             disabled={loadingWearable || wearableConnected}
           >
             {loadingWearable
               ? "Checking wearable status..."
               : wearableConnected
-              ? "✅ Wearable Connected (Whoop/Apple Health)"
-              : "Connect Wearable Device"}
+              ? "✅ Apple Health Linked"
+              : "Link Apple Health"}
           </button>
 
           {/* Coinbase Wallet */}
@@ -177,14 +183,14 @@ export default function FinalOnboarding() {
           </button>
         </div>
 
-        {/* ─── Error notice ──────────────────────────────────────── */}
+        {/* Error notice */}
         {error && (
           <div className="text-red-400 font-semibold mt-2 animate-pulse">
             {error}
           </div>
         )}
 
-        {/* ─── AI Companion ─────────────────────────────────────── */}
+        {/* AI Companion */}
         <div className="w-full max-w-3xl mt-8">
           <h2 className="text-xl mb-2 text-cyan-400 font-semibold">
             NAO AI Companion
@@ -194,7 +200,7 @@ export default function FinalOnboarding() {
           </div>
         </div>
 
-        {/* ─── Progress helper text ─────────────────────────────── */}
+        {/* Progress helper text */}
         {allowContinue ? (
           <p className="text-green-400 mt-4">
             ✅ All systems go — you’re ready to mint your Health dNFT.
@@ -205,7 +211,7 @@ export default function FinalOnboarding() {
           </p>
         )}
 
-        {/* ─── Continue button ──────────────────────────────────── */}
+        {/* Continue button */}
         <button
           className="mt-4 px-6 py-3 bg-blue-500 rounded-2xl text-white font-semibold disabled:opacity-40"
           disabled={!allowContinue}
