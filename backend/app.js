@@ -1,27 +1,22 @@
 require('dotenv').config();
 const express = require('express');
+const mongoose = require('mongoose');
+const verifyWorkout = require('./routes/verifyWorkout');
+
 const app = express();
-
-const onboardRoute = require('./routes/onboard.js'); // ✅ Correctly imports the fixed onboard route
-
-// Middleware to parse incoming JSON
 app.use(express.json());
 
-// Mount onboard route at /onboard (so POST /onboard works)
-app.use('/onboard', onboardRoute);
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// Health check endpoint (for Render.com)
-app.get('/healthz', (req, res) => {
-  res.status(200).send('OK');
-});
+// Register the route
+app.use('/api', verifyWorkout);
 
-// Catch-all for invalid routes
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found' });
-});
-
-// Start the Express server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`✅ NAO backend live on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
