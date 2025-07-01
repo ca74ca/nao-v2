@@ -3,6 +3,9 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 
+// Use node-fetch for server-side fetch
+const fetch = (...args: any[]) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -10,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { threadId, message, page, onboardingComplete } = req.body;
+  const { threadId, message, page, onboardingComplete, userId } = req.body;
 
   if (!threadId || !message) {
     return res.status(400).json({ error: "Missing threadId or message" });
@@ -124,6 +127,69 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const textBlock = lastAssistantMessage?.content?.find(
       (block: any) => block.type === "text"
     ) as { type: "text"; text: { value: string } } | undefined;
+
+    // --- WORKOUT LOGIC INTEGRATION ---
+
+    // Helper: does the assistant message look like a workout summary?
+    const isWorkoutSummary = (text: string) =>
+      /your workout log|workout summary|workout recorded|logged for you|here is your log|health passport/i.test(text);
+
+    // Helper: does the user confirm to log?
+    const isUserConfirmation = (text: string) =>
+      /^(yes|log it|that's correct|done|no, that's all|looks good|confirm)$/i.test(text.trim());
+
+    // Only proceed if both are true
+    if (
+      textBlock?.text?.value &&
+      lastAssistantMessage?.role === "assistant" &&
+      isWorkoutSummary(textBlock.text.value) &&
+      isUserConfirmation(message)
+    ) {
+      // Get userId from the request, session, or thread (customize as needed)
+      // For production, replace with real session-based user ID
+      const realUserId = userId || req.body.userId || req.query.userId || "user-" + threadId;
+
+      // The actual summary text
+      const workoutText = textBlock.text.value;
+
+      // Call backend to log and verify
+      const backendUrl = process.env.NAO_BACKEND_URL || "http://localhost:3001";
+      const verifyRes = await fetch(`${backendUrl}/api/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: realUserId, workoutText }),
+      });
+
+      if (!verifyRes.ok) {
+        const errDetail = await verifyRes.text();
+        return res.status(500).json({
+          error: "Failed to log workout",
+          details: errDetail,
+        });
+      }
+
+      const verifyData = await verifyRes.json();
+
+      // Build the reply with AI verification
+      let reply = textBlock.text.value;
+      if (verifyData?.aiResult) {
+        reply += `
+
+---
+**AI Verified:** ${verifyData.aiResult.plausible ? "✅ Plausible" : "⚠️ Unusual"}
+- *Reasoning*: ${verifyData.aiResult.reasoning}
+- *Suggestion*: ${verifyData.aiResult.suggestion}
+`;
+      }
+
+      return res.status(200).json({
+        reply,
+        threadId,
+        aiVerification: verifyData,
+      });
+    }
+
+    // --- END WORKOUT LOGIC ---
 
     res.status(200).json({
       reply: textBlock?.text?.value || "NAO is thinking...",

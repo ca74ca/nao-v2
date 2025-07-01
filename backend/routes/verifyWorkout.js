@@ -19,7 +19,11 @@ router.post('/verify', async (req, res) => {
       ]
     });
 
-    const aiResult = JSON.parse(completion.choices[0].message.content);
+    // Strip code block markers if present
+    let aiContent = completion.choices[0].message.content.trim();
+    aiContent = aiContent.replace(/^```json|^```|```$/gim, '').trim();
+
+    const aiResult = JSON.parse(aiContent);
 
     const log = await WorkoutLog.create({
       userId,
