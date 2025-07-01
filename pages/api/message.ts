@@ -56,16 +56,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const toolCalls = run.required_action.submit_tool_outputs.tool_calls;
         const toolOutputs: { tool_call_id: string; output: string }[] = [];
 
+        /* -----------------------------------------------------------
+           TOOL-CALL HANDLER  ➜ onboardUser • logWorkout • getRecentWorkouts
+        ----------------------------------------------------------- */
         for (const call of toolCalls) {
-          /* ──────────────── onboardUser tool ─────────────── */
+          /* ─────────── onboardUser ─────────── */
           if (call.function.name === "onboardUser") {
             let args: any = {};
-            try {
-              args = JSON.parse(call.function.arguments);
-            } catch (e) {
-              console.error("Bad onboardUser args:", call.function.arguments);
-            }
-
+            try { args = JSON.parse(call.function.arguments); } catch {}
             const newUser = {
               ...args,
               walletId: `0x${Math.floor(Math.random() * 1e16).toString(16)}`,
@@ -76,7 +74,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               nftTitle: "NAO Health NFT",
               nftMeta: "Dynamic, evolving health record",
             };
-
             try {
               const usersFile = path.join(process.cwd(), "users.json");
               let users = fs.existsSync(usersFile)
@@ -87,23 +84,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             } catch (e) {
               console.error("❌ write users.json", e);
             }
-
             toolOutputs.push({
               tool_call_id: call.id,
               output: JSON.stringify({ success: true, ...newUser }),
             });
-            continue;
+            continue;               // ⬅ keep going to next call
           }
 
-          /* ──────────────── logWorkout tool ─────────────── */
+          /* ─────────── logWorkout ─────────── */
           if (call.function.name === "logWorkout") {
             let args: any = {};
-            try {
-              args = JSON.parse(call.function.arguments);
-            } catch {
-              console.error("Bad logWorkout args:", call.function.arguments);
-            }
-
+            try { args = JSON.parse(call.function.arguments); } catch {}
             const backend = process.env.NAO_BACKEND_URL || "http://localhost:3001";
             const verifyRes = await fetch(`${backend}/api/verify`, {
               method: "POST",
@@ -113,7 +104,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 workoutText: args.workoutText,
               }),
             });
-
             const verifyData = verifyRes.ok
               ? await verifyRes.json()
               : { error: "verify failed", status: verifyRes.status };
@@ -125,12 +115,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             continue;
           }
 
-          /* ──────────────── unknown tool fallback ───────── */
+          /* ──────── NEW: getRecentWorkouts ──────── */
+          if (call.function.name === "getRecentWorkouts") {
+            let args: any = {};
+            try { args = JSON.parse(call.function.arguments); } catch {}
+            const { userId: uid, limit = 5 } = args;
+
+            try {
+              const backend = process.env.NAO_BACKEND_URL || "http://localhost:3001";
+              const resp = await fetch(`${backend}/api/history/${uid}?limit=${limit}`);
+              const data = await resp.json();
+              toolOutputs.push({
+                tool_call_id: call.id,
+                output: JSON.stringify(data.logs),
+              });
+            } catch (err) {
+              console.error("Failed getRecentWorkouts:", err);
+              toolOutputs.push({
+                tool_call_id: call.id,
+                output: JSON.stringify({ error: "Failed to fetch workouts" }),
+              });
+            }
+            continue;
+          }
+
+          /* ─────────── unknown tool fallback ─────────── */
           toolOutputs.push({
             tool_call_id: call.id,
             output: JSON.stringify({ error: "Unknown tool/function" }),
           });
         }
+        /* ----------------------------------------------------------- */
 
         // submit all outputs back to OpenAI
         await openai.beta.threads.runs.submitToolOutputs(

@@ -6,8 +6,8 @@ interface EchoAssistantProps {
   initialThreadId?: string | null;
   videoSrc?: string;
   inputPlaceholder?: string;
-  onSend?: (input: string) => Promise<string>; // <-- ADDED THIS LINE
-  prompt?: string; // ✅ NEW LINE
+  onSend?: (input: string) => Promise<string>;
+  prompt?: string;
 }
 
 export default function EchoAssistant({
@@ -15,8 +15,8 @@ export default function EchoAssistant({
   initialThreadId = null,
   videoSrc,
   inputPlaceholder = "Type your command...",
-  onSend, // <-- ADDED THIS ARGUMENT
-  prompt, // ✅ NEW
+  onSend,
+  prompt,
 }: EchoAssistantProps) {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
     initialMessage
@@ -28,28 +28,33 @@ export default function EchoAssistant({
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string | null>(initialThreadId);
   const [loading, setLoading] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null); // <--- NEW
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);   // ★ NEW
   const router = useRouter();
 
-  // Fetch a new threadId when the component mounts, if not provided
+  /* ───────────────── Fetch a threadId on mount ───────────────── */
   useEffect(() => {
     if (!threadId) {
       fetch("/api/thread", { method: "POST" })
-        .then((res) => res.json())
-        .then((data) => setThreadId(data.threadId))
+        .then((r) => r.json())
+        .then((d) => setThreadId(d.threadId))
         .catch(() => setThreadId(null));
     }
   }, [threadId]);
 
+  /* ───────────────── Auto-scroll to bottom on new message ─────── */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  /* ───────────────── Handle send ──────────────────────────────── */
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
 
-    // Capture the user's email if it looks like one
-    if (!userEmail && /\S+@\S+\.\S+/.test(input.trim())) {
-      setUserEmail(input.trim());
-    }
+    if (!userEmail && /\S+@\S+\.\S+/.test(input.trim())) setUserEmail(input.trim());
 
     setMessages((msgs) => [...msgs, { sender: "You", text: input }]);
     setLoading(true);
@@ -60,10 +65,7 @@ export default function EchoAssistant({
         reply = await onSend(input);
       } else {
         if (!threadId) {
-          setMessages((msgs) => [
-            ...msgs,
-            { sender: "System", text: "NAO is initializing, please wait..." }
-          ]);
+          setMessages((m) => [...m, { sender: "System", text: "NAO is initializing, please wait..." }]);
           setLoading(false);
           setInput("");
           return;
@@ -74,81 +76,40 @@ export default function EchoAssistant({
           body: JSON.stringify({ threadId, message: input }),
         });
         if (!res.ok) {
-          const errorText = await res.text();
-          setMessages((msgs) => [
-            ...msgs,
-            { sender: "System", text: "Error from server: " + errorText }
-          ]);
+          setMessages((m) => [...m, { sender: "System", text: "Error: " + (await res.text()) }]);
           setLoading(false);
           setInput("");
           return;
         }
-        const data = await res.json();
-        reply = data.reply;
+        reply = (await res.json()).reply;
       }
-      setMessages((msgs) => [...msgs, { sender: "NAO", text: reply || "NAO is thinking..." }]);
+      setMessages((m) => [...m, { sender: "NAO", text: reply || "NAO is thinking..." }]);
 
-      // ---- Redirection logic: if onboarding is complete ----
-      if (
-        reply &&
-        (
-          reply.toLowerCase().includes("you're all set") ||
-          reply.toLowerCase().includes("onboarding complete")
-        )
-      ) {
-        if (userEmail) {
-          router.push({ pathname: "/mint", query: { email: userEmail } });
-        } else if (reply) {
-          // fallback: try to extract from reply, if ever included
-          const match = reply.match(/[\w\-.]+@[\w\-.]+\.\w+/);
-          if (match) {
-            router.push({ pathname: "/mint", query: { email: match[0] } });
-          }
-        }
+      /* optional redirect logic (kept as-is) */
+      if (reply && /you're all set|onboarding complete/i.test(reply)) {
+        const email = userEmail || reply.match(/[\w\-.]+@[\w\-.]+\.\w+/)?.[0];
+        if (email) router.push({ pathname: "/mint", query: { email } });
       }
-      // -----------------------------------------------------
     } catch (err) {
-      setMessages((msgs) => [
-        ...msgs,
-        { sender: "System", text: "Network error: " + (err as Error).message }
-      ]);
+      setMessages((m) => [...m, { sender: "System", text: "Network error: " + (err as Error).message }]);
     }
     setInput("");
     setLoading(false);
-    if (inputRef.current) inputRef.current.focus();
+    inputRef.current?.focus();
   };
 
+  /* ───────────────── JSX ──────────────────────────────────────── */
   return (
-    <div style={{
-      position: "relative",
-      width: "100vw",
-      height: "100vh",
-      overflow: "hidden",
-      color: "#fff"
-    }}>
-      {/* Optional Fullscreen Video */}
+    <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", color: "#fff" }}>
       {videoSrc && (
         <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            objectFit: "cover",
-            zIndex: 0
-          }}
+          autoPlay muted loop playsInline
+          style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", objectFit: "cover", zIndex: 0 }}
         >
           <source src={videoSrc} type="video/mp4" />
-          Your browser does not support the video tag.
         </video>
       )}
 
-      {/* Floating Chat at Bottom Third */}
       <div
         style={{
           position: "fixed",
@@ -160,7 +121,7 @@ export default function EchoAssistant({
           flexDirection: "column",
           alignItems: "center",
           pointerEvents: "none",
-          zIndex: 2
+          zIndex: 2,
         }}
       >
         <div
@@ -175,51 +136,53 @@ export default function EchoAssistant({
             padding: 14,
             backdropFilter: "blur(10px)",
             marginBottom: 6,
-            minHeight: 0,
           }}
         >
-          <div style={{
-            maxHeight: 110,
-            overflowY: "auto",
-            marginBottom: 8,
-            scrollBehavior: "smooth",
-          }}>
+          {/* Scrollable chat box */}
+          <div
+            style={{
+              maxHeight: 110,
+              overflowY: "auto",
+              marginBottom: 8,
+              scrollBehavior: "smooth",
+            }}
+          >
             {messages.map((msg, i) => (
-              <div key={i} style={{
-                margin: "0.25rem 0",
-                color: msg.sender === "NAO" 
-                  ? "#00fff9" 
-                  : msg.sender === "System" 
-                    ? "#ff6b6b" 
-                    : "#cceeff",
-                textShadow: msg.sender === "NAO"
-                  ? "0 0 8px #00fff9, 0 0 2px #00fff9"
-                  : msg.sender === "System"
-                    ? "0 0 6px #ff6b6b"
-                    : "0 0 6px #338fff",
-                fontSize: 17,
-                lineHeight: 1.33,
-                letterSpacing: 0.2,
-              }}>
+              <div
+                key={i}
+                style={{
+                  margin: "0.25rem 0",
+                  color:
+                    msg.sender === "NAO"
+                      ? "#00fff9"
+                      : msg.sender === "System"
+                      ? "#ff6b6b"
+                      : "#cceeff",
+                  textShadow:
+                    msg.sender === "NAO"
+                      ? "0 0 8px #00fff9, 0 0 2px #00fff9"
+                      : msg.sender === "System"
+                      ? "0 0 6px #ff6b6b"
+                      : "0 0 6px #338fff",
+                  fontSize: 17,
+                  lineHeight: 1.33,
+                  letterSpacing: 0.2,
+                }}
+              >
                 <b>{msg.sender}:</b> {msg.text}
               </div>
             ))}
+            <div ref={messagesEndRef} />  {/* auto-scroll target */}
           </div>
-          <form
-            onSubmit={handleSend}
-            style={{
-              display: "flex",
-              gap: 8,
-              width: "100%",
-              pointerEvents: "auto"
-            }}
-          >
+
+          {/* Input bar */}
+          <form onSubmit={handleSend} style={{ display: "flex", gap: 8, width: "100%", pointerEvents: "auto" }}>
             <input
-              type="text"
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={inputPlaceholder}
+              disabled={loading}
               style={{
                 flex: 1,
                 padding: "10px 18px",
@@ -232,11 +195,7 @@ export default function EchoAssistant({
                 boxShadow: "0 0 8px 2px #00fff9",
                 fontWeight: 500,
                 textAlign: "center",
-                backdropFilter: "blur(2px)",
-                transition: "box-shadow 0.2s",
               }}
-              autoFocus
-              disabled={loading}
             />
             <button
               type="submit"
@@ -250,7 +209,6 @@ export default function EchoAssistant({
                 fontWeight: "bold",
                 boxShadow: "0 0 12px 2px #00fff9",
                 cursor: loading ? "not-allowed" : "pointer",
-                transition: "box-shadow 0.2s, background 0.2s"
               }}
             >
               {loading ? "..." : "Send"}
