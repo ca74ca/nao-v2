@@ -91,29 +91,62 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             continue;               // ⬅ keep going to next call
           }
 
-          /* ─────────── logWorkout ─────────── */
-          if (call.function.name === "logWorkout") {
-            let args: any = {};
-            try { args = JSON.parse(call.function.arguments); } catch {}
-            const backend = process.env.NAO_BACKEND_URL || "http://localhost:3001";
-            const verifyRes = await fetch(`${backend}/api/verify`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                userId: args.userId || userId || `user-${threadId}`,
-                workoutText: args.workoutText,
-              }),
-            });
-            const verifyData = verifyRes.ok
-              ? await verifyRes.json()
-              : { error: "verify failed", status: verifyRes.status };
+         /* ─────────── logWorkout ─────────── */
+if (call.function.name === "logWorkout") {
+  let args: any = {};
+  try {
+    args = JSON.parse(call.function.arguments);
+  } catch {}
 
-            toolOutputs.push({
-              tool_call_id: call.id,
-              output: JSON.stringify(verifyData),
-            });
-            continue;
-          }
+  const backend = process.env.NAO_BACKEND_URL || "http://localhost:3001";
+
+  try {
+    // call the updated verify route that returns reward data
+    const verifyRes = await fetch(`${backend}/api/verifyWorkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: args.userId || userId || `user-${threadId}`,
+        workoutText: args.workoutText,
+      }),
+    });
+
+    const verifyData = await verifyRes.json();
+
+    /* pull reward fields */
+    const {
+      success,
+      aiResult,
+      xpGained,
+      newLevel,
+      updatedStreak,
+      rewardPoints,
+    } = verifyData;
+
+    toolOutputs.push({
+      /* return everything to OpenAI so NAO can speak it */
+      tool_call_id: call.id,
+      output: JSON.stringify({
+        success,
+        aiResult,
+        xpGained,
+        newLevel,
+        updatedStreak,
+        rewardPoints,
+        message: `Workout logged! +${xpGained} XP · Level ${newLevel} · ${updatedStreak}-day streak · ${rewardPoints} points.`,
+      }),
+    });
+  } catch (err) {
+    console.error("❌ verifyWorkout error:", err);
+    toolOutputs.push({
+      tool_call_id: call.id,
+      output: JSON.stringify({ error: "Failed to log workout" }),
+    });
+  }
+
+  continue; // go to next tool call
+}
+
 
           /* ──────── NEW: getRecentWorkouts ──────── */
           if (call.function.name === "getRecentWorkouts") {
