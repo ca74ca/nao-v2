@@ -141,11 +141,14 @@ export default function EchoAssistant({
           {/* Scrollable chat box */}
           <div
             style={{
-              maxHeight: 110,
-              overflowY: "auto",
-              marginBottom: 8,
-              scrollBehavior: "smooth",
-            }}
+  maxHeight: "40vh",
+  minHeight: "120px",
+  overflowY: "auto",
+  marginBottom: 8,
+  scrollBehavior: "smooth",
+  transition: "max-height 0.3s ease",
+}}
+
           >
             {messages.map((msg, i) => (
               <div
