@@ -31,10 +31,10 @@ export default function EchoAssistant({
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);   // ★ NEW
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  /* ───────────────── Fetch a threadId on mount ───────────────── */
+  // Fetch a threadId on mount
   useEffect(() => {
     if (!threadId) {
       fetch("/api/thread", { method: "POST" })
@@ -44,12 +44,12 @@ export default function EchoAssistant({
     }
   }, [threadId]);
 
-  /* ───────────────── Auto-scroll to bottom on new message ─────── */
+  // Auto-scroll to bottom on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /* ───────────────── Handle send ──────────────────────────────── */
+  // Handle send
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -76,7 +76,8 @@ export default function EchoAssistant({
           body: JSON.stringify({ threadId, message: input }),
         });
         if (!res.ok) {
-          setMessages((m) => [...m, { sender: "System", text: "Error: " + (await res.text()) }]);
+          const errorText = await res.text(); // FIX: Await outside setMessages
+          setMessages((m) => [...m, { sender: "System", text: "Error: " + errorText }]);
           setLoading(false);
           setInput("");
           return;
@@ -85,26 +86,40 @@ export default function EchoAssistant({
       }
       setMessages((m) => [...m, { sender: "NAO", text: reply || "NAO is thinking..." }]);
 
-      /* optional redirect logic (kept as-is) */
+      // optional redirect logic (kept as-is)
       if (reply && /you're all set|onboarding complete/i.test(reply)) {
         const email = userEmail || reply.match(/[\w\-.]+@[\w\-.]+\.\w+/)?.[0];
         if (email) router.push({ pathname: "/mint", query: { email } });
       }
     } catch (err) {
-      setMessages((m) => [...m, { sender: "System", text: "Network error: " + (err as Error).message }]);
+      setMessages((m) => [
+        ...m,
+        { sender: "System", text: "Network error: " + (err as Error).message },
+      ]);
     }
     setInput("");
     setLoading(false);
     inputRef.current?.focus();
   };
 
-  /* ───────────────── JSX ──────────────────────────────────────── */
+  // JSX
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", color: "#fff" }}>
       {videoSrc && (
         <video
-          autoPlay muted loop playsInline
-          style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", objectFit: "cover", zIndex: 0 }}
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            objectFit: "cover",
+            zIndex: 0,
+          }}
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
@@ -141,14 +156,13 @@ export default function EchoAssistant({
           {/* Scrollable chat box */}
           <div
             style={{
-  maxHeight: "40vh",
-  minHeight: "120px",
-  overflowY: "auto",
-  marginBottom: 8,
-  scrollBehavior: "smooth",
-  transition: "max-height 0.3s ease",
-}}
-
+              maxHeight: "40vh",
+              minHeight: "120px",
+              overflowY: "auto",
+              marginBottom: 8,
+              scrollBehavior: "smooth",
+              transition: "max-height 0.3s ease",
+            }}
           >
             {messages.map((msg, i) => (
               <div
@@ -175,7 +189,7 @@ export default function EchoAssistant({
                 <b>{msg.sender}:</b> {msg.text}
               </div>
             ))}
-            <div ref={messagesEndRef} />  {/* auto-scroll target */}
+            <div ref={messagesEndRef} /> {/* auto-scroll target */}
           </div>
 
           {/* Input bar */}
