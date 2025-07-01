@@ -3,71 +3,70 @@ import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
 
-// Use node-fetch for server-side fetch
-const fetch = (...args: any[]) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+// node-fetch for server-side requests
+const fetch = (...args: any[]) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
+  if (req.method !== "POST")
     return res.status(405).json({ error: "Method not allowed" });
-  }
 
   const { threadId, message, page, onboardingComplete, userId } = req.body;
-
-  if (!threadId || !message) {
+  if (!threadId || !message)
     return res.status(400).json({ error: "Missing threadId or message" });
-  }
 
   try {
-    const runs = await openai.beta.threads.runs.list(threadId, { limit: 1 });
-    const latestRun = runs.data[0];
-    if (
-      latestRun &&
-      ["queued", "in_progress", "cancelling"].includes(latestRun.status)
-    ) {
-      return res.status(400).json({
-        error: "Assistant is still responding. Please wait for the previous response to finish.",
-        runStatus: latestRun.status,
-      });
-    }
+    // 1 ▸ block double-send if a run is still live
+    const last = await openai.beta.threads.runs.list(threadId, { limit: 1 });
+    const active = last.data[0];
+    if (active && ["queued", "in_progress", "cancelling"].includes(active.status))
+      return res
+        .status(400)
+        .json({ error: "Assistant still responding", runStatus: active.status });
 
+    // 2 ▸ append user message
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
       content: message,
     });
 
+    // 3 ▸ build run instructions
     let instructions = `You are NAO, a futuristic AI health assistant.`;
-    if (page) instructions += ` The user is currently on the "${page}" page.`;
-    if (typeof onboardingComplete === "boolean") {
+    if (page) instructions += ` User is on "${page}".`;
+    if (typeof onboardingComplete === "boolean")
       instructions += onboardingComplete
-        ? ` The user has completed onboarding.`
-        : ` The user has NOT completed onboarding.`;
-    }
-    instructions += ` Respond intelligently and avoid repeating onboarding prompts.`;
+        ? ` Onboarding complete.`
+        : ` Onboarding NOT complete.`;
+    instructions += ` Respond intelligently; avoid repeating onboarding prompts.`;
 
-    const run = await openai.beta.threads.runs.create(threadId, {
+    // 4 ▸ start the run
+    let run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: process.env.OPENAI_ASSISTANT_ID!,
       instructions,
     });
 
-    let runStatus = run.status;
-    let lastRun = run;
-    while (["queued", "in_progress", "cancelling", "requires_action"].includes(runStatus)) {
-      if (runStatus === "requires_action" && lastRun.required_action?.submit_tool_outputs) {
-        const toolCalls = lastRun.required_action.submit_tool_outputs.tool_calls;
+    // 5 ▸ main polling / tool-handling loop
+    while (["queued", "in_progress", "cancelling", "requires_action"].includes(run.status)) {
+      if (
+        run.status === "requires_action" &&
+        run.required_action?.submit_tool_outputs
+      ) {
+        const toolCalls = run.required_action.submit_tool_outputs.tool_calls;
         const toolOutputs: { tool_call_id: string; output: string }[] = [];
 
         for (const call of toolCalls) {
-          if (call.type === "function" && call.function.name === "onboardUser") {
+          /* ──────────────── onboardUser tool ─────────────── */
+          if (call.function.name === "onboardUser") {
             let args: any = {};
             try {
               args = JSON.parse(call.function.arguments);
             } catch (e) {
-              console.error("Failed to parse tool call arguments:", call.function.arguments, e);
+              console.error("Bad onboardUser args:", call.function.arguments);
             }
 
-            const userWithWallet = {
+            const newUser = {
               ...args,
               walletId: `0x${Math.floor(Math.random() * 1e16).toString(16)}`,
               passportId: `NFT-${Math.random().toString(36).substring(2, 10)}`,
@@ -80,127 +79,93 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             try {
               const usersFile = path.join(process.cwd(), "users.json");
-              let users: { [key: string]: any } = {};
-              if (fs.existsSync(usersFile)) {
-                users = JSON.parse(fs.readFileSync(usersFile, "utf8"));
-              }
-              users[userWithWallet.email] = userWithWallet;
+              let users = fs.existsSync(usersFile)
+                ? JSON.parse(fs.readFileSync(usersFile, "utf8"))
+                : {};
+              users[newUser.email] = newUser;
               fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
             } catch (e) {
-              console.error("❌ Failed to write user file:", e);
+              console.error("❌ write users.json", e);
             }
 
             toolOutputs.push({
               tool_call_id: call.id,
-              output: JSON.stringify({ success: true, ...userWithWallet }),
+              output: JSON.stringify({ success: true, ...newUser }),
             });
-          } else {
+            continue;
+          }
+
+          /* ──────────────── logWorkout tool ─────────────── */
+          if (call.function.name === "logWorkout") {
+            let args: any = {};
+            try {
+              args = JSON.parse(call.function.arguments);
+            } catch {
+              console.error("Bad logWorkout args:", call.function.arguments);
+            }
+
+            const backend = process.env.NAO_BACKEND_URL || "http://localhost:3001";
+            const verifyRes = await fetch(`${backend}/api/verify`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userId: args.userId || userId || `user-${threadId}`,
+                workoutText: args.workoutText,
+              }),
+            });
+
+            const verifyData = verifyRes.ok
+              ? await verifyRes.json()
+              : { error: "verify failed", status: verifyRes.status };
+
             toolOutputs.push({
               tool_call_id: call.id,
-              output: JSON.stringify({ error: "Unknown tool/function" }),
+              output: JSON.stringify(verifyData),
             });
+            continue;
           }
+
+          /* ──────────────── unknown tool fallback ───────── */
+          toolOutputs.push({
+            tool_call_id: call.id,
+            output: JSON.stringify({ error: "Unknown tool/function" }),
+          });
         }
 
-        await openai.beta.threads.runs.submitToolOutputs(threadId, lastRun.id, {
-          tool_outputs: toolOutputs,
-        });
+        // submit all outputs back to OpenAI
+        await openai.beta.threads.runs.submitToolOutputs(
+          threadId,
+          run.id,
+          { tool_outputs: toolOutputs }
+        );
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      lastRun = await openai.beta.threads.runs.retrieve(threadId, run.id);
-      runStatus = lastRun.status;
+      // wait & poll again
+      await new Promise((r) => setTimeout(r, 1000));
+      run = await openai.beta.threads.runs.retrieve(threadId, run.id);
     }
 
-    if (runStatus !== "completed") {
-      console.error("❌ Assistant run failed:", lastRun);
-      return res.status(500).json({
-        error: "Assistant run failed or cancelled.",
-        runStatus,
-        lastRun,
-      });
-    }
+    if (run.status !== "completed")
+      return res
+        .status(500)
+        .json({ error: "Assistant run failed", runStatus: run.status });
 
-    const messages = await openai.beta.threads.messages.list(threadId, { limit: 10 });
-    const lastAssistantMessage = messages.data.find((msg) => msg.role === "assistant");
-
-    const textBlock = lastAssistantMessage?.content?.find(
-      (block: any) => block.type === "text"
-    ) as { type: "text"; text: { value: string } } | undefined;
-
-    // --- WORKOUT LOGIC INTEGRATION ---
-
-    // Helper: does the assistant message look like a workout summary?
-    const isWorkoutSummary = (text: string) =>
-      /your workout log|workout summary|workout recorded|logged for you|here is your log|health passport/i.test(text);
-
-    // Helper: does the user confirm to log?
-    const isUserConfirmation = (text: string) =>
-      /^(yes|log it|that's correct|done|no, that's all|looks good|confirm)$/i.test(text.trim());
-
-    // Only proceed if both are true
-    if (
-      textBlock?.text?.value &&
-      lastAssistantMessage?.role === "assistant" &&
-      isWorkoutSummary(textBlock.text.value) &&
-      isUserConfirmation(message)
-    ) {
-      // Get userId from the request, session, or thread (customize as needed)
-      // For production, replace with real session-based user ID
-      const realUserId = userId || req.body.userId || req.query.userId || "user-" + threadId;
-
-      // The actual summary text
-      const workoutText = textBlock.text.value;
-
-      // Call backend to log and verify
-      const backendUrl = process.env.NAO_BACKEND_URL || "http://localhost:3001";
-      const verifyRes = await fetch(`${backendUrl}/api/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: realUserId, workoutText }),
-      });
-
-      if (!verifyRes.ok) {
-        const errDetail = await verifyRes.text();
-        return res.status(500).json({
-          error: "Failed to log workout",
-          details: errDetail,
-        });
-      }
-
-      const verifyData = await verifyRes.json();
-
-      // Build the reply with AI verification
-      let reply = textBlock.text.value;
-      if (verifyData?.aiResult) {
-        reply += `
-
----
-**AI Verified:** ${verifyData.aiResult.plausible ? "✅ Plausible" : "⚠️ Unusual"}
-- *Reasoning*: ${verifyData.aiResult.reasoning}
-- *Suggestion*: ${verifyData.aiResult.suggestion}
-`;
-      }
-
-      return res.status(200).json({
-        reply,
-        threadId,
-        aiVerification: verifyData,
-      });
-    }
-
-    // --- END WORKOUT LOGIC ---
+    /* ───────────── return final assistant text ─────────── */
+    const msgs = await openai.beta.threads.messages.list(threadId, { limit: 10 });
+    const lastMsg = msgs.data.find((m) => m.role === "assistant");
+    const textBlock = lastMsg?.content?.find((b: any) => b.type === "text") as
+      | { type: "text"; text: { value: string } }
+      | undefined;
 
     res.status(200).json({
       reply: textBlock?.text?.value || "NAO is thinking...",
       threadId,
     });
   } catch (error: any) {
-    console.error("❌ Error in /api/message:", error);
+    console.error("❌ /api/message error:", error);
     res.status(500).json({
       error: "Internal Server Error",
-      details: error?.message || JSON.stringify(error),
-      stack: error?.stack,
+      details: error?.message,
     });
   }
 }
