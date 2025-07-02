@@ -1,3 +1,4 @@
+// pages/api/message.ts  ◆ FULL WORKING VERSION ◆
 import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import fs from "fs";
@@ -14,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "Missing threadId or message" });
 
   try {
-    // 1 ▸ block double-send if a run is still live
+    /* 1 ▸ block double-send if a run is still live */
     const last = await openai.beta.threads.runs.list(threadId, { limit: 1 });
     const active = last.data[0];
     if (active && ["queued", "in_progress", "cancelling"].includes(active.status))
@@ -22,38 +23,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .status(400)
         .json({ error: "Assistant still responding", runStatus: active.status });
 
-    // 2 ▸ append user message
+    /* 2 ▸ append user message */
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
       content: message,
     });
 
-    // 3 ▸ build run instructions
+    /* 3 ▸ build run instructions */
     let instructions = `You are NAO, a futuristic AI health assistant.`;
     if (page) instructions += ` User is on "${page}".`;
     if (typeof onboardingComplete === "boolean")
-      instructions += onboardingComplete
-        ? ` Onboarding complete.`
-        : ` Onboarding NOT complete.`;
+      instructions += onboardingComplete ? ` Onboarding complete.` : ` Onboarding NOT complete.`;
     instructions += ` Respond intelligently; avoid repeating onboarding prompts.`;
 
-    // 4 ▸ start the run
+    /* 4 ▸ start the run  (TOOLS ARRAY ADDED) */
     let run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: process.env.OPENAI_ASSISTANT_ID!,
       instructions,
+      tools: [
+        { type: "function", function: { name: "onboardUser" } },
+        { type: "function", function: { name: "logWorkout" } },
+        { type: "function", function: { name: "getRewardStatus" } },   // new
+        { type: "function", function: { name: "getRecentWorkouts" } },
+        { type: "function", function: { name: "trigger_nft_evolution" } }
+      ],
     });
 
-    // 5 ▸ main polling / tool-handling loop
+    /* 5 ▸ main polling / tool-handling loop */
     while (["queued", "in_progress", "cancelling", "requires_action"].includes(run.status)) {
-      if (
-        run.status === "requires_action" &&
-        run.required_action?.submit_tool_outputs
-      ) {
-        const toolCalls = run.required_action.submit_tool_outputs.tool_calls;
+      if (run.status === "requires_action" && run.required_action?.submit_tool_outputs) {
+        const toolCalls  = run.required_action.submit_tool_outputs.tool_calls;
         const toolOutputs: { tool_call_id: string; output: string }[] = [];
 
         /* -----------------------------------------------------------
-           TOOL-CALL HANDLER  ➜ onboardUser • logWorkout • getRecentWorkouts
+           TOOL-CALL HANDLER  ➜ onboardUser • logWorkout • getRewardStatus • getRecentWorkouts
         ----------------------------------------------------------- */
         for (const call of toolCalls) {
           /* ─────────── onboardUser ─────────── */
@@ -84,43 +87,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               tool_call_id: call.id,
               output: JSON.stringify({ success: true, ...newUser }),
             });
-            continue;               // ⬅ keep going to next call
+            continue;
           }
 
           /* ─────────── logWorkout ─────────── */
           if (call.function.name === "logWorkout") {
             let args: any = {};
-            try {
-              args = JSON.parse(call.function.arguments);
-            } catch {}
+            try { args = JSON.parse(call.function.arguments); } catch {}
 
-            const backend = process.env.NAO_BACKEND_URL || "http://localhost:3001";
+            const backend =
+              process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
+              process.env.NAO_BACKEND_URL ||
+              "http://localhost:3001";
 
             try {
-              // call the updated verify route that returns reward data
               const verifyRes = await fetch(`${backend}/api/verifyWorkout`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   userId: args.userId || userId || `user-${threadId}`,
-                  workoutText: args.workoutText || args.message || message || "", // <- FIXED fallback chain
+                  workoutText: args.workoutText || args.message || message || "",
                 }),
               });
 
               const verifyData = await verifyRes.json();
-
-              /* pull reward fields */
-              const {
-                success,
-                aiResult,
-                xpGained,
-                newLevel,
-                updatedStreak,
-                rewardPoints,
-              } = verifyData;
+              const { success, aiResult, xpGained, newLevel, updatedStreak, rewardPoints } = verifyData;
 
               toolOutputs.push({
-                /* return everything to OpenAI so NAO can speak it */
                 tool_call_id: call.id,
                 output: JSON.stringify({
                   success,
@@ -139,18 +132,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 output: JSON.stringify({ error: "Failed to log workout" }),
               });
             }
-
-            continue; // go to next tool call
+            continue;
           }
 
-          /* ──────── NEW: getRecentWorkouts ──────── */
+          /* ─────────── NEW: getRewardStatus ─────────── */
+          if (call.function.name === "getRewardStatus") {
+            let args: any = {};
+            try { args = JSON.parse(call.function.arguments); } catch {}
+            const backend =
+              process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
+              process.env.NAO_BACKEND_URL ||
+              "http://localhost:3001";
+            try {
+              const resp = await fetch(`${backend}/api/getRewardStatus`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: args.userId || userId || `user-${threadId}` }),
+              });
+              const data = await resp.json();           // { xp, level, rewardPoints, streak, nftBadges }
+              toolOutputs.push({ tool_call_id: call.id, output: JSON.stringify(data) });
+            } catch (err) {
+              console.error("getRewardStatus error:", err);
+              toolOutputs.push({
+                tool_call_id: call.id,
+                output: JSON.stringify({ error: "Failed to fetch rewards" }),
+              });
+            }
+            continue;
+          }
+
+          /* ──────── getRecentWorkouts (unchanged) ──────── */
           if (call.function.name === "getRecentWorkouts") {
             let args: any = {};
             try { args = JSON.parse(call.function.arguments); } catch {}
             const { userId: uid, limit = 5 } = args;
 
             try {
-              const backend = process.env.NAO_BACKEND_URL || "http://localhost:3001";
+              const backend =
+                process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
+                process.env.NAO_BACKEND_URL ||
+                "http://localhost:3001";
               const resp = await fetch(`${backend}/api/history/${uid}?limit=${limit}`);
               const data = await resp.json();
               toolOutputs.push({
@@ -172,30 +193,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             tool_call_id: call.id,
             output: JSON.stringify({ error: "Unknown tool/function" }),
           });
-        }
-        /* ----------------------------------------------------------- */
+        } /* end for-loop */
 
-        // submit all outputs back to OpenAI
-        await openai.beta.threads.runs.submitToolOutputs(
-          threadId,
-          run.id,
-          { tool_outputs: toolOutputs }
-        );
-      }
+        /* submit all outputs back to OpenAI */
+        await openai.beta.threads.runs.submitToolOutputs(threadId, run.id, { tool_outputs: toolOutputs });
+      } /* end requires_action */
 
-      // wait & poll again
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1000));
       run = await openai.beta.threads.runs.retrieve(threadId, run.id);
-    }
+    } /* end while */
 
     if (run.status !== "completed")
-      return res
-        .status(500)
-        .json({ error: "Assistant run failed", runStatus: run.status });
+      return res.status(500).json({ error: "Assistant run failed", runStatus: run.status });
 
     /* ───────────── return final assistant text ─────────── */
     const msgs = await openai.beta.threads.messages.list(threadId, { limit: 10 });
-    const lastMsg = msgs.data.find((m) => m.role === "assistant");
+    const lastMsg = msgs.data.find(m => m.role === "assistant");
     const textBlock = lastMsg?.content?.find((b: any) => b.type === "text") as
       | { type: "text"; text: { value: string } }
       | undefined;
