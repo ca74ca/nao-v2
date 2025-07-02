@@ -103,7 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   userId: args.userId || userId || `user-${threadId}`,
-                  workoutText: args.workoutText,
+                  workoutText: args.workoutText || args.message || message || "", // <- FIXED fallback chain
                 }),
               });
 
