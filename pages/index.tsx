@@ -61,7 +61,10 @@ export default function Home() {
   const router = useRouter();
 
   // Reward state and NFT evolution sync
-  const { rewardState, applyRewardEvent } = useRewardState();
+  const user = typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("nao_user") || "{}")
+    : {};
+  const { rewardState, applyRewardEvent } = useRewardState(user.walletId || "");
   useNFTSync(rewardState, NFT_TOKEN_ID, evolveNFT, getUpdatedTraits);
 
   // --- Add State for Awaiting User Choice ---
