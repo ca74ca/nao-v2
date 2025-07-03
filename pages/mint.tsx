@@ -182,7 +182,6 @@ function generateRandomState(length = 16) {
 
 export default function MintPage() {
   const router = useRouter();
-  const { rewardState } = useRewardState();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -190,6 +189,9 @@ export default function MintPage() {
   const [now, setNow] = useState<Date>(new Date());
   const [whoopSyncStatus, setWhoopSyncStatus] = useState<string>("");
   const [appleSyncStatus, setAppleSyncStatus] = useState<string>("");
+
+  // Reward state - using user walletId when available
+  const { rewardState } = useRewardState(user?.walletId || "");
 
   // dNFT state
   const [nftMeta, setNftMeta] = useState<any>(null);
@@ -202,6 +204,11 @@ export default function MintPage() {
 
   // --- AUTH & LOCAL USER LOAD ---
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     const storedUser = localStorage.getItem("nao_user");
     if (!storedUser) {
       setError("User not found. Please onboard again.");
@@ -299,9 +306,7 @@ export default function MintPage() {
   }
 
   const handleWhoopSync = () => {
-    const localUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
-
-    const wallet = localUser.walletId || localUser.wallet;
+    const wallet = user?.walletId || user?.wallet;
     if (!wallet) {
       alert("No wallet found. Please log in again.");
       return;
@@ -805,15 +810,31 @@ export default function MintPage() {
             position: "relative",
           }}
         >
-          {/* 1. Show connected progress values */}
-          <RewardsTracker
-            state={{
-              calories: caloriesBurned,
-              workoutsCompleted: workoutAchieved ? 1 : 0,
-              strainScore: whoopData?.strain?.score ?? 0,
-              recoveryScore: whoopRecovery,
-            }}
-          />
+          {/* 1. Show connected progress values or login message */}
+          {!user?.walletId ? (
+            <div style={{
+              padding: "20px",
+              borderRadius: "12px",
+              backgroundColor: "rgba(246, 226, 122, 0.1)",
+              border: "2px solid #f6e27a",
+              color: "#f6e27a",
+              textAlign: "center",
+              fontWeight: 600,
+              fontSize: 16,
+              marginBottom: 32,
+            }}>
+              Please log in to see your rewards.
+            </div>
+          ) : (
+            <RewardsTracker
+              state={{
+                calories: caloriesBurned,
+                workoutsCompleted: workoutAchieved ? 1 : 0,
+                strainScore: whoopData?.strain?.score ?? 0,
+                recoveryScore: whoopRecovery,
+              }}
+            />
+          )}
 
           {/* 2. Show NFT art + evolution UI */}
           <section

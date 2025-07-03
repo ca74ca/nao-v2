@@ -60,8 +60,17 @@ export default function Home() {
   const [isOnboarded, setIsOnboarded] = useState(false);
   const router = useRouter();
 
+  // Parse user from localStorage with SSR guard
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const parsedUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
+      setUser(parsedUser);
+    }
+  }, []);
+
   // Reward state and NFT evolution sync
-  const { rewardState, applyRewardEvent } = useRewardState();
+  const { rewardState, applyRewardEvent } = useRewardState(user?.walletId || "");
   useNFTSync(rewardState, NFT_TOKEN_ID, evolveNFT, getUpdatedTraits);
 
   // --- Add State for Awaiting User Choice ---
@@ -259,12 +268,13 @@ export default function Home() {
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
           // --- PATCH: Merge and preserve walletId and other fields ---
-          const prev = JSON.parse(localStorage.getItem("nao_user") || "{}");
-          localStorage.setItem("nao_user", JSON.stringify({
-            ...prev,
-            email: onboardFields.email ?? prev.email ?? "",
-            username: onboardFields.username ?? prev.username ?? "",
-          }));
+          const updatedUser = {
+            ...user,
+            email: onboardFields.email ?? user?.email ?? "",
+            username: onboardFields.username ?? user?.username ?? "",
+          };
+          localStorage.setItem("nao_user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
           router.push("/mint");
           setLoading(false);
         }, 1600);
@@ -292,12 +302,13 @@ export default function Home() {
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
           // --- PATCH: Merge and preserve walletId and other fields ---
-          const prev = JSON.parse(localStorage.getItem("nao_user") || "{}");
-          localStorage.setItem("nao_user", JSON.stringify({
-            ...prev,
-            email: onboardFields.email ?? prev.email ?? "",
-            username: onboardFields.username ?? prev.username ?? "",
-          }));
+          const updatedUser = {
+            ...user,
+            email: onboardFields.email ?? user?.email ?? "",
+            username: onboardFields.username ?? user?.username ?? "",
+          };
+          localStorage.setItem("nao_user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
           router.push("/mint");
           setLoading(false);
         }, 1600);
