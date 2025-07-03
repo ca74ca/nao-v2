@@ -43,6 +43,12 @@ type OnboardFields = {
 };
 
 export default function Home() {
+  // Check for user login first
+  const user = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("nao_user") || "{}") : {};
+  if (!user?.walletId) {
+    return <div>Please log in to see your rewards.</div>;
+  }
+
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
   useEffect(() => {
     const chatContainer = document.querySelector('[style*="overflow-y: auto"]');
@@ -61,7 +67,7 @@ export default function Home() {
   const router = useRouter();
 
   // Reward state and NFT evolution sync
-  const { rewardState, applyRewardEvent } = useRewardState();
+  const { rewardState, applyRewardEvent } = useRewardState(user.walletId);
   useNFTSync(rewardState, NFT_TOKEN_ID, evolveNFT, getUpdatedTraits);
 
   // --- Add State for Awaiting User Choice ---
