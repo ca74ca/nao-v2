@@ -182,7 +182,7 @@ function generateRandomState(length = 16) {
 
 export default function MintPage() {
   const router = useRouter();
-  const { rewardState } = useRewardState();
+const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || "" : "");
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
