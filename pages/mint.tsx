@@ -231,7 +231,7 @@ export default function MintPage() {
     }
   }, [router]);
 
-  // Fallback logic: Get XP and Level (from rewardState, fallback to user, then 0/1)
+  // XP/Level fallback logic: Do NOT reference passportData!
   const currentXP = rewardState?.xp ?? user?.xp ?? 0;
   const currentLevel = rewardState?.evolutionLevel ?? user?.evolutionLevel ?? 1;
 
