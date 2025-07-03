@@ -182,7 +182,7 @@ function generateRandomState(length = 16) {
 
 export default function MintPage() {
   const router = useRouter();
-const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || "" : "");
+  const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || "" : "");
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -226,6 +226,10 @@ const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.pars
       setLoading(false);
     }
   }, [router]);
+
+  // Fallback logic: Get XP and Level (from rewardState, fallback to user, then 0/1)
+  const currentXP = rewardState?.xp ?? user?.xp ?? 0;
+  const currentLevel = rewardState?.evolutionLevel ?? user?.evolutionLevel ?? 1;
 
   // Try to get the email from user object
   const email = user?.email || "";
@@ -383,8 +387,8 @@ const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.pars
   const passportData = {
     username: user.username || "User",
     passportId: user.passportId || "N/A",
-    xp: user.xp ?? 0,
-    evolutionLevel: user.evolutionLevel ?? 1,
+    xp: currentXP,
+    evolutionLevel: currentLevel,
     nftImage: "/start_user_2nft.png",
     nftTitle: user.nftTitle || "NAO Health NFT",
     nftMeta: user.nftMeta || "Dynamic, evolving health record",
