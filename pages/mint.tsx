@@ -182,10 +182,19 @@ function generateRandomState(length = 16) {
 
 export default function MintPage() {
   const router = useRouter();
-  const { rewardState } = useRewardState();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Get initial user for useRewardState, but use empty object during SSR
+  const initialUser = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("nao_user") || "{}") : {};
+  
+  // Check for user login and show prompt if no walletId
+  if (typeof window !== "undefined" && !initialUser?.walletId) {
+    return <div>Please log in to see your rewards.</div>;
+  }
+  
+  const { rewardState } = useRewardState(initialUser.walletId || "");
   const [weather, setWeather] = useState<string>("");
   const [now, setNow] = useState<Date>(new Date());
   const [whoopSyncStatus, setWhoopSyncStatus] = useState<string>("");
