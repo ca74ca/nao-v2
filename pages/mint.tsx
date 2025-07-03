@@ -385,14 +385,15 @@ export default function MintPage() {
   if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
   if (!user) return <div>User not found. Please onboard again.</div>;
 
+  // Build passportData object AFTER currentXP/currentLevel defined
   const passportData = {
-    username: user.username || "User",
-    passportId: user.passportId || "N/A",
+    username: user?.username || "User",
+    passportId: user?.passportId || "N/A",
     xp: currentXP,
     evolutionLevel: currentLevel,
     nftImage: "/start_user_2nft.png",
-    nftTitle: user.nftTitle || "NAO Health NFT",
-    nftMeta: user.nftMeta || "Dynamic, evolving health record",
+    nftTitle: user?.nftTitle || "NAO Health NFT",
+    nftMeta: user?.nftMeta || "Dynamic, evolving health record",
   };
 
   // --- DYNAMIC CALORIE/RECOVERY/WORKOUT LOGIC FROM WHOOP ---
