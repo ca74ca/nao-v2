@@ -170,7 +170,6 @@ async function fetchWeather(city = "Detroit") {
   }
 }
 
-// Util: Generate a random state for OAuth (min 8 chars, default 16)
 function generateRandomState(length = 16) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let state = "";
@@ -182,7 +181,13 @@ function generateRandomState(length = 16) {
 
 export default function MintPage() {
   const router = useRouter();
-  const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || "" : "");
+
+  const { rewardState } = useRewardState(
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || ""
+      : ""
+  );
+
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -200,7 +205,6 @@ export default function MintPage() {
   const [whoopLoading, setWhoopLoading] = useState(true);
   const [whoopError, setWhoopError] = useState<string | null>(null);
 
-  // --- AUTH & LOCAL USER LOAD ---
   useEffect(() => {
     const storedUser = localStorage.getItem("nao_user");
     if (!storedUser) {
@@ -231,7 +235,6 @@ export default function MintPage() {
   const currentXP = rewardState?.xp ?? user?.xp ?? 0;
   const currentLevel = rewardState?.evolutionLevel ?? user?.evolutionLevel ?? 1;
 
-  // Try to get the email from user object
   const email = user?.email || "";
 
   useEffect(() => {
@@ -242,19 +245,17 @@ export default function MintPage() {
         const res = await fetch(`/api/getUser?wallet=${user.walletId.toLowerCase()}`);
         if (!res.ok) throw new Error("User refresh failed");
         const fresh = await res.json();
-        setUser(fresh);                       // contains latest WHOOP fields
+        setUser(fresh);
       } catch (err) {
         console.error("User refresh error:", err);
       }
     };
 
-    refreshUser();                            // initial pull
-    const id = setInterval(refreshUser, 60_000); // refresh every 60 s
+    refreshUser();
+    const id = setInterval(refreshUser, 60_000);
     return () => clearInterval(id);
   }, [user?.walletId]);
 
-
-  // Fetch user info from backend by email
   useEffect(() => {
     if (!email) {
       setLoading(false);
@@ -270,7 +271,6 @@ export default function MintPage() {
       .catch(() => setLoading(false));
   }, [email]);
 
-  // Live date/time update
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
@@ -280,7 +280,6 @@ export default function MintPage() {
     fetchWeather().then(setWeather);
   }, [user]);
 
-  // --- dNFT fetch logic ---
   useEffect(() => {
     async function fetchNft() {
       if (!user?.tokenId) return setNftMeta(null);
@@ -304,21 +303,16 @@ export default function MintPage() {
 
   const handleWhoopSync = () => {
     const localUser = JSON.parse(localStorage.getItem("nao_user") || "{}");
-
     const wallet = localUser.walletId || localUser.wallet;
     if (!wallet) {
       alert("No wallet found. Please log in again.");
       return;
     }
-
-    // ✅ Set cookie so /api/whoop-auth can access wallet
     document.cookie = `wallet=${wallet}; path=/; SameSite=Lax`;
-
     setWhoopSyncStatus("Opening WHOOP...");
     window.open(getWhoopAuthUrl(wallet), "_blank", "width=500,height=700");
     setTimeout(() => setWhoopSyncStatus(""), 1800);
   };
-
 
   useEffect(() => {
     function handleWhoopMessage(event: MessageEvent) {
@@ -444,7 +438,6 @@ export default function MintPage() {
     icon: "🔥",
   };
 
-  // --- NEW: Workout Achieved Reward ---
   const workoutAchievedReward = {
     id: "workout",
     title: "Workout Achieved (Syncs with WHOOP)",
@@ -479,10 +472,8 @@ export default function MintPage() {
     systemRecoveryReward,
   ];
 
-  // XP goal for evolution (can be dynamic if needed)
   const xpGoal = 500;
   const xp = passportData.xp;
-  const readyToEvolve = xp >= xpGoal;
 
   return (
     <div
@@ -787,7 +778,6 @@ export default function MintPage() {
               ></div>
             </div>
           </div>
-          {/* --- END VO2 Max Reward Card --- */}
         </div>
       </div>
 
@@ -999,18 +989,14 @@ export default function MintPage() {
           </section>
         </main>
       </div>
-      {/* Always-accessible Evolve NFT button (original) */}
       <EvolveActionBar onEvolve={handleEvolve} evolving={evolving} />
-
-      {/* Always-accessible Evolve NFT XP Meter + Glow (ADDITION) */}
       <EvolveMeterActionBar
         onEvolve={handleEvolve}
         evolving={evolving}
-        ready={passportData.xp >= 500}
+        ready={passportData.xp >= xpGoal}
         xp={passportData.xp}
-        xpGoal={500}
+        xpGoal={xpGoal}
       />
-
       <div
         style={{
           position: "fixed",
@@ -1030,7 +1016,7 @@ export default function MintPage() {
               `Here is your health passport. You're doing great! You're on level ${passportData.evolutionLevel} with ${passportData.xp} reward points and your streak is 5 days.`
             }
             inputPlaceholder="Awaken NAO"
-            onSend={sendMessage} // <-- ADDED: connect smart chat!
+            onSend={sendMessage}
           />
         </div>
       </div>
