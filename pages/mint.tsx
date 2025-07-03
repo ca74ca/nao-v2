@@ -182,7 +182,17 @@ function generateRandomState(length = 16) {
 
 export default function MintPage() {
   const router = useRouter();
-const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || "" : "");
+
+  const { rewardState } = useRewardState(
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || ""
+      : ""
+  );
+
+  // ✅ NEW: Use live state with fallback to stored passport data
+  const currentXP = rewardState?.xp ?? passportData?.xp;
+  const currentLevel = rewardState?.level ?? passportData?.evolutionLevel;
+
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -209,6 +219,7 @@ const { rewardState } = useRewardState(typeof window !== "undefined" ? JSON.pars
       setLoading(false);
       return;
     }
+    // ... your existing user logic continues here
 
     try {
       const parsed = JSON.parse(storedUser);
