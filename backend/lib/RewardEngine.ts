@@ -1,37 +1,48 @@
-// backend/lib/RewardEngine.ts
 import mongoose from "mongoose";
 import User from "../models/User";
 import Workout from "../models/Workout";
 import RewardEvent from "../models/RewardEvent";
 
-// Example config (you can customize later)
-const LEVEL_THRESHOLDS = [0, 20, 50, 90, 140]; // XP needed per level
+// XP thresholds for each level (can be tweaked in the future)
+const LEVEL_THRESHOLDS = [0, 20, 50, 90, 140];
 
+/* ------------------------------------------------------------------
+   Core helper → current XP goal & remaining for any totalXP value
+------------------------------------------------------------------ */
+function calcGoal(totalXP: number) {
+  const nextIdx = LEVEL_THRESHOLDS.findIndex((xp) => xp > totalXP);
+  const xpGoal =
+    nextIdx === -1
+      ? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1] + 50 // fallback if out‑of‑range
+      : LEVEL_THRESHOLDS[nextIdx];
+  return { xpGoal, xpRemaining: Math.max(0, xpGoal - totalXP) };
+}
+
+/* ------------------------------------------------------------------
+   processWorkout → called by /verifyWorkout
+------------------------------------------------------------------ */
 export async function processWorkout(userId: string, workoutData: any) {
   await mongoose.connect(process.env.MONGODB_URI!);
 
-  // 1. Fetch user or throw error
+  /* 1️⃣  Fetch user */
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
-  // 2. Calculate XP & level
+  /* 2️⃣  XP & level math */
   const xpGained = workoutData.xpEstimate || 10;
+  const newXP = (user.xp || 0) + xpGained;
+  const newLevel = LEVEL_THRESHOLDS.filter((xp) => newXP >= xp).length;
+  const { xpGoal, xpRemaining } = calcGoal(newXP);
+
+  /* 3️⃣  Streak */
   const now = new Date();
-
-  const prevXP = user.xp || 0;
-  const newXP = prevXP + xpGained;
-
-  // Determine new level
-  const newLevel = LEVEL_THRESHOLDS.filter(xp => newXP >= xp).length;
-  const xpGoal = LEVEL_THRESHOLDS[newLevel] || (LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1] + 50);
-  const xpRemaining = Math.max(0, xpGoal - newXP);
-
-  // 3. Streak logic
   const last = user.lastWorkout ? new Date(user.lastWorkout) : null;
-  const isToday = last && new Date(last).toDateString() === now.toDateString();
-  const streak = isToday ? user.streak : (last && Date.now() - last.getTime() < 48 * 3600 * 1000 ? user.streak + 1 : 1);
+  const sameDay = last && last.toDateString() === now.toDateString();
+  const within48h =
+    last && Date.now() - last.getTime() < 48 * 3600 * 1000;
+  const streak = sameDay ? user.streak : within48h ? user.streak + 1 : 1;
 
-  // 4. Update user
+  /* 4️⃣  Persist user */
   user.xp = newXP;
   user.rewardPoints = (user.rewardPoints || 0) + Math.floor(xpGained / 2);
   user.evolutionLevel = newLevel;
@@ -39,15 +50,8 @@ export async function processWorkout(userId: string, workoutData: any) {
   user.lastWorkout = now;
   await user.save();
 
-  // 5. Save workout
-  await Workout.create({
-    userId,
-    ...workoutData,
-    xpGained,
-    createdAt: now
-  });
-
-  // 6. Log reward event
+  /* 5️⃣  Save workout + reward event */
+  await Workout.create({ userId, ...workoutData, xpGained, createdAt: now });
   await RewardEvent.create({
     userId,
     type: "workout",
@@ -57,10 +61,10 @@ export async function processWorkout(userId: string, workoutData: any) {
       newLevel,
       streak,
     },
-    createdAt: now
+    createdAt: now,
   });
 
-  // 7. Return updated state
+  /* 6️⃣  Return state */
   return {
     xpGained,
     totalXP: newXP,
@@ -69,6 +73,25 @@ export async function processWorkout(userId: string, workoutData: any) {
     streak,
     xpGoal,
     xpRemaining,
-    evolutionTriggered: newLevel > user.evolutionLevel
+  };
+}
+
+/* ------------------------------------------------------------------
+   getUserStatus → used by /getRewardStatus & assistant tool
+------------------------------------------------------------------ */
+export async function getUserStatus(userId: string) {
+  await mongoose.connect(process.env.MONGODB_URI!);
+  const user = await User.findById(userId);
+  if (!user) return null;
+
+  const { xpGoal, xpRemaining } = calcGoal(user.xp || 0);
+
+  return {
+    totalXP: user.xp || 0,
+    level: user.evolutionLevel || 1,
+    rewardPoints: user.rewardPoints || 0,
+    streak: user.streak || 0,
+    xpGoal,
+    xpRemaining,
   };
 }
