@@ -5,6 +5,12 @@ const RewardEvent = require("../models/RewardEvent");
 
 const LEVEL_THRESHOLDS = [0, 20, 50, 90, 140];
 
+// Helper: Find user by walletId (NAO pattern)
+async function findUserByWalletId(walletId) {
+  await mongoose.connect(process.env.MONGODB_URI);
+  return await User.findOne({ walletId });
+}
+
 function calcGoal(totalXP) {
   const nextIdx = LEVEL_THRESHOLDS.findIndex((xp) => xp > totalXP);
   const xpGoal =
@@ -15,9 +21,7 @@ function calcGoal(totalXP) {
 }
 
 async function processWorkout(userId, workoutData) {
-  await mongoose.connect(process.env.MONGODB_URI);
-
-  const user = await User.findById(userId);
+  const user = await findUserByWalletId(userId);
   if (!user) throw new Error("User not found");
 
   const xpGained = workoutData.xpEstimate || 10;
@@ -39,14 +43,14 @@ async function processWorkout(userId, workoutData) {
   await user.save();
 
   await Workout.create({
-    userId,
+    userId: user.walletId,
     ...workoutData,
     xpGained,
     createdAt: now,
   });
 
   await RewardEvent.create({
-    userId,
+    userId: user.walletId,
     eventType: "workout",
     details: {
       workoutText: workoutData.originalText || workoutData.workoutText || "",
@@ -69,8 +73,7 @@ async function processWorkout(userId, workoutData) {
 }
 
 async function getUserStatus(userId) {
-  await mongoose.connect(process.env.MONGODB_URI);
-  const user = await User.findById(userId);
+  const user = await findUserByWalletId(userId);
   if (!user) return null;
 
   const { xpGoal, xpRemaining } = calcGoal(user.xp || 0);
