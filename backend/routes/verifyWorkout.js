@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // ✅ Import your real reward engine (adjust the path as needed)
-const { processWorkout } = require("../lib/RewardEngine");
+const { processWorkout } = require("../lib/RewardEngine.js");
 
 /* -----------------------------------------------------------
    POST /api/verifyWorkout
