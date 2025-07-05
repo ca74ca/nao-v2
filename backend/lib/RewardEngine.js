@@ -5,10 +5,17 @@ const RewardEvent = require("../models/RewardEvent");
 
 const LEVEL_THRESHOLDS = [0, 20, 50, 90, 140];
 
-// Helper: Find user by walletId (NAO pattern)
+// Helper: Find user by walletId (case-insensitive)
 async function findUserByWalletId(walletId) {
   await mongoose.connect(process.env.MONGODB_URI);
-  return await User.findOne({ walletId });
+
+  // Normalize walletId to lowercase for Ethereum/Web3 best practice
+  const normalizedWalletId = typeof walletId === "string" ? walletId.toLowerCase() : walletId;
+
+  // Optionally add a debug log
+  // console.log("Looking up user by walletId:", normalizedWalletId);
+
+  return await User.findOne({ walletId: normalizedWalletId });
 }
 
 function calcGoal(totalXP) {
@@ -21,6 +28,7 @@ function calcGoal(totalXP) {
 }
 
 async function processWorkout(userId, workoutData) {
+  // Always normalize userId (wallet address)
   const user = await findUserByWalletId(userId);
   if (!user) throw new Error("User not found");
 
@@ -73,6 +81,7 @@ async function processWorkout(userId, workoutData) {
 }
 
 async function getUserStatus(userId) {
+  // Always normalize userId (wallet address)
   const user = await findUserByWalletId(userId);
   if (!user) return null;
 

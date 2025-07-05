@@ -9,6 +9,9 @@ const { processWorkout } = require("../lib/RewardEngine.js");
    Logs a workout, returns AI analysis + reward data
 ----------------------------------------------------------- */
 router.post("/verifyWorkout", async (req, res) => {
+  // Debug: log the full body for troubleshooting
+  console.log("Incoming verifyWorkout body:", req.body);
+
   try {
     const { userId, workoutText, source = "manual" } = req.body;
 
@@ -20,6 +23,9 @@ router.post("/verifyWorkout", async (req, res) => {
         error: "Missing userId or workoutText",
       });
     }
+
+    // Normalize wallet address (best practice for Ethereum)
+    const normalizedUserId = typeof userId === "string" ? userId.toLowerCase() : userId;
 
     /* 🧠 1. OPTIONAL: call your AI parser here to get structured data  */
     // const parsed = await parseWorkoutAI(workoutText, source);
@@ -36,18 +42,18 @@ router.post("/verifyWorkout", async (req, res) => {
     };
 
     /* ⚙️ 2. Process the workout & calculate rewards */
-    const reward = await processWorkout(userId, parsed);
+    const reward = await processWorkout(normalizedUserId, parsed);
     // reward = { xpGained, totalXP, newLevel, streak, rewardPoints, xpGoal, xpRemaining, evolutionTriggered }
 
     // 🧾 Debug logs (keep during launch)
-    console.log("✅ Workout verified for:", userId);
+    console.log("✅ Workout verified for:", normalizedUserId);
     console.log("📋 Workout:", workoutText);
     console.log("🎁 Rewards:", reward);
 
     /* 📣 3. Return the truth back to the frontend / assistant */
     return res.json({
       success: true,
-      userId,
+      userId: normalizedUserId,
       aiResult: parsed.summary,
       ...reward
     });
