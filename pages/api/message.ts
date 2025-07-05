@@ -90,55 +90,105 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             continue;
           }
 
-          /* ─────────── logWorkout ─────────── */
-          if (call.function.name === "logWorkout") {
-            let args: any = {};
-            try { args = JSON.parse(call.function.arguments); } catch {}
+  /* ─────────── logWorkout ─────────── */
+if (call.function.name === "logWorkout") {
+  let args: any = {};
+  try {
+    args = JSON.parse(call.function.arguments);
+  } catch {}
 
-            const backend =
-              process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
-              process.env.NAO_BACKEND_URL ||
-              "http://localhost:3001";
+  const backend =
+    process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
+    process.env.NAO_BACKEND_URL ||
+    "http://localhost:3001";
 
-            try {
-              const verifyRes = await fetch(`${backend}/api/verifyWorkout`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  userId: args.userId || userId || `user-${threadId}`,
-                  workoutText: args.workoutText || args.message || message || "",
-                }),
-              });
+  // 🧠 Try to extract wallet from (a) tool args (b) context (c) cookie
+  let cookieWallet: string | undefined = undefined;
+  if (typeof req !== "undefined" && req.headers?.cookie) {
+    const match = req.headers.cookie.match(/wallet=([^;]+)/);
+    if (match && match[1]?.startsWith("0x")) {
+      cookieWallet = match[1];
+    }
+  }
 
-              const verifyData = await verifyRes.json();
-              const { success, aiResult, xpGained, newLevel, updatedStreak, rewardPoints } = verifyData;
+  const walletAddress =
+    (typeof args.userId === "string" && args.userId.startsWith("0x")) ? args.userId
+    : (typeof userId === "string" && userId.startsWith("0x")) ? userId
+    : cookieWallet || null;
 
-              toolOutputs.push({
-                tool_call_id: call.id,
-                output: JSON.stringify({
-                  success,
-                  aiResult,
-                  xpGained,
-                  newLevel,
-                  updatedStreak,
-                  rewardPoints,
-                  message: `Workout logged! +${xpGained} XP · Level ${newLevel} · ${updatedStreak}-day streak · ${rewardPoints} points.`,
-                }),
-              });
-            } catch (err) {
-              console.error("❌ verifyWorkout error:", err);
-              toolOutputs.push({
-                tool_call_id: call.id,
-                output: JSON.stringify({ error: "Failed to log workout" }),
-              });
-            }
-            continue;
-          }
+  if (!walletAddress) {
+    console.error("❌ No wallet found for logWorkout");
+    toolOutputs.push({
+      tool_call_id: call.id,
+      output: JSON.stringify({ error: "No wallet address found. Please connect your wallet." }),
+    });
+    continue;
+  }
+
+  try {
+    const verifyRes = await fetch(`${backend}/api/verifyWorkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: walletAddress, // ✅ Always a real wallet ID now
+        workoutText: args.workoutText || args.message || message || "",
+      }),
+    });
+
+    const verifyData = await verifyRes.json();
+    const { success, aiResult, xpGained, newLevel, updatedStreak, rewardPoints } = verifyData;
+
+    toolOutputs.push({
+      tool_call_id: call.id,
+      output: JSON.stringify({
+        success,
+        aiResult,
+        xpGained,
+        newLevel,
+        updatedStreak,
+        rewardPoints,
+        message: `Workout logged! +${xpGained} XP · Level ${newLevel} · ${updatedStreak}-day streak · ${rewardPoints} points.`,
+      }),
+    });
+  } catch (err) {
+    console.error("❌ verifyWorkout error:", err);
+    toolOutputs.push({
+      tool_call_id: call.id,
+      output: JSON.stringify({ error: "Failed to log workout" }),
+    });
+  }
+  continue;
+}
+
 
           /* ─────────── NEW: getRewardStatus ─────────── */
           if (call.function.name === "getRewardStatus") {
             let args: any = {};
             try { args = JSON.parse(call.function.arguments); } catch {}
+            
+            // 🧠 Try to extract wallet from (a) tool args (b) context (c) cookie
+            let cookieWallet: string | undefined = undefined;
+            if (typeof req !== "undefined" && req.headers?.cookie) {
+              const match = req.headers.cookie.match(/wallet=([^;]+)/);
+              if (match && match[1]?.startsWith("0x")) {
+                cookieWallet = match[1];
+              }
+            }
+
+            const walletAddress =
+              (typeof args.userId === "string" && args.userId.startsWith("0x")) ? args.userId
+              : (typeof userId === "string" && userId.startsWith("0x")) ? userId
+              : cookieWallet || null;
+
+            if (!walletAddress) {
+              console.error("❌ No wallet found for getRewardStatus");
+              toolOutputs.push({
+                tool_call_id: call.id,
+                output: JSON.stringify({ error: "No wallet address found. Please connect your wallet." }),
+              });
+              continue;
+            }
+
             const backend =
               process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
               process.env.NAO_BACKEND_URL ||
@@ -147,7 +197,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               const resp = await fetch(`${backend}/api/getRewardStatus`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: args.userId || userId || `user-${threadId}` }),
+                body: JSON.stringify({ userId: walletAddress }),
               });
               const data = await resp.json();           // { xp, level, rewardPoints, streak, nftBadges }
               toolOutputs.push({ tool_call_id: call.id, output: JSON.stringify(data) });
@@ -161,18 +211,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             continue;
           }
 
-          /* ──────── getRecentWorkouts (unchanged) ──────── */
+          /* ──────── getRecentWorkouts ──────── */
           if (call.function.name === "getRecentWorkouts") {
             let args: any = {};
             try { args = JSON.parse(call.function.arguments); } catch {}
-            const { userId: uid, limit = 5 } = args;
+            const { limit = 5 } = args;
+
+            // 🧠 Try to extract wallet from (a) tool args (b) context (c) cookie
+            let cookieWallet: string | undefined = undefined;
+            if (typeof req !== "undefined" && req.headers?.cookie) {
+              const match = req.headers.cookie.match(/wallet=([^;]+)/);
+              if (match && match[1]?.startsWith("0x")) {
+                cookieWallet = match[1];
+              }
+            }
+
+            const walletAddress =
+              (typeof args.userId === "string" && args.userId.startsWith("0x")) ? args.userId
+              : (typeof userId === "string" && userId.startsWith("0x")) ? userId
+              : cookieWallet || null;
+
+            if (!walletAddress) {
+              console.error("❌ No wallet found for getRecentWorkouts");
+              toolOutputs.push({
+                tool_call_id: call.id,
+                output: JSON.stringify({ error: "No wallet address found. Please connect your wallet." }),
+              });
+              continue;
+            }
 
             try {
               const backend =
                 process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
                 process.env.NAO_BACKEND_URL ||
                 "http://localhost:3001";
-              const resp = await fetch(`${backend}/api/history/${uid}?limit=${limit}`);
+              const resp = await fetch(`${backend}/api/history/${walletAddress}?limit=${limit}`);
               const data = await resp.json();
               toolOutputs.push({
                 tool_call_id: call.id,
