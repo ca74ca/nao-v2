@@ -10,13 +10,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method not allowed" });
 
-  const { thread_id, message, page, onboardingComplete, userId, walletId } = req.body;
-  if (!thread_id || !message)
-    return res.status(400).json({ error: "Missing thread_id or message" });
+  const { threadId, message, page, onboardingComplete, userId, walletId } = req.body;
+  if (!threadId || !message)
+    return res.status(400).json({ error: "Missing threadId or message" });
 
   try {
     /* 1 ▸ block double-send if a run is still live */
-    const last = await openai.beta.threads.runs.list(thread_id, { limit: 1 });
+    const last = await openai.beta.threads.runs.list(threadId, { limit: 1 });
     const active = last.data[0];
     if (active && ["queued", "in_progress", "cancelling"].includes(active.status))
       return res
@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .json({ error: "Assistant still responding", runStatus: active.status });
 
     /* 2 ▸ append user message */
-    await openai.beta.threads.messages.create(thread_id, {
+    await openai.beta.threads.messages.create(threadId, {
       role: "user",
       content: message,
     });
@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     instructions += ` Respond intelligently; avoid repeating onboarding prompts.`;
 
     /* 4 ▸ start the run  (TOOLS ARRAY ADDED) */
-    let run = await openai.beta.threads.runs.create(thread_id, {
+    let run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: process.env.OPENAI_ASSISTANT_ID!,
       instructions,
       tools: [
@@ -272,18 +272,18 @@ if (call.function.name === "logWorkout") {
         } /* end for-loop */
 
         /* submit all outputs back to OpenAI */
-        await openai.beta.threads.runs.submitToolOutputs(thread_id, run.id, { tool_outputs: toolOutputs });
+        await openai.beta.threads.runs.submitToolOutputs(threadId, run.id, { tool_outputs: toolOutputs });
       } /* end requires_action */
 
       await new Promise(r => setTimeout(r, 1000));
-      run = await openai.beta.threads.runs.retrieve(thread_id, run.id);
+      run = await openai.beta.threads.runs.retrieve(threadId, run.id);
     } /* end while */
 
     if (run.status !== "completed")
       return res.status(500).json({ error: "Assistant run failed", runStatus: run.status });
 
     /* ───────────── return final assistant text ─────────── */
-    const msgs = await openai.beta.threads.messages.list(thread_id, { limit: 10 });
+    const msgs = await openai.beta.threads.messages.list(threadId, { limit: 10 });
     const lastMsg = msgs.data.find(m => m.role === "assistant");
     const textBlock = lastMsg?.content?.find((b: any) => b.type === "text") as
       | { type: "text"; text: { value: string } }
@@ -291,7 +291,7 @@ if (call.function.name === "logWorkout") {
 
     res.status(200).json({
       reply: textBlock?.text?.value || "NAO is thinking...",
-      threadId: thread_id,
+      threadId: threadId,
     });
   } catch (error: any) {
     console.error("❌ /api/message error:", error);
