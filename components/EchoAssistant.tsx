@@ -70,11 +70,18 @@ export default function EchoAssistant({
           setInput("");
           return;
         }
-        const res = await fetch("/api/message", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ threadId, message: input }),
-        });
+       const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
+const walletId = user.walletId;
+
+const res = await fetch("/api/message", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    threadId,
+    message: input,
+    walletId, // <-- Always include this
+  }),
+});
         if (!res.ok) {
           const errorText = await res.text(); // FIX: Await outside setMessages
           setMessages((m) => [...m, { sender: "System", text: "Error: " + errorText }]);

@@ -94,18 +94,24 @@ export default function NAOCommandInput() {
     setRequiredToolCalls(null);
 
     try {
-      await fetch("/api/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thread_id: threadId, message: userInput }),
-      });
+  const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
+  const walletId = user.walletId;
 
-      const runRes = await fetch("/api/assistant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thread_id: threadId }),
-      });
+  await fetch("/api/message", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+      thread_id: threadId, 
+      message: userInput, 
+      walletId // <-- include walletId here
+    }),
+  });
 
+  const runRes = await fetch("/api/assistant", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ thread_id: threadId }),
+  });
       const runData = await runRes.json();
       const receivedRunId = runData.run_id;
       setRunId(receivedRunId);

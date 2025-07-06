@@ -1,5 +1,5 @@
+import React from "react";
 import { useEffect, useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/router";
 
 type Message = {
@@ -34,88 +34,104 @@ export default function GPTAssistant({ initialPrompt }: { initialPrompt: string 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newMsg = { sender: "User", text: input };
+    const newMsg: Message = { sender: "User", text: input };
     setMessages((prev) => [...prev, newMsg]);
     setInput("");
     setLoading(true);
 
-    const thread_id = threadIdRef.current;
-    if (!thread_id) return;
+    const threadId = threadIdRef.current;
+    if (!threadId) return;
 
-    // STEP 2: Send message
-    await fetch("/api/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ thread_id, content: input })
-    });
+    try {
+      // Retrieve walletId from localStorage
+      const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
+      const walletId = user.walletId;
 
-    // STEP 3: Trigger assistant
-    const res = await fetch("/api/assistant", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ thread_id })
-    });
-    const { run_id } = await res.json();
-
-    // STEP 4: Poll until complete
-    let status = "queued";
-    let toolCalls = [];
-    while (status !== "completed" && status !== "failed") {
-      const r = await fetch("/api/run-status", {
+      // STEP 2: Send message (pass walletId)
+      await fetch("/api/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thread_id, run_id })
+        body: JSON.stringify({
+          threadId,
+          message: input,
+          walletId, // <-- Include walletId here!
+        }),
       });
-      const data = await r.json();
-      status = data.status;
-      toolCalls = data.tool_calls;
-      if (status !== "completed") await new Promise((res) => setTimeout(res, 1000));
-    }
 
-    // STEP 5: Handle tool calls (onboardUser, etc.)
-    for (const tool of toolCalls || []) {
-      const fn = tool.function.name;
-      const args = JSON.parse(tool.function.arguments);
+      // STEP 3: Trigger assistant
+      const res = await fetch("/api/assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ thread_id: threadId })
+      });
+      const { run_id } = await res.json();
 
-      if (fn === "createUserAndWallet") {
-        const result = await fetch("/api/createUserAndWallet", {
+      // STEP 4: Poll until complete
+      let status = "queued";
+      let toolCalls: any[] = [];
+      while (status !== "completed" && status !== "failed") {
+        const r = await fetch("/api/run-status", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(args)
+          body: JSON.stringify({ thread_id: threadId, run_id })
         });
-        const data = await result.json();
-
-        // Save user to localStorage
-        localStorage.setItem("nao_user", JSON.stringify(data.user));
-
-        await fetch("/api/reply", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            thread_id,
-            run_id,
-            tool_call_id: tool.id,
-            output: JSON.stringify({ success: true })
-          })
-        });
-
-        setTimeout(() => router.push("/final-onboarding"), 1000);
+        const data = await r.json();
+        status = data.status;
+        toolCalls = data.tool_calls;
+        if (status !== "completed") await new Promise((res) => setTimeout(res, 1000));
       }
 
-      // Add more tool functions here if needed
+      // STEP 5: Handle tool calls (onboardUser, etc.)
+      for (const tool of toolCalls || []) {
+        const fn = tool.function.name;
+        const args = JSON.parse(tool.function.arguments);
+
+        if (fn === "createUserAndWallet") {
+          const result = await fetch("/api/createUserAndWallet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args)
+          });
+          const data = await result.json();
+
+          // Save user to localStorage
+          localStorage.setItem("nao_user", JSON.stringify(data.user));
+
+          await fetch("/api/reply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              thread_id: threadId,
+              run_id,
+              tool_call_id: tool.id,
+              output: JSON.stringify({ success: true })
+            })
+          });
+
+          setTimeout(() => router.push("/final-onboarding"), 1000);
+        }
+
+        // Add more tool functions here if needed
+      }
+
+      // STEP 6: Get assistant response
+      const threadRes = await fetch("/api/thread-messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ thread_id: threadId })
+      });
+      const msgData = await threadRes.json();
+      const last = msgData.messages.at(-1)?.content?.[0]?.text?.value;
+      if (last) setMessages((prev) => [...prev, { sender: "NAO", text: last }]);
+
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "NAO", text: "Error sending message: " + String(err) }
+      ]);
     }
-
-    // STEP 6: Get assistant response
-    const threadRes = await fetch("/api/thread-messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ thread_id })
-    });
-    const msgData = await threadRes.json();
-    const last = msgData.messages.at(-1)?.content?.[0]?.text?.value;
-    if (last) setMessages((prev) => [...prev, { sender: "NAO", text: last }]);
-
-    setLoading(false);
   };
 
   return (

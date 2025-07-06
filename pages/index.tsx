@@ -487,20 +487,29 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch("/api/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ threadId, message: input }),
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        setMessages((msgs) => [
-          ...msgs,
-          { sender: "System", text: "Error from server: " + errorText }
-        ]);
-        setLoading(false);
-        return;
-      }
+  // Retrieve walletId from localStorage
+  const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
+  const walletId = user.walletId;
+
+  const res = await fetch("/api/message", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      threadId,
+      message: input,
+      walletId, // <-- ADD THIS LINE
+    }),
+  });
+  if (!res.ok) {
+    const errorText = await res.text();
+    setMessages((msgs) => [
+      ...msgs,
+      { sender: "System", text: "Error from server: " + errorText }
+    ]);
+    setLoading(false);
+    return;
+  }
+  // ...rest of your code...
       const data = await res.json();
       setMessages((msgs) => [...msgs, { sender: "NAO", text: data.reply }]);
     } catch (err) {

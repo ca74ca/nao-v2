@@ -349,31 +349,35 @@ export default function MintPage() {
       .then((data) => setThreadId(data.threadId))
       .catch(() => setThreadId(null));
   }, []);
-  // Smart message handler for EchoAssistant
-  const sendMessage = async (input: string) => {
-    if (!threadId) return "NAO is initializing, please wait...";
-    try {
-      const res = await fetch("/api/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          threadId,
-          message: input,
-          page: "mint",
-          onboardingComplete: true,
-        }),
-      });
-      const data = await res.json();
-      if (data?.reply) {
-        return data.reply;
-      } else {
-        return "NAO is thinking...";
-      }
-    } catch (err: any) {
-      return "Network error: " + (err?.message || "Unknown error");
+ // Smart message handler for EchoAssistant
+const sendMessage = async (input: string) => {
+  if (!threadId) return "NAO is initializing, please wait...";
+  // --- NEW: get walletId from localStorage ---
+  const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
+  const walletId = user.walletId;
+  try {
+    const res = await fetch("/api/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        threadId,
+        message: input,
+        page: "mint",
+        onboardingComplete: true,
+        walletId, // <-- ADDED: always send walletId!
+      }),
+    });
+    const data = await res.json();
+    if (data?.reply) {
+      return data.reply;
+    } else {
+      return "NAO is thinking...";
     }
-  };
-  // --- END: NAO SMART CHAT ADDITION ---
+  } catch (err: any) {
+    return "Network error: " + (err?.message || "Unknown error");
+  }
+};
+// --- END: NAO SMART CHAT ADDITION ---
 
   if (loading) return <div>Loading your passport...</div>;
   if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
