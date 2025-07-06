@@ -9,13 +9,13 @@ const LEVEL_THRESHOLDS = [0, 20, 50, 90, 140];
 async function findUserByWalletId(walletId) {
   await mongoose.connect(process.env.MONGODB_URI);
 
-  // Normalize walletId to lowercase for Ethereum/Web3 best practice
-  const normalizedWalletId = typeof walletId === "string" ? walletId.toLowerCase() : walletId;
+  // Use case-insensitive regex to match regardless of case
+  const walletRegex = new RegExp(`^${walletId}$`, 'i');
 
-  // Optionally add a debug log
-  // console.log("Looking up user by walletId:", normalizedWalletId);
+  // Debug log to see what we're searching for
+  console.log("Looking up user by walletId (case-insensitive):", walletId);
 
-  return await User.findOne({ walletId: normalizedWalletId });
+  return await User.findOne({ walletId: walletRegex });
 }
 
 function calcGoal(totalXP) {
