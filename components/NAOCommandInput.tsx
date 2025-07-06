@@ -33,7 +33,7 @@ export default function NAOCommandInput() {
       const res = await fetch("/api/submit-tool-output", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thread_id: threadId, run_id: runId, tool_outputs: toolOutputs }),
+        body: JSON.stringify({ threadId: threadId, run_id: runId, tool_outputs: toolOutputs }),
       });
       const data = await res.json();
       if (data.status) {
@@ -57,7 +57,7 @@ export default function NAOCommandInput() {
       const res = await fetch("/api/run-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thread_id: threadId, run_id: currentRunId }),
+        body: JSON.stringify({ threadId: threadId, run_id: currentRunId }),
       });
       const data = await res.json();
       status = data.status;
@@ -75,7 +75,7 @@ export default function NAOCommandInput() {
       const replyRes = await fetch("/api/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thread_id: threadId }),
+        body: JSON.stringify({ threadId: threadId }),
       });
       const replyData = await replyRes.json();
       setMessages(prev => [...prev, { role: "assistant", content: replyData.reply || "⚠️ NAO didn’t respond." }]);
@@ -101,7 +101,7 @@ export default function NAOCommandInput() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ 
-      thread_id: threadId, 
+      threadId: threadId, 
       message: userInput, 
       walletId // <-- include walletId here
     }),
@@ -110,7 +110,7 @@ export default function NAOCommandInput() {
   const runRes = await fetch("/api/assistant", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ thread_id: threadId }),
+    body: JSON.stringify({ threadId: threadId }),
   });
       const runData = await runRes.json();
       const receivedRunId = runData.run_id;
