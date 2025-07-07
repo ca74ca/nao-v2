@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
 
 const WorkoutSchema = new mongoose.Schema({
-  userId:      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  // 🔑  Store the wallet address (or any user string) directly.
+  //     No ObjectId casting = no CastError.
+  userId:      { type: String, required: true },
 
   /* provenance */
   source:      { type: String, enum: ["manual", "whoop", "apple"], default: "manual" },
-  workoutText: { type: String, required: true },        // raw text or payload
-  parsedType:  { type: String },                        // e.g. "strength", "cardio"
-  durationMin: { type: Number },                        // derived from text/device
-  intensity:   { type: String },                        // “low / medium / high”
+  workoutText: { type: String, required: true },
+  parsedType:  { type: String },
+  durationMin: { type: Number },
+  intensity:   { type: String },
   calories:    { type: Number },
 
   /* rewards */
@@ -16,5 +18,8 @@ const WorkoutSchema = new mongoose.Schema({
 
   timestamp:   { type: Date, default: Date.now }
 });
+
+// Optional: make lookups fast and unique
+// WorkoutSchema.index({ userId: 1, timestamp: -1 });
 
 module.exports = mongoose.model("Workout", WorkoutSchema);

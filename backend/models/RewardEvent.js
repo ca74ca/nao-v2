@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 const RewardEventSchema = new mongoose.Schema({
-  userId:     { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  // Store the wallet address directly as a string for web3 compatibility
+  userId:     { type: String, required: true },
 
   eventType:  {
     type: String,
@@ -9,7 +10,9 @@ const RewardEventSchema = new mongoose.Schema({
     required: true
   },
 
-  details:        { type: String },
+  // If you want to store structured data, use Mixed; otherwise, leave as String
+  details:        { type: mongoose.Schema.Types.Mixed },
+
   xpDelta:        { type: Number, default: 0 },
   rewardPoints:   { type: Number, default: 0 },
   levelAfter:     { type: Number, default: 1 },
