@@ -151,22 +151,21 @@ export default function FinalOnboarding() {
     Ready to unlock a new era of proactive well-being where your fitness journey is uniquely yours, financially rewarding, and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set your first AI-driven goal, and link your card. Your first $1 reward is waiting – tap below to begin your healthier, wealthier journey.
   </p>
 </div>
-
-{/* Sync Buttons */}
-<div className="space-y-5 w-full mt-8">
-  <h2 className="text-xl font-bold text-cyan-300 tracking-wide mb-4">
-    🔗 Sync Your Systems
-  </h2>
-
+{/* Sync Buttons — Glassmorphic Horizontal Layout */}
+<div className="w-full flex flex-wrap justify-center gap-8 mt-12 max-w-6xl mx-auto">
   {/* Apple Health */}
   <button
-    className={`relative px-6 py-4 rounded-2xl w-full text-lg font-medium tracking-wide text-white
-      transition-all duration-200 border border-cyan-400/30 shadow-lg backdrop-blur
-      ${
-        wearableConnected
-          ? "bg-green-600/70 hover:bg-green-700"
-          : "bg-black/30 hover:bg-cyan-500/20 animate-pulse"
-      } active:scale-95`}
+    className={`
+      min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
+      backdrop-blur-md bg-white/5 border border-cyan-300/30
+      shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
+      transition-all duration-200 ease-out
+      ring-1 ring-inset ring-white/10
+      hover:ring-cyan-400/50 hover:shadow-[0_4px_35px_0_rgba(0,255,255,0.45)]
+      active:scale-95 active:shadow-[0_0_20px_0_rgba(0,255,255,0.6)]
+      disabled:bg-emerald-600/80 disabled:hover:shadow-none disabled:cursor-default
+      ${wearableConnected ? "text-white" : "text-cyan-100 animate-pulse"}
+    `}
     onClick={handleAppleHealthLink}
     disabled={loadingWearable || wearableConnected}
   >
@@ -179,13 +178,17 @@ export default function FinalOnboarding() {
 
   {/* Coinbase Wallet */}
   <button
-    className={`relative px-6 py-4 rounded-2xl w-full text-lg font-medium tracking-wide text-white
-      transition-all duration-200 border border-cyan-400/30 shadow-lg backdrop-blur
-      ${
-        coinbaseLinked
-          ? "bg-green-600/70 hover:bg-green-700"
-          : "bg-black/30 hover:bg-cyan-500/20 animate-pulse"
-      } active:scale-95`}
+    className={`
+      min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
+      backdrop-blur-md bg-white/5 border border-cyan-300/30
+      shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
+      transition-all duration-200 ease-out
+      ring-1 ring-inset ring-white/10
+      hover:ring-cyan-400/50 hover:shadow-[0_4px_35px_0_rgba(0,255,255,0.45)]
+      active:scale-95 active:shadow-[0_0_20px_0_rgba(0,255,255,0.6)]
+      disabled:bg-emerald-600/80 disabled:hover:shadow-none disabled:cursor-default
+      ${coinbaseLinked ? "text-white" : "text-cyan-100 animate-pulse"}
+    `}
     onClick={() => setCoinbaseLinked(true)}
     disabled={coinbaseLinked}
   >
@@ -194,13 +197,17 @@ export default function FinalOnboarding() {
 
   {/* Apple Pay */}
   <button
-    className={`relative px-6 py-4 rounded-2xl w-full text-lg font-medium tracking-wide text-white
-      transition-all duration-200 border border-cyan-400/30 shadow-lg backdrop-blur
-      ${
-        applePaySynced
-          ? "bg-green-600/70 hover:bg-green-700"
-          : "bg-black/30 hover:bg-cyan-500/20 animate-pulse"
-      } active:scale-95`}
+    className={`
+      min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
+      backdrop-blur-md bg-white/5 border border-cyan-300/30
+      shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
+      transition-all duration-200 ease-out
+      ring-1 ring-inset ring-white/10
+      hover:ring-cyan-400/50 hover:shadow-[0_4px_35px_0_rgba(0,255,255,0.45)]
+      active:scale-95 active:shadow-[0_0_20px_0_rgba(0,255,255,0.6)]
+      disabled:bg-emerald-600/80 disabled:hover:shadow-none disabled:cursor-default
+      ${applePaySynced ? "text-white" : "text-cyan-100 animate-pulse"}
+    `}
     onClick={() => setApplePaySynced(true)}
     disabled={applePaySynced}
   >
@@ -210,12 +217,6 @@ export default function FinalOnboarding() {
   </button>
 </div>
 
-{/* Error notice */}
-{error && (
-  <div className="text-red-400 font-semibold mt-2 animate-pulse text-center">
-    {error}
-  </div>
-)}
 
 
 
