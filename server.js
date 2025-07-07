@@ -7,39 +7,33 @@ const mongoose = require('mongoose');
 
 const onboardRoutes = require('./backend/routes/onboard');
 const verifyRoutes = require('./backend/routes/verifyWorkout');
+const rewardRoutes = require('./backend/routes/getRewardStatus'); // ✅ NEW
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Log out your MongoDB URI for debugging (remove this in production!)
+// Mongo
 console.log("Connecting to MongoDB with URI:", process.env.MONGODB_URI);
-
-// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => {
-    console.log('✅ Mongoose connected!');
-  })
-  .catch((err) => {
-    console.error('❌ Mongoose error:', err);
-  });
+  .then(() => console.log('✅ Mongoose connected!'))
+  .catch((err) => console.error('❌ Mongoose error:', err));
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Health check route
-app.get('/', (_, res) => {
-  res.send('✅ NAO API running');
-});
+// Health check
+app.get('/', (_, res) => res.send('✅ NAO API running'));
 
-// Route setup
+// ✅ Routes
 app.use('/onboard', onboardRoutes);
 app.use('/api', verifyRoutes);
+app.use('/api', rewardRoutes); // ✅ <-- MOUNT REWARD STATUS
 
-// Start the server
+// Start server
 app.listen(PORT, () => {
   console.log(`✅ NAO backend live on port ${PORT}`);
 });
