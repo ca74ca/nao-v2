@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { RewardEngine, RewardState, RewardEvent, RewardResult } from "../rewards/RewardEngine";
+import { RewardState } from "../rewards/RewardEngine";
 
-// Make sure you define or import this!
+/* ---------- Initial empty state ---------- */
 export const initialRewardState: RewardState = {
   xp: 0,
   energyCredits: 0,
@@ -11,53 +11,50 @@ export const initialRewardState: RewardState = {
   rewardsReady: false,
 };
 
-// Replace with your actual API endpoint
-const REWARD_API = "/api/rewards";
+/* Backend base URL (env var preferred) */
+const BACKEND =
+  process.env.NEXT_PUBLIC_NAO_BACKEND_URL ||
+  "https://nao-sdk-api.onrender.com";
 
+/* ---------- Hook ---------- */
 export function useRewardState(userId: string) {
-  const [rewardState, setRewardState] = useState<RewardState>(initialRewardState);
+  const [rewardState, setRewardState] = useState<RewardState>(
+    initialRewardState
+  );
   const [loading, setLoading] = useState(true);
 
-  // Fetch reward state from API on load
+  /* Fetch live reward state whenever userId changes */
   useEffect(() => {
     async function fetchRewardState() {
       setLoading(true);
       try {
-        const res = await fetch(`${REWARD_API}?userId=${userId}`);
+        const res = await fetch(`${BACKEND}/api/getRewardStatus`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
         if (!res.ok) throw new Error("Failed to fetch reward state");
         const data = await res.json();
-        setRewardState(data); // Optionally validate/transform data
-      } catch (e) {
+
+        /* Map backend fields → local RewardState */
+        setRewardState({
+          xp: data.totalXP,
+          energyCredits: data.rewardPoints,
+          streak: data.streak,
+          evolutionLevel: data.level,
+          lastActivity: null,
+          rewardsReady: true,
+        });
+      } catch {
         setRewardState(initialRewardState);
       } finally {
         setLoading(false);
       }
     }
+
     if (userId) fetchRewardState();
   }, [userId]);
 
-  // Apply reward event and sync to backend
-  async function applyRewardEvent(event: RewardEvent): Promise<RewardResult> {
-    // Optimistic update (optional)
-    const optimistic = RewardEngine.applyEvent(rewardState, event);
-    setRewardState(optimistic.state);
-
-    try {
-      const res = await fetch(`${REWARD_API}/event`, {
-        method: "POST",
-        body: JSON.stringify({ userId, event }),
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) throw new Error("Failed to update reward event");
-      const data = await res.json();
-      setRewardState(data.state); // Make sure your backend returns { state }
-      return data;
-    } catch (err) {
-      // Optionally roll back optimistic update on error
-      setRewardState(rewardState);
-      throw err;
-    }
-  }
-
-  return { rewardState, applyRewardEvent, loading };
+  /* No custom event-sync yet — workouts already handled via /verifyWorkout */
+  return { rewardState, loading };
 }
