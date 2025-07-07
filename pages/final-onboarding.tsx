@@ -120,7 +120,6 @@ export default function FinalOnboarding() {
             <span className="text-5xl font-bold text-cyan-400 tracking-tighter">
               NAO
             </span>
-          </div>
           <div className="mt-8 text-center text-lg text-gray-300 px-4">
             Meet your NAO model
             <br />
@@ -129,42 +128,50 @@ export default function FinalOnboarding() {
         </div>
       </div>
 
-      {/* RIGHT: Onboarding content */}
-      <div className="relative z-10 flex-1 flex flex-col items-start justify-start px-8 py-10 space-y-6 max-w-2xl ml-auto">
-        <h1 className="text-4xl font-bold">
-          Welcome to NAO: Your Health Intelligence Passport
-        </h1>
+   {/* RIGHT: Onboarding content */}
+<div className="absolute top-24 right-16 w-[42%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[75vh] overflow-y-auto space-y-4">
+  <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
+    Welcome to NAO: Your Health Intelligence Passport
+  </h1>
+  <p className="whitespace-pre-line">
+    Welcome to NAO, the worlds first Health Intelligence Passport that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized
+    guidance for your unique well-being journey and rewarding your efforts with real cash. Our advanced AI constantly analyzes your sleep, activity levels, and biomarkers (via Whoop/Apple Health),
+    delivering actionable insights. Whether it's suggesting optimal workout intensity, recommending recovery protocols like "Your workout recovery is 92%—ideal day for strength training," or nudging you 
+    with "Your stress levels spiked today—try 5 mins of breathwork now," NAO evolves with your progress. This dynamic learning ensures your fitness journey is always challenging, achievable, and truly yours.
 
-        <div className="overflow-y-auto max-h-[65vh] w-full text-sm leading-6 whitespace-pre-line text-gray-200 border border-gray-700/40 rounded-2xl p-6 backdrop-blur-sm bg-black/40">
-{`Welcome to NAO, the first Health Intelligence Passport that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized 
-guidance for your unique well-being journey and rewarding your efforts with real cash. Our advanced AI constantly analyzes your sleep, activity levels, and biomarkers (via Whoop/Apple Health),
-delivering actionable insights. Whether it's suggesting optimal workout intensity, recommending recovery protocols like "Your workout recovery is 92%—ideal day for strength training," or nudging you 
-with "Your stress levels spiked today—try 5 mins of breathwork now," NAO evolves with your progress. This dynamic learning ensures your fitness journey is always challenging, achievable, and truly yours.
-Hit your health goals, and you'll earn $NAO – a USD-pegged stablecoin that's truly usable anywhere, just like cash! Spend your rewards instantly via Apple Pay or Mastercard at your favorite gym, grocery store, 
-or even for that post-workout smoothie. As your health improves, so do your earning opportunities, with higher rewards for consistent progress and milestones.
-Say goodbye to generic plans and embrace truly personalized wellness with rewards that grow with you. Your comprehensive health data becomes a secure, living NFT you own on the blockchain, 
-empowering you with unparalleled control and privacy. This means seamless doctor visits by sharing a simple QR code, and robust security for all your health information. 
-The $NAO stablecoin itself is designed for future-proof value: built on a robust blockchain framework, its stability and utility are continually enhanced through
-community governance and potential algorithmic improvements, ensuring it remains a reliable, spendable asset as the Web3 ecosystem evolves. This means your earnings are always secure and ready for use. 
-Ready to unlock a new era of proactive well-being where your fitness journey is uniquely yours, financially rewarding,
-and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set your first AI-driven goal, and link your card. Your first $1 reward is waiting – tap below to begin your healthier, wealthier journey`}
+    Hit your health goals, and you'll earn $NAO – a USD-pegged stablecoin that's truly usable anywhere, just like cash! Spend your rewards instantly via Apple Pay or Mastercard at your favorite gym, grocery store, 
+    or even for that post-workout smoothie. As your health improves, so do your earning opportunities, with higher rewards for consistent progress and milestones.
+
+    Say goodbye to generic plans and embrace truly personalized wellness with rewards that grow with you. Your comprehensive health data becomes a secure, living NFT you own on the blockchain, 
+    empowering you with unparalleled control and privacy. This means seamless doctor visits by sharing a simple QR code, and robust security for all your health information. 
+
+    The $NAO stablecoin itself is designed for future-proof value: built on a robust blockchain framework, its stability and utility are continually enhanced through
+    community governance and potential algorithmic improvements, ensuring it remains a reliable, spendable asset as the Web3 ecosystem evolves. 
+
+    Ready to unlock a new era of proactive well-being where your fitness journey is uniquely yours, financially rewarding, and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set your first AI-driven goal, and link your card. Your first $1 reward is waiting – tap below to begin your healthier, wealthier journey.
+  </p>
 </div>
-     {/* Sync buttons */}
-<div className="space-y-4 w-full mt-6">
-  <h2 className="text-lg font-semibold text-cyan-400 mb-2">
-    Sync Your Systems
+
+{/* Sync Buttons */}
+<div className="space-y-5 w-full mt-8">
+  <h2 className="text-xl font-bold text-cyan-300 tracking-wide mb-4">
+    🔗 Sync Your Systems
   </h2>
 
   {/* Apple Health */}
   <button
-    className={`relative px-5 py-4 rounded-2xl w-full text-white transition-all duration-200
-      ${wearableConnected ? "bg-green-600/70" : "bg-white/10 hover:bg-white/20"}
-      shadow-lg backdrop-blur-md border border-white/20`}
+    className={`relative px-6 py-4 rounded-2xl w-full text-lg font-medium tracking-wide text-white
+      transition-all duration-200 border border-cyan-400/30 shadow-lg backdrop-blur
+      ${
+        wearableConnected
+          ? "bg-green-600/70 hover:bg-green-700"
+          : "bg-black/30 hover:bg-cyan-500/20 animate-pulse"
+      } active:scale-95`}
     onClick={handleAppleHealthLink}
     disabled={loadingWearable || wearableConnected}
   >
     {loadingWearable
-      ? "🔄 Checking wearable status..."
+      ? "🔄 Checking Apple Health..."
       : wearableConnected
       ? "✅ Apple Health Linked"
       : "📲 Link Apple Health"}
@@ -172,20 +179,28 @@ and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set you
 
   {/* Coinbase Wallet */}
   <button
-    className={`relative px-5 py-4 rounded-2xl w-full text-white transition-all duration-200
-      ${coinbaseLinked ? "bg-green-600/70" : "bg-white/10 hover:bg-white/20"}
-      shadow-lg backdrop-blur-md border border-white/20`}
+    className={`relative px-6 py-4 rounded-2xl w-full text-lg font-medium tracking-wide text-white
+      transition-all duration-200 border border-cyan-400/30 shadow-lg backdrop-blur
+      ${
+        coinbaseLinked
+          ? "bg-green-600/70 hover:bg-green-700"
+          : "bg-black/30 hover:bg-cyan-500/20 animate-pulse"
+      } active:scale-95`}
     onClick={() => setCoinbaseLinked(true)}
     disabled={coinbaseLinked}
   >
-    {coinbaseLinked ? "✅ Coinbase Linked" : "💰 Link Coinbase Wallet"}
+    {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
   </button>
 
   {/* Apple Pay */}
   <button
-    className={`relative px-5 py-4 rounded-2xl w-full text-white transition-all duration-200
-      ${applePaySynced ? "bg-green-600/70" : "bg-white/10 hover:bg-white/20"}
-      shadow-lg backdrop-blur-md border border-white/20`}
+    className={`relative px-6 py-4 rounded-2xl w-full text-lg font-medium tracking-wide text-white
+      transition-all duration-200 border border-cyan-400/30 shadow-lg backdrop-blur
+      ${
+        applePaySynced
+          ? "bg-green-600/70 hover:bg-green-700"
+          : "bg-black/30 hover:bg-cyan-500/20 animate-pulse"
+      } active:scale-95`}
     onClick={() => setApplePaySynced(true)}
     disabled={applePaySynced}
   >
@@ -197,10 +212,11 @@ and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set you
 
 {/* Error notice */}
 {error && (
-  <div className="text-red-400 font-semibold mt-2 animate-pulse">
+  <div className="text-red-400 font-semibold mt-2 animate-pulse text-center">
     {error}
   </div>
 )}
+
 
 
         {/* AI Companion */}
