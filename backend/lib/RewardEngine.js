@@ -5,30 +5,23 @@ const RewardEvent = require("../models/RewardEvent");
 
 const LEVEL_THRESHOLDS = [0, 20, 50, 90, 140];
 
-// Helper: Find user by walletId (case-insensitive)
+// 🔍 Helper: Find user by walletId (case-insensitive)
 async function findUserByWalletId(walletId) {
   await mongoose.connect(process.env.MONGODB_URI);
-
-  // Use case-insensitive regex to match regardless of case
   const walletRegex = new RegExp(`^${walletId}$`, 'i');
-
-  // Debug log to see what we're searching for
   console.log("Looking up user by walletId (case-insensitive):", walletId);
-
   return await User.findOne({ walletId: walletRegex });
 }
 
 function calcGoal(totalXP) {
   const nextIdx = LEVEL_THRESHOLDS.findIndex((xp) => xp > totalXP);
-  const xpGoal =
-    nextIdx === -1
-      ? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1] + 50
-      : LEVEL_THRESHOLDS[nextIdx];
+  const xpGoal = nextIdx === -1
+    ? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1] + 50
+    : LEVEL_THRESHOLDS[nextIdx];
   return { xpGoal, xpRemaining: Math.max(0, xpGoal - totalXP) };
 }
 
 async function processWorkout(userId, workoutData) {
-  // Always normalize userId (wallet address)
   const user = await findUserByWalletId(userId);
   if (!user) throw new Error("User not found");
 
@@ -43,6 +36,7 @@ async function processWorkout(userId, workoutData) {
   const within48h = last && Date.now() - last.getTime() < 48 * 3600 * 1000;
   const streak = sameDay ? user.streak : within48h ? (user.streak || 0) + 1 : 1;
 
+  // 🧠 Update user state
   user.xp = newXP;
   user.rewardPoints = (user.rewardPoints || 0) + Math.floor(xpGained / 2);
   user.evolutionLevel = newLevel;
@@ -50,18 +44,27 @@ async function processWorkout(userId, workoutData) {
   user.lastWorkout = now;
   await user.save();
 
+  // 💬 Normalize workoutText
+  const workoutText =
+    workoutData.originalText ||
+    workoutData.workoutText ||
+    "Workout logged";
+
+  // 📝 Log workout
   await Workout.create({
     userId: user.walletId,
+    workoutText,
     ...workoutData,
     xpGained,
     createdAt: now,
   });
 
+  // 🏆 Log reward event
   await RewardEvent.create({
     userId: user.walletId,
     eventType: "workout",
     details: {
-      workoutText: workoutData.originalText || workoutData.workoutText || "",
+      workoutText,
       xpGained,
       newLevel,
       streak,
@@ -74,14 +77,13 @@ async function processWorkout(userId, workoutData) {
     totalXP: newXP,
     newLevel,
     rewardPoints: user.rewardPoints,
-    streak,
+    updatedStreak: streak,
     xpGoal,
     xpRemaining,
   };
 }
 
 async function getUserStatus(userId) {
-  // Always normalize userId (wallet address)
   const user = await findUserByWalletId(userId);
   if (!user) return null;
 
