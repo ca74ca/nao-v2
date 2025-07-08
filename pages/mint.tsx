@@ -341,21 +341,25 @@ export default function MintPage() {
     setTimeout(() => setAppleSyncStatus(""), 2000);
   };
 
-  // --- BEGIN: NAO SMART CHAT ADDITION ---
-  const [threadId, setThreadId] = useState<string | null>(null);
-  useEffect(() => {
-    fetch("/api/thread", { method: "POST" })
-      .then((res) => res.json())
-      .then((data) => setThreadId(data.threadId))
-      .catch(() => setThreadId(null));
-  }, []);
- // Smart message handler for EchoAssistant
+ // --- BEGIN: NAO SMART CHAT ADDITION ---
+const [threadId, setThreadId] = useState<string | null>(null);
+
+useEffect(() => {
+  fetch("/api/thread", { method: "POST" })
+    .then((res) => res.json())
+    .then((data) => setThreadId(data.threadId))
+    .catch(() => setThreadId(null));
+}, []);
+
+// Smart message handler for EchoAssistant (handles all tool calls)
 const sendMessage = async (input: string) => {
   if (!threadId) return "NAO is initializing, please wait...";
-  // --- NEW: get walletId from localStorage ---
+
   const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
   const walletId = user.walletId;
+
   try {
+    /* 1️⃣ Send user message to OpenAI */
     const res = await fetch("/api/message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -364,15 +368,89 @@ const sendMessage = async (input: string) => {
         message: input,
         page: "mint",
         onboardingComplete: true,
-        walletId, // <-- ADDED: always send walletId!
+        walletId,
       }),
     });
     const data = await res.json();
-    if (data?.reply) {
-      return data.reply;
-    } else {
-      return "NAO is thinking...";
+
+    /* 2️⃣ If OpenAI asks for tool outputs, run them */
+    if (
+      data?.run?.status === "requires_action" &&
+      data?.run?.required_action?.submit_tool_outputs
+    ) {
+      const toolCalls = data.run.required_action.submit_tool_outputs.tool_calls;
+
+      const tool_outputs = await Promise.all(
+        toolCalls.map(async (tool: any) => {
+          const { name, arguments: argsJSON } = tool.function;
+          const args = JSON.parse(argsJSON);
+
+          let output: any = { error: "Unknown tool" };
+
+          if (name === "verifyWorkout") {
+            const workoutRes = await fetch("/api/verifyWorkout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(args),
+            });
+            output = await workoutRes.json();
+          }
+
+          if (name === "getRewardStatus") {
+            const rewardRes = await fetch(
+              `/api/getRewardStatus?wallet=${args.walletId || walletId}`
+            );
+            output = await rewardRes.json();
+          }
+
+          if (name === "get_user_history" || name === "getRecentWorkouts") {
+            const histRes = await fetch(`/api/history/${args.userId}`);
+            output = await histRes.json();
+          }
+
+          if (name === "generateGreeting") {
+            const greetRes = await fetch(
+              `/api/generateGreeting?walletId=${args.walletId || walletId}`
+            );
+            output = await greetRes.json();
+          }
+
+          if (name === "redeem") {
+            const redeemRes = await fetch("/api/redeem", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ walletId: args.walletId || walletId }),
+            });
+            output = await redeemRes.json();
+          }
+
+          return { tool_call_id: tool.id, output };
+        })
+      );
+
+      /* 3️⃣ Send outputs back to OpenAI */
+      await fetch("/api/submit-tool-output", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thread_id: threadId,
+          run_id: data.run.id,
+          tool_outputs,
+        }),
+      });
+
+      /* 4️⃣ Get the assistant’s follow-up reply */
+      const followUp = await fetch("/api/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ threadId }),
+      });
+      const followData = await followUp.json();
+      return followData.reply || "NAO is thinking...";
     }
+
+    /* 5️⃣ No tool call needed */
+    return data?.reply || "NAO is thinking...";
   } catch (err: any) {
     return "Network error: " + (err?.message || "Unknown error");
   }
