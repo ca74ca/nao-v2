@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Workout = require("../models/WorkoutLog"); // ✅ matches your model file
+const Workout = require("../models/Workout"); // ✅ Use correct model
 
 // GET /api/history/:userId?limit=5
 router.get("/history/:userId", async (req, res) => {
@@ -8,8 +8,8 @@ router.get("/history/:userId", async (req, res) => {
   const limit = parseInt(req.query.limit) || 5;
 
   try {
-    const logs = await Workout.find({ userId })
-      .sort({ createdAt: -1 })
+    const logs = await Workout.find({ userId: new RegExp(`^${userId}$`, "i") }) // ✅ Case-insensitive match on userId
+      .sort({ timestamp: -1 }) // ✅ use 'timestamp', not 'createdAt'
       .limit(limit)
       .lean();
 

@@ -56,7 +56,7 @@ async function processWorkout(userId, workoutData) {
     workoutText,
     ...workoutData,
     xpGained,
-    createdAt: now,
+    timestamp: now, // ✅ Corrected from createdAt
   });
 
   // 🏆 Log reward event
