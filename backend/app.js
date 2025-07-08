@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 
 const verifyWorkout   = require('./routes/verifyWorkout');
 const getRewardStatus = require('./routes/getRewardStatus');
-const historyRoute   = require('./routes/history');        // ✅ NEW LINE
+const historyRoute    = require('./routes/history');
+const dailyGreeting   = require('./routes/dailyGreeting'); // ✅ Move require here
 
 const app = express();
 app.use(express.json());
@@ -19,7 +20,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Register API routes
 app.use('/api', verifyWorkout);
 app.use('/api', getRewardStatus);
-+app.use('/api', historyRoute);                             // ✅ NEW LINE
+app.use('/api', historyRoute);
+app.use('/api', dailyGreeting); // ✅ Register outside of listen
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
