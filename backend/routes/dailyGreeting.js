@@ -2,7 +2,7 @@
 const express  = require("express");
 const router   = express.Router();
 const User     = require("../models/User");               // adjust path if different
-const { generateDailyMessage } = require("../utils/generateDailyMessage");
+const { generateDailyMessage } = require('../../utils/generateDailyMessage');
 const OpenAI   = require("openai").default;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
