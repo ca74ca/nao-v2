@@ -407,8 +407,8 @@ const sendMessage = async (input: string) => {
             // Use whatever ID the tool gives first; otherwise fall back to the walletId you already have
             const userId = args.userId || args.walletId || walletId;
 
-            // Call your existing backend route
-            const histRes = await fetch(`/api/history/${userId}`);
+            // Call your backend server directly
+            const histRes = await fetch(`https://nao-sdk-api.onrender.com/api/history/${userId}`);
             output = await histRes.json();
           }
 
