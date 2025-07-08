@@ -404,7 +404,7 @@ const sendMessage = async (input: string) => {
           }
 
           if (name === "get_user_history" || name === "getRecentWorkouts") {
-            const histRes = await fetch(`/api/history/${args.userId}`);
+const histRes = await fetch(`/api/history/${args.userId}`);
             output = await histRes.json();
           }
 
