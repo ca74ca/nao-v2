@@ -404,7 +404,11 @@ const sendMessage = async (input: string) => {
           }
 
           if (name === "get_user_history" || name === "getRecentWorkouts") {
-const histRes = await fetch(`/api/history/${args.userId}`);
+            // Use whatever ID the tool gives first; otherwise fall back to the walletId you already have
+            const userId = args.userId || args.walletId || walletId;
+
+            // Call your existing backend route
+            const histRes = await fetch(`/api/history/${userId}`);
             output = await histRes.json();
           }
 
@@ -439,7 +443,7 @@ const histRes = await fetch(`/api/history/${args.userId}`);
         }),
       });
 
-      /* 4️⃣ Get the assistant’s follow-up reply */
+      /* 4️⃣ Get the assistant's follow-up reply */
       const followUp = await fetch("/api/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
