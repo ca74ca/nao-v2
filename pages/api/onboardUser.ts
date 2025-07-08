@@ -1,7 +1,12 @@
+// pages/api/onboardUser.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-// 1. Import your MongoDB connect function
-import clientPromise from '../../lib/mongodb'; // or wherever your MongoDB util is
+import clientPromise from '../../lib/mongodb'; // adjust path if needed
 
+/**
+ * -------------------------------
+ *  Types
+ * -------------------------------
+ */
 type OnboardRequest = {
   username?: string;
   name?: string;
@@ -14,64 +19,78 @@ type BackendResponse = {
   status: 'success' | 'exists' | 'error';
   message: string;
   walletAddress?: string;
-  healthPassportNFT?: string;
   redirectUrl?: string;
   error?: string;
 };
 
-// Dummy function for wallet minting or retrieval
+/**
+ * -------------------------------
+ *  Stub: Mint or fetch a wallet
+ *  (replace with real logic)
+ * -------------------------------
+ */
 async function mintOrGetWalletAddress(email: string): Promise<string> {
-  // Replace this with your actual wallet minting logic.
-  // For now, it returns a dummy deterministic address per email.
-  // In production, integrate with your wallet service.
+  // ❗ Replace this with your real wallet-minting code.
+  // Deterministic dummy wallet for now:
   return `0x${Buffer.from(email).toString('hex').slice(0, 40)}`;
 }
 
+/**
+ * -------------------------------
+ *  Handler
+ * -------------------------------
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<BackendResponse>
 ) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ 
-      status: 'error',
-      message: 'Method Not Allowed' 
-    });
+    return res
+      .status(405)
+      .json({ status: 'error', message: 'Method Not Allowed' });
   }
 
+  // ------------------ Parse & validate ------------------
   const {
     username: rawUsername,
     name,
     email: rawEmail,
-    healthGoals = "General wellness",
-    connectWearables = false
+    healthGoals = 'General wellness',
+    connectWearables = false,
   } = req.body as OnboardRequest;
 
-  const username = rawUsername || name;
+  const username = (rawUsername || name)?.trim();
   const email = rawEmail?.toLowerCase().trim();
 
-  if (!username || !email || typeof connectWearables !== 'boolean') {
+  if (!username || !email) {
     return res.status(400).json({
       status: 'error',
-      message: 'Missing or invalid required fields'
+      message: 'Missing required fields: username and email',
     });
   }
 
   try {
-    // Debug log to verify API handler is hit
-    console.log("SUBMIT HANDLER FIRED!"); // <--- LOG ADDED HERE
-
-    // 2. Connect to Mongo
+    // ------------------ Connect to MongoDB ------------------
     const client = await clientPromise;
-    const db = client.db(); // or your db name
+    const db = client.db(); // default DB or change to your db name
     const users = db.collection('users');
 
-    // 3. Check if user exists
+    // ------------------ Check for existing user ------------------
     const existingUser = await users.findOne({ email });
+
+    // ========== EXISTING USER ==========
     if (existingUser) {
-      // If user exists, fetch their walletAddress if you store it
-      // For demo, mint/retrieve again (in production, fetch from DB)
-      const walletAddress = await mintOrGetWalletAddress(email);
+      let walletAddress: string | undefined = existingUser.walletId;
+
+      // If the user exists but has **no** wallet, mint and save one now
+      if (!walletAddress) {
+        walletAddress = await mintOrGetWalletAddress(email);
+        await users.updateOne(
+          { email },
+          { $set: { walletId: walletAddress } }
+        );
+      }
 
       return res.status(200).json({
         status: 'exists',
@@ -81,34 +100,37 @@ export default async function handler(
       });
     }
 
-    // 4. Insert new user
+    // ========== NEW USER ==========
+    // 1) Insert the new user (without wallet yet)
     const newUser = {
       username,
       email,
       healthGoals,
       connectWearables,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     await users.insertOne(newUser);
 
-    // 4.5 Mint or fetch wallet address for this user
+    // 2) Mint wallet & persist
     const walletAddress = await mintOrGetWalletAddress(email);
+    await users.updateOne(
+      { email },
+      { $set: { walletId: walletAddress } }
+    );
 
-    // 5. Respond with success, including walletAddress
+    // 3) Respond
     return res.status(200).json({
       status: 'success',
       message: 'User onboarded successfully',
       walletAddress,
       redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
     });
-
   } catch (error: any) {
-    console.error('Onboarding Error:', error);
-
+    console.error('[onboardUser Error]', error);
     return res.status(500).json({
       status: 'error',
       message: error.message || 'Internal Server Error',
-      redirectUrl: '/onboarding/error?code=500'
+      redirectUrl: '/onboarding/error?code=500',
     });
   }
 }
