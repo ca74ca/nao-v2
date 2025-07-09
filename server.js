@@ -9,6 +9,7 @@ const verifyRoutes        = require('./backend/routes/verifyWorkout');
 const rewardRoutes        = require('./backend/routes/getRewardStatus');
 const historyRoutes       = require('./backend/routes/history');
 const dailyGreetingRoutes = require('./backend/routes/dailyGreeting');
+const redeemRoutes        = require('./backend/routes/redeem');
 
 // ➕ NEW: dNFT route
 const dnftRoutes          = require('./routes/getDNFT');   // <— add this line
@@ -38,6 +39,7 @@ app.use('/api', verifyRoutes);
 app.use('/api', rewardRoutes);
 app.use('/api', historyRoutes);
 app.use('/api', dailyGreetingRoutes);
+app.use('/api', redeemRoutes);               // <— add redeem route
 app.use('/api', dnftRoutes);                 // <— add this line
 
 // ✅ Start server
