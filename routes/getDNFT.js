@@ -1,7 +1,7 @@
 // backend/routes/getDNFT.js
 const express = require("express");
 const router = express.Router();
-const db = require("../backend/db");           // same util you use in getRewardStatus
+const { connect } = require("../backend/db");           // same util you use in getRewardStatus
 const Workout = require("../backend/models/Workout");
 // ----- helper -----
 function calcTier(level) {
@@ -15,7 +15,7 @@ function calcTier(level) {
 router.get("/dnft/:walletId", async (req, res) => {
   try {
     const { walletId } = req.params;
-    const mongo = await db();
+    const mongo = await connect();
     const user = await mongo.collection("users")
       .findOne({ walletId: new RegExp(`^${walletId}$`, "i") });
 

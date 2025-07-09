@@ -13,7 +13,7 @@ router.post("/getRewardStatus", async (req, res) => {
       return res.status(400).json({ success: false, message: "Missing userId" });
     }
 
-    const mongo = await db(); // db() should return a connected MongoDB client
+    const mongo = await db.connect(); // db.connect() returns a connected MongoDB client
     const user = await mongo
       .collection("users")
       .findOne({ walletId: userId });
