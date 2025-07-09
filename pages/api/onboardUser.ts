@@ -100,31 +100,29 @@ export default async function handler(
       });
     }
 
-    // ========== NEW USER ==========
-    // 1) Insert the new user (without wallet yet)
-    const newUser = {
-      username,
-      email,
-      healthGoals,
-      connectWearables,
-      createdAt: new Date(),
-    };
-    await users.insertOne(newUser);
+   // ========== NEW USER ==========
+// 1) Mint wallet first
+const walletAddress = await mintOrGetWalletAddress(email);
 
-    // 2) Mint wallet & persist
-    const walletAddress = await mintOrGetWalletAddress(email);
-    await users.updateOne(
-      { email },
-      { $set: { walletId: walletAddress } }
-    );
+// 2) Insert the new user including walletId
+const newUser = {
+  username,
+  email,
+  healthGoals,
+  connectWearables,
+  walletId: walletAddress,
+  createdAt: new Date(),
+};
+await users.insertOne(newUser);
 
-    // 3) Respond
-    return res.status(200).json({
-      status: 'success',
-      message: 'User onboarded successfully',
-      walletAddress,
-      redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
-    });
+// 3) Respond
+return res.status(200).json({
+  status: 'success',
+  message: 'User onboarded successfully',
+  walletAddress,
+  redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
+});
+
   } catch (error: any) {
     console.error('[onboardUser Error]', error);
     return res.status(500).json({
