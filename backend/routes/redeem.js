@@ -19,7 +19,7 @@ if (!TREASURY_PRIVATE_KEY || !USDC_CONTRACT || !CHAIN_RPC_URL) {
 // ────────────────────────────────────────────────────────────────
 //  Signer & token contract
 // ────────────────────────────────────────────────────────────────
-const provider = new ethers.JsonRpcProvider(CHAIN_RPC_URL);
+const provider = new ethers.providers.JsonRpcProvider(CHAIN_RPC_URL); // ✅ correct for v5
 const signer   = new ethers.Wallet(TREASURY_PRIVATE_KEY, provider);
 
 const ERC20_ABI = ["function transfer(address to,uint256 amount) public returns(bool)",
