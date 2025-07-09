@@ -1,7 +1,7 @@
 // backend/routes/getDNFT.js
 const express = require("express");
 const router = express.Router();
-const db = require("../db");           // same util you use in getRewardStatus
+const db = require("../backend/db");           // same util you use in getRewardStatus
 const Workout = require("../models/Workout");
 
 // ----- helper -----

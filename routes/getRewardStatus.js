@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // Your existing MongoDB connection utility
+const db = require("../backend/db"); // Your existing MongoDB connection utility
 
 /* -----------------------------------------------------------
    POST /getRewardStatus
