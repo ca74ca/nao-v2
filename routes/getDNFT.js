@@ -2,8 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../backend/db");           // same util you use in getRewardStatus
-const Workout = require("../models/Workout");
-
+const Workout = require("../backend/models/Workout");
 // ----- helper -----
 function calcTier(level) {
   if (level >= 8) return "Mythic";
