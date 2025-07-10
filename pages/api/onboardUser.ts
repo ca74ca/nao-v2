@@ -1,6 +1,6 @@
-// pages/api/onboardUser.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../lib/mongodb'; // adjust path if needed
+import { sendConfirmationEmail as sendWelcomeEmail } from '../../utils/sendConfirmationEmail';
 
 /**
  * -------------------------------
@@ -100,28 +100,36 @@ export default async function handler(
       });
     }
 
-   // ========== NEW USER ==========
-// 1) Mint wallet first
-const walletAddress = await mintOrGetWalletAddress(email);
+    // ========== NEW USER ==========
 
-// 2) Insert the new user including walletId
-const newUser = {
-  username,
-  email,
-  healthGoals,
-  connectWearables,
-  walletId: walletAddress,
-  createdAt: new Date(),
-};
-await users.insertOne(newUser);
+    // 1) Mint wallet first
+    const walletAddress = await mintOrGetWalletAddress(email);
 
-// 3) Respond
-return res.status(200).json({
-  status: 'success',
-  message: 'User onboarded successfully',
-  walletAddress,
-  redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
-});
+    // 2) Insert the new user including walletId
+    const newUser = {
+      username,
+      email,
+      healthGoals,
+      connectWearables,
+      walletId: walletAddress,
+      createdAt: new Date(),
+    };
+    await users.insertOne(newUser);
+
+    // ✅ 3) Send welcome email (NEW LOGIC)
+    try {
+      await sendWelcomeEmail(username, email);
+    } catch (emailErr) {
+      console.error('❌ Failed to send welcome email:', emailErr);
+    }
+
+    // 4) Respond
+    return res.status(200).json({
+      status: 'success',
+      message: 'User onboarded successfully',
+      walletAddress,
+      redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
+    });
 
   } catch (error: any) {
     console.error('[onboardUser Error]', error);
