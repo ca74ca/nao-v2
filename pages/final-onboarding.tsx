@@ -102,16 +102,15 @@ export default function FinalOnboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-row relative">
-      {/* Video background */}
-      <video
-        className="fixed top-1/2 left-1/2 w-screen h-screen object-cover -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
-        src="/sign_u_sign_in_vidd_1.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-      />
+    <div 
+      className="min-h-screen bg-black text-white flex flex-row relative"
+      style={{
+        backgroundImage: "url('/log_in_panel_3.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      }}
+    >
 
       {/* LEFT: Sticky NAO model (hidden on mobile) */}
       <div className="hidden md:flex relative z-10 flex-shrink-0 w-[420px] flex-col items-center justify-center">
@@ -131,7 +130,7 @@ export default function FinalOnboarding() {
    {/* RIGHT: Onboarding content */}
 <div className="absolute top-24 right-16 w-[42%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[75vh] overflow-y-auto space-y-4">
   <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
-    Welcome to NAO: Your Health Intelligence Passport
+    Welcome to NAO: Your Health AI
   </h1>
   <p className="whitespace-pre-line">
     Welcome to NAO, the worlds first Health Intelligence Passport that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized
@@ -178,17 +177,20 @@ export default function FinalOnboarding() {
 
   {/* Coinbase Wallet */}
   <button
-    className={`
-      min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
-      backdrop-blur-md bg-white/5 border border-cyan-300/30
-      shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
-      transition-all duration-200 ease-out
-      ring-1 ring-inset ring-white/10
-      hover:ring-cyan-400/50 hover:shadow-[0_4px_35px_0_rgba(0,255,255,0.45)]
-      active:scale-95 active:shadow-[0_0_20px_0_rgba(0,255,255,0.6)]
-      disabled:bg-emerald-600/80 disabled:hover:shadow-none disabled:cursor-default
-      ${coinbaseLinked ? "text-white" : "text-cyan-100 animate-pulse"}
-    `}
+    style={{
+      minWidth: "280px",
+      padding: "14px 26px",
+      borderRadius: "9999px",
+      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
+      color: "white",
+      fontWeight: 600,
+      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
+      border: "none",
+      transition: "0.3s",
+      cursor: "pointer",
+      fontSize: "18px",
+      letterSpacing: "0.025em"
+    }}
     onClick={() => setCoinbaseLinked(true)}
     disabled={coinbaseLinked}
   >
@@ -197,17 +199,20 @@ export default function FinalOnboarding() {
 
   {/* Apple Pay */}
   <button
-    className={`
-      min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
-      backdrop-blur-md bg-white/5 border border-cyan-300/30
-      shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
-      transition-all duration-200 ease-out
-      ring-1 ring-inset ring-white/10
-      hover:ring-cyan-400/50 hover:shadow-[0_4px_35px_0_rgba(0,255,255,0.45)]
-      active:scale-95 active:shadow-[0_0_20px_0_rgba(0,255,255,0.6)]
-      disabled:bg-emerald-600/80 disabled:hover:shadow-none disabled:cursor-default
-      ${applePaySynced ? "text-white" : "text-cyan-100 animate-pulse"}
-    `}
+    style={{
+      minWidth: "280px",
+      padding: "14px 26px",
+      borderRadius: "9999px",
+      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
+      color: "white",
+      fontWeight: 600,
+      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
+      border: "none",
+      transition: "0.3s",
+      cursor: "pointer",
+      fontSize: "18px",
+      letterSpacing: "0.025em"
+    }}
     onClick={() => setApplePaySynced(true)}
     disabled={applePaySynced}
   >
