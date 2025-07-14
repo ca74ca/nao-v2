@@ -106,7 +106,7 @@ export default function FinalOnboarding() {
       className="min-h-screen bg-black text-white flex flex-row relative"
       style={{
         backgroundImage: "url('/log_in_panel_3.png')",
-        backgroundSize: "cover",
+        backgroundSize: "contain",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       }}
@@ -143,8 +143,8 @@ export default function FinalOnboarding() {
         )}
       </div>
 
-   {/* RIGHT: Onboarding content - Centered */}
-<div className="absolute top-1/2 right-16 w-[42%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[60vh] overflow-y-auto space-y-4 transform -translate-y-1/2">
+   {/* RIGHT: Onboarding content - Properly Centered */}
+<div className="absolute top-[50%] left-[50%] w-[45%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[65vh] overflow-y-auto space-y-4" style={{ transform: 'translate(-50%, -50%)' }}>
   <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
     Welcome to NAO: Your Health AI
   </h1>
