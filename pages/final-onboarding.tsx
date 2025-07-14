@@ -11,23 +11,17 @@ export default function FinalOnboarding() {
   const [coinbaseLinked, setCoinbaseLinked] = useState(false);
   const [applePaySynced, setApplePaySynced] = useState(false);
   const [allowContinue, setAllowContinue] = useState(false);
-
   const [loadingWearable, setLoadingWearable] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
 
-  // Pull user from localStorage and hydrate wallet context
   useEffect(() => {
-    const stored =
-      typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
-
+    const stored = typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
     if (stored) {
       try {
         const parsedUser = JSON.parse(stored);
         setUser(parsedUser);
         if (parsedUser.wallet) setWallet(parsedUser.wallet);
-      } catch (e) {
-        console.error("Failed to parse nao_user from localStorage:", e);
+      } catch {
         router.push("/");
       }
     } else {
@@ -35,45 +29,30 @@ export default function FinalOnboarding() {
     }
   }, [router, setWallet]);
 
-  // Check wearable status once we have a user
   useEffect(() => {
     const checkWearable = async () => {
       if (!user?.email) return;
-
       setLoadingWearable(true);
       try {
-        const res = await fetch(
-          `/api/getUser?email=${encodeURIComponent(user.email)}`
-        );
-        if (!res.ok) throw new Error("Could not fetch user status");
+        const res = await fetch(`/api/getUser?email=${encodeURIComponent(user.email)}`);
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        setWearableConnected(
-          Boolean(data?.whoopLinked || data?.appleHealthLinked)
-        );
-        setError(null);
-      } catch (e) {
-        setError("Could not check wearable status.");
+        setWearableConnected(Boolean(data?.whoopLinked || data?.appleHealthLinked));
+      } catch {
+        console.error("Could not check wearable status.");
       } finally {
         setLoadingWearable(false);
       }
     };
-
     checkWearable();
   }, [user]);
 
-  // Enable “Continue” only when all three syncs are complete
   useEffect(() => {
     setAllowContinue(wearableConnected && coinbaseLinked && applePaySynced);
   }, [wearableConnected, coinbaseLinked, applePaySynced]);
 
-  // Handlers
-  const handleWhoopConnect = () => {
-    window.location.href = "/api/whoop-auth";
-  };
-
   const handleAppleHealthLink = async () => {
     if (!user?.email) return;
-
     setLoadingWearable(true);
     try {
       const res = await fetch("https://nao-health-sync.onrender.com/api/link-apple", {
@@ -81,186 +60,96 @@ export default function FinalOnboarding() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
       });
-
       const data = await res.json();
-      if (data.status === "linked") {
-        setWearableConnected(true);
-        setError(null);
-      } else {
-        setError(data.error || "Apple Health link failed.");
-      }
-    } catch (err) {
-      console.error("Apple Health link error:", err);
-      setError("Error linking Apple Health.");
+      if (data.status === "linked") setWearableConnected(true);
+    } catch {
+      console.error("Error linking Apple Health.");
     } finally {
       setLoadingWearable(false);
     }
   };
 
-  const handleFinish = () => {
-    router.push("/mint");
-  };
-
   return (
-    <div 
-      className="min-h-screen bg-black text-white flex flex-row relative"
-      style={{
-        backgroundImage: "url('/log_in_panel_3.png')",
-        backgroundSize: "contain",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat"
-      }}
-    >
-
-      {/* LEFT: Sticky NAO model (hidden on mobile) */}
-      <div className="hidden md:flex relative z-10 flex-shrink-0 w-[420px] flex-col items-center justify-center">
-        <div className="sticky top-0 flex flex-col items-center w-full h-screen justify-center">
-          <div className="w-[320px] h-[480px] bg-gradient-to-b from-gray-800 to-gray-900 rounded-3xl shadow-2xl flex items-center justify-center border border-gray-700">
-            <span className="text-5xl font-bold text-cyan-400 tracking-tighter">
-              NAO
-            </span>
-          <div className="mt-8 text-center text-lg text-gray-300 px-4">
-            Meet your NAO model
-            <br />
-            Your Health AI
-          </div>
+    <div className="flex flex-col md:flex-row min-h-screen text-white">
+      {/* Left: Background + Model */}
+      <div
+        className="relative w-full md:w-1/2 h-[50vh] md:h-screen bg-cover bg-center"
+        style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
+      >
+        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
+          <h1 className="text-6xl font-extrabold text-cyan-400 tracking-widest drop-shadow-lg">NAO</h1>
+          <p className="mt-4 text-cyan-100 text-lg">Meet your NAO model</p>
+          <p className="text-cyan-100 text-base">Your Health AI</p>
         </div>
       </div>
 
-      {/* Continue Button - Top Right */}
-      <div className="absolute top-8 right-8 z-20">
-        <button
-          className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl text-white font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 transition-all duration-200"
-          disabled={!allowContinue}
-          onClick={handleFinish}
-        >
-          {allowContinue ? "Continue to Health Passport ✨" : "Complete Setup First"}
-        </button>
-        {!allowContinue && (
-          <p className="text-yellow-300 text-sm mt-2 text-center">
-            ⚠️ Complete all connections below
+      {/* Right: Onboarding */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center px-10 py-14 relative">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-6 text-cyan-300">Welcome to NAO: Your Health Passport</h2>
+          <p className="text-cyan-100 mb-8 leading-relaxed text-[15px]">
+            NAO evolves with your health progress, syncing your wearables and rewarding healthy habits. As you thrive, your NFT levels up and unlocks real rewards. Connect your systems below to continue.
           </p>
-        )}
-      </div>
 
-   {/* RIGHT: Onboarding content - Properly Centered */}
-<div className="absolute top-[50%] left-[50%] w-[45%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[65vh] overflow-y-auto space-y-4" style={{ transform: 'translate(-50%, -50%)' }}>
-  <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
-    Welcome to NAO: Your Health AI
-  </h1>
-  <p className="whitespace-pre-line">
-    Welcome to NAO, the worlds first Health Intelligence Passport that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized
-    guidance for your unique well-being journey and rewarding your efforts with real cash. Our advanced AI constantly analyzes your sleep, activity levels, and biomarkers (via Whoop/Apple Health),
-    delivering actionable insights. Whether it's suggesting optimal workout intensity, recommending recovery protocols like "Your workout recovery is 92%—ideal day for strength training," or nudging you 
-    with "Your stress levels spiked today—try 5 mins of breathwork now," NAO evolves with your progress. This dynamic learning ensures your fitness journey is always challenging, achievable, and truly yours.
+          <div className="flex flex-col gap-4">
+            <button
+              className={`rounded-2xl py-4 font-semibold text-white ${
+                wearableConnected ? "bg-green-500" : "bg-cyan-600"
+              } transition`}
+              onClick={handleAppleHealthLink}
+              disabled={loadingWearable || wearableConnected}
+            >
+              {loadingWearable
+                ? "🔄 Checking Apple Health..."
+                : wearableConnected
+                ? "✅ Apple Health Linked"
+                : "📲 Link Apple Health"}
+            </button>
 
-    Hit your health goals, and you'll earn $NAO – a USD-pegged stablecoin that's truly usable anywhere, just like cash! Spend your rewards instantly via Apple Pay or Mastercard at your favorite gym, grocery store, 
-    or even for that post-workout smoothie. As your health improves, so do your earning opportunities, with higher rewards for consistent progress and milestones.
+            <button
+              className={`rounded-2xl py-4 font-semibold ${
+                coinbaseLinked ? "bg-green-500" : "bg-gradient-to-r from-cyan-400 to-blue-600"
+              } text-white transition`}
+              onClick={() => setCoinbaseLinked(true)}
+              disabled={coinbaseLinked}
+            >
+              {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
+            </button>
 
-    Say goodbye to generic plans and embrace truly personalized wellness with rewards that grow with you. Your comprehensive health data becomes a secure, living NFT you own on the blockchain, 
-    empowering you with unparalleled control and privacy. This means seamless doctor visits by sharing a simple QR code, and robust security for all your health information. 
-
-    The $NAO stablecoin itself is designed for future-proof value: built on a robust blockchain framework, its stability and utility are continually enhanced through
-    community governance and potential algorithmic improvements, ensuring it remains a reliable, spendable asset as the Web3 ecosystem evolves. 
-
-    Ready to unlock a new era of proactive well-being where your fitness journey is uniquely yours, financially rewarding, and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set your first AI-driven goal, and link your card. Your first $1 reward is waiting – tap below to begin your healthier, wealthier journey.
-  </p>
-</div>
-{/* Sync Buttons — Glassmorphic Horizontal Layout */}
-<div className="w-full flex flex-wrap justify-center gap-8 mt-12 max-w-6xl mx-auto">
-  {/* Apple Health */}
-  <button
-    className={`
-      min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
-      backdrop-blur-md bg-white/5 border border-cyan-300/30
-      shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
-      transition-all duration-200 ease-out
-      ring-1 ring-inset ring-white/10
-      hover:ring-cyan-400/50 hover:shadow-[0_4px_35px_0_rgba(0,255,255,0.45)]
-      active:scale-95 active:shadow-[0_0_20px_0_rgba(0,255,255,0.6)]
-      disabled:bg-emerald-600/80 disabled:hover:shadow-none disabled:cursor-default
-      ${wearableConnected ? "text-white" : "text-cyan-100 animate-pulse"}
-    `}
-    onClick={handleAppleHealthLink}
-    disabled={loadingWearable || wearableConnected}
-  >
-    {loadingWearable
-      ? "🔄 Checking Apple Health..."
-      : wearableConnected
-      ? "✅ Apple Health Linked"
-      : "📲 Link Apple Health"}
-  </button>
-
-  {/* Coinbase Wallet */}
-  <button
-    style={{
-      minWidth: "280px",
-      padding: "14px 26px",
-      borderRadius: "9999px",
-      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
-      color: "white",
-      fontWeight: 600,
-      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
-      border: "none",
-      transition: "0.3s",
-      cursor: "pointer",
-      fontSize: "18px",
-      letterSpacing: "0.025em"
-    }}
-    onClick={() => setCoinbaseLinked(true)}
-    disabled={coinbaseLinked}
-  >
-    {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
-  </button>
-
-  {/* Apple Pay */}
-  <button
-    style={{
-      minWidth: "280px",
-      padding: "14px 26px",
-      borderRadius: "9999px",
-      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
-      color: "white",
-      fontWeight: 600,
-      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
-      border: "none",
-      transition: "0.3s",
-      cursor: "pointer",
-      fontSize: "18px",
-      letterSpacing: "0.025em"
-    }}
-    onClick={() => setApplePaySynced(true)}
-    disabled={applePaySynced}
-  >
-    {applePaySynced
-      ? "✅ Apple Pay Synced"
-      : "💳 Sync Apple Pay for Stablecoin Usage"}
-  </button>
-</div>
-
-
-
-
-        {/* AI Companion */}
-        <div className="w-full max-w-3xl mt-8">
-          <h2 className="text-xl mb-2 text-cyan-400 font-semibold">
-            NAO AI Companion
-          </h2>
-          <div className="border border-gray-600 rounded-2xl p-4">
-            <EchoAssistant prompt="Begin your intelligence by typing here." />
+            <button
+              className={`rounded-2xl py-4 font-semibold ${
+                applePaySynced ? "bg-green-500" : "bg-gradient-to-r from-cyan-400 to-blue-600"
+              } text-white transition`}
+              onClick={() => setApplePaySynced(true)}
+              disabled={applePaySynced}
+            >
+              {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay for Stablecoin Usage"}
+            </button>
           </div>
-        </div>
 
-        {/* Progress helper text */}
-        {allowContinue ? (
-          <p className="text-green-400 mt-4">
-            ✅ All systems go — you’re ready to mint your Health dNFT.
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-cyan-300 mb-2">NAO AI Companion</h3>
+            <div className="rounded-xl border border-cyan-400 p-4">
+              <EchoAssistant prompt="Begin your intelligence by typing here." />
+            </div>
+          </div>
+
+          <button
+            className={`w-full mt-10 py-4 rounded-xl font-bold text-lg transition ${
+              allowContinue
+                ? "bg-gradient-to-r from-cyan-400 to-green-400 text-black hover:scale-105"
+                : "bg-gray-700 text-gray-400 cursor-not-allowed"
+            }`}
+            disabled={!allowContinue}
+            onClick={() => router.push("/mint")}
+          >
+            {allowContinue ? "🚀 Continue to Your Health Passport" : "Complete Setup to Continue"}
+          </button>
+
+          <p className="mt-3 text-center text-sm text-cyan-400">
+            {allowContinue ? "✅ All systems go." : "⚠️ Finish setup to unlock your NFT."}
           </p>
-        ) : (
-          <p className="text-yellow-300 mt-4">
-            ⚠️ Please complete every connection above to continue.
-          </p>
-        )}
+        </div>
       </div>
     </div>
   );
