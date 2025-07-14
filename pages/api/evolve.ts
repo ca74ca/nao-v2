@@ -3,7 +3,13 @@ import { connectToDatabase } from '../../lib/db';
 import { ThirdwebSDK } from '@thirdweb-dev/sdk';
 import { ethers } from 'ethers';
 
-const sdk = ThirdwebSDK.fromPrivateKey(process.env.PRIVATE_KEY as string, 'polygon');
+const sdk = ThirdwebSDK.fromPrivateKey(
+  process.env.PRIVATE_KEY as string,
+  'polygon',
+  {
+    clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+  }
+);
 const contractAddress = process.env.NAO_NFT_CONTRACT_ADDRESS as string;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
