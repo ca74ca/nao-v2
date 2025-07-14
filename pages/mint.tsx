@@ -257,40 +257,26 @@ export default function MintPage() {
     return () => clearInterval(id);
   }, [user?.walletId]);
 
-  useEffect(() => {
-    if (!email) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    fetch(`/api/getUser?email=${encodeURIComponent(email)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [email]);
+ useEffect(() => {
+  const t = setInterval(() => setNow(new Date()), 1000);
+  return () => clearInterval(t);
+}, []);
 
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
+useEffect(() => {
+  fetchWeather().then(setWeather);
+}, [user]);
 
-  useEffect(() => {
-    fetchWeather().then(setWeather);
-  }, [user]);
+useEffect(() => {
+  async function fetchNft() {
+    if (!user?.tokenId) return setNftMeta(null);
+    setNftMeta(null);
+    const res = await fetch(`/api/nft-metadata?tokenId=${user.tokenId}`);
+    const data = await res.json();
+    setNftMeta(data);
+  }
+  fetchNft();
+}, [user?.tokenId]);
 
-  useEffect(() => {
-    async function fetchNft() {
-      if (!user?.tokenId) return setNftMeta(null);
-      setNftMeta(null);
-      const res = await fetch(`/api/nft-metadata?tokenId=${user.tokenId}`);
-      const data = await res.json();
-      setNftMeta(data);
-    }
-    fetchNft();
-  }, [user?.tokenId]);
 
   async function handleEvolve() {
     if (!user?.tokenId) return;
