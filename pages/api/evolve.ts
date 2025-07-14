@@ -3,11 +3,12 @@ import { connectToDatabase } from '../../lib/db';
 import { ThirdwebSDK } from '@thirdweb-dev/sdk';
 import { ethers } from 'ethers';
 
-const sdk = ThirdwebSDK.fromPrivateKey(process.env.ADMIN_PRIVATE_KEY as string, 'polygon'); // your chain
+const sdk = ThirdwebSDK.fromPrivateKey(process.env.PRIVATE_KEY as string, 'polygon');
 const contractAddress = process.env.NAO_NFT_CONTRACT_ADDRESS as string;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
   const { wallet, email } = req.body;
 
   if (!wallet || !email) {
@@ -24,22 +25,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const currentLevel = user.level || 1;
     const nextLevel = Math.min(currentLevel + 1, 5);
     const xp = user.xp || 0;
-    const nextXpGoal = 500; // Optional: Make this dynamic if you want per-level XP scaling
 
-    // Update MongoDB
     await users.updateOne(
       { email },
-      {
-        $set: {
-          level: nextLevel,
-          xp,
-        },
-      }
+      { $set: { level: nextLevel, xp } }
     );
 
-    // Update NFT metadata
     const contract = await sdk.getContract(contractAddress, 'nft');
-    const metadata = await contract.metadata.get();
 
     const traitMap: any = {
       1: 'Bronze',
@@ -49,9 +41,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       5: 'Mythic',
     };
     const newTrait = traitMap[nextLevel];
+    const tokenId = user.tokenId;
 
-    await contract.erc721.setTokenMetadata(user.tokenId, {
-      ...metadata,
+    if (!tokenId) {
+      return res.status(400).json({ error: 'User does not have an associated NFT tokenId' });
+    }
+
+    await contract.erc721.updateMetadata(tokenId, {
       name: `NAO Health Passport - Level ${nextLevel}`,
       description: `Your evolving Health NFT. Current Trait: ${newTrait}`,
       image: `https://naoverse.io/level_${nextLevel}_${newTrait.toLowerCase()}.png`,
@@ -62,7 +58,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
     });
 
-    // Respond with updated user
     const updatedUser = await users.findOne({ email });
     res.status(200).json({
       level: nextLevel,
