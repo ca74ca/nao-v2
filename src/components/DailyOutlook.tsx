@@ -21,6 +21,10 @@ type DailyOutlookProps = {
   workoutComplete?: boolean;
   xp?: number;
   xpGoal?: number;
+  // WHOOP integration props (for future use)
+  whoopData?: any;
+  whoopLoading?: boolean;
+  whoopError?: string | null;
 };
 
 const BLUE = "#2D9CFF";
