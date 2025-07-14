@@ -127,8 +127,24 @@ export default function FinalOnboarding() {
         </div>
       </div>
 
-   {/* RIGHT: Onboarding content */}
-<div className="absolute top-24 right-16 w-[42%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[75vh] overflow-y-auto space-y-4">
+      {/* Continue Button - Top Right */}
+      <div className="absolute top-8 right-8 z-20">
+        <button
+          className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-2xl text-white font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 transition-all duration-200"
+          disabled={!allowContinue}
+          onClick={handleFinish}
+        >
+          {allowContinue ? "Continue to Health Passport ✨" : "Complete Setup First"}
+        </button>
+        {!allowContinue && (
+          <p className="text-yellow-300 text-sm mt-2 text-center">
+            ⚠️ Complete all connections below
+          </p>
+        )}
+      </div>
+
+   {/* RIGHT: Onboarding content - Centered */}
+<div className="absolute top-1/2 right-16 w-[42%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[60vh] overflow-y-auto space-y-4 transform -translate-y-1/2">
   <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
     Welcome to NAO: Your Health AI
   </h1>
@@ -245,15 +261,6 @@ export default function FinalOnboarding() {
             ⚠️ Please complete every connection above to continue.
           </p>
         )}
-
-        {/* Continue button */}
-        <button
-className="mt-4 px-6 py-3 bg-cyan-500 hover:bg-cyan-600 rounded-2xl text-white font-semibold disabled:opacity-40 transition"
-          disabled={!allowContinue}
-          onClick={handleFinish}
-        >
-          Continue to Health Passport
-        </button>
       </div>
     </div>
   );
