@@ -213,21 +213,43 @@ export default function MintPage() {
       setLoading(false);
       return;
     }
-    // ... your existing user logic continues here
 
     try {
       const parsed = JSON.parse(storedUser);
       if (!parsed?.email) {
         setError("User not found. Please onboard again.");
         router.push("/");
+        setLoading(false);
+        return;
+      }
+
+      // If user data is incomplete (missing walletId), fetch from API
+      if (!parsed.walletId || !parsed.xp) {
+        const fetchCompleteUserData = async () => {
+          try {
+            const res = await fetch(`/api/getUser?email=${encodeURIComponent(parsed.email)}`);
+            if (!res.ok) throw new Error("Failed to fetch user data");
+            const completeUser = await res.json();
+            
+            // Update localStorage with complete user data
+            localStorage.setItem('nao_user', JSON.stringify(completeUser));
+            setUser(completeUser);
+            setLoading(false);
+          } catch (err) {
+            console.error("Error fetching complete user data:", err);
+            setUser(parsed); // Use incomplete data as fallback
+            setLoading(false);
+          }
+        };
+        fetchCompleteUserData();
       } else {
         setUser(parsed);
+        setLoading(false);
       }
     } catch (e) {
       console.error("Failed to parse stored user", e);
       setError("Invalid user data. Please re-onboard.");
       router.push("/");
-    } finally {
       setLoading(false);
     }
   }, [router]);
@@ -246,7 +268,10 @@ export default function MintPage() {
         const res = await fetch(`/api/getUser?wallet=${user.walletId.toLowerCase()}`);
         if (!res.ok) throw new Error("User refresh failed");
         const fresh = await res.json();
+        
+        // Update both state and localStorage with fresh data
         setUser(fresh);
+        localStorage.setItem('nao_user', JSON.stringify(fresh));
       } catch (err) {
         console.error("User refresh error:", err);
       }
