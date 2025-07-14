@@ -54,7 +54,9 @@ function EvolveMeterActionBar({
   xp: number,
   xpGoal: number
 }) {
-  const percent = Math.min(100, Math.round((xp / xpGoal) * 100));
+  const safeXpGoal = xpGoal && xpGoal > 0 ? xpGoal : 1;
+  const xpPct = Math.min(1, (xp || 0) / safeXpGoal);
+  const percent = Math.min(100, Math.round(xpPct * 100));
   return (
     <div style={{
       position: "fixed",
@@ -304,13 +306,35 @@ useEffect(() => {
 
 
   async function handleEvolve() {
-    if (!user?.tokenId) return;
+    if (!user?.walletId || !user?.email) return;
     setEvolving(true);
-    await fetch(`/api/evolve?tokenId=${user.tokenId}`, { method: "POST" });
-    const res = await fetch(`/api/nft-metadata?tokenId=${user.tokenId}`);
-    const data = await res.json();
-    setNftMeta(data);
-    setEvolving(false);
+
+    try {
+      const res = await fetch('/api/evolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: user.walletId,
+          email: user.email,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to evolve NFT');
+
+      const updatedUser = await res.json();
+      setUser(updatedUser);
+      localStorage.setItem('nao_user', JSON.stringify(updatedUser));
+
+      // Refresh the NFT metadata preview if needed
+      const nftRes = await fetch(`/api/nft-metadata?tokenId=${updatedUser.tokenId}`);
+      const nftData = await nftRes.json();
+      setNftMeta(nftData);
+    } catch (err) {
+      console.error('Evolve failed:', err);
+      alert('Could not evolve NFT at this time.');
+    } finally {
+      setEvolving(false);
+    }
   }
 
   const handleWhoopSync = () => {
@@ -1031,7 +1055,7 @@ const sendMessage = async (input: string) => {
                 <span style={{ color: BLUE, fontWeight: 800 }}>{passportData.xp}</span>
               </div>
             </div>
-            {/* Placeholder NFT Preview and Celebrate Button */}
+            {/* Live NFT Preview */}
             <div style={{
               marginTop: 28,
               marginBottom: 0,
@@ -1040,24 +1064,56 @@ const sendMessage = async (input: string) => {
               flexDirection: "column",
               alignItems: "center"
             }}>
-              <div style={{
-                width: 220,
-                height: 220,
-                background: "linear-gradient(145deg, #00fff9aa, #1267daa0)",
-                borderRadius: 20,
-                boxShadow: "0 0 20px #00fff9aa",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 20,
-                fontWeight: "bold",
-                color: "#fff",
-                textAlign: "center",
-                padding: 20,
-                marginBottom: 22
-              }}>
-                NFT Preview Coming Soon
-              </div>
+              {(() => {
+                const levelMap = {
+                  1: "bronze",
+                  2: "silver", 
+                  3: "gold",
+                  4: "platinum",
+                  5: "mythic",
+                };
+
+                const nextLevel = Math.min((currentLevel || 0) + 1, 5);
+                const nextTrait = levelMap[nextLevel];
+                const nextImagePath = `/level_${nextLevel}_${nextTrait}.png`;
+
+                return (
+                  <div
+                    style={{
+                      borderRadius: 20,
+                      background: "rgba(0,0,0,0.5)",
+                      padding: 24,
+                      textAlign: "center",
+                      color: "#00ffc8",
+                      boxShadow: "0 0 18px 6px #00ffc833",
+                      marginBottom: 20,
+                    }}
+                  >
+                    <h3 style={{ fontSize: 18, marginBottom: 12 }}>🔮 Next Evolution Preview</h3>
+
+                    <div style={{ marginBottom: 10, color: "#ccc", fontSize: 14 }}>
+                      Level {nextLevel} → <span style={{ color: "#00ffc8", fontWeight: 600 }}>{nextTrait?.toUpperCase()} Trait</span>
+                    </div>
+
+                    <img
+                      src={nextImagePath}
+                      alt={`Level ${nextLevel} ${nextTrait}`}
+                      style={{
+                        width: "100%",
+                        maxWidth: 220,
+                        margin: "0 auto",
+                        borderRadius: 16,
+                        border: "2px solid #00ffc8",
+                        boxShadow: "0 0 18px 4px #00ffc888",
+                      }}
+                    />
+
+                    <div style={{ marginTop: 12, fontSize: 13, color: "#999" }}>
+                      Preview: Your NFT evolves with your progress.
+                    </div>
+                  </div>
+                );
+              })()}
               <button
                 onClick={() => alert("🎉 Mint logic coming soon")}
                 style={{
