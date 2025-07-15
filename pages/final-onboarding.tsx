@@ -71,76 +71,55 @@ export default function FinalOnboarding() {
   const handleFinish = () => router.push("/mint");
 
   return (
-    <div className="relative w-full h-screen flex text-white bg-black">
-      {/* Sidebar */}
-      <div className="hidden md:flex w-[420px] flex-col bg-gradient-to-b from-gray-800 to-gray-900 border-r border-gray-700 p-10">
-        <h2 className="text-3xl font-bold text-cyan-400 mb-6">Welcome to NAO</h2>
-        <p className="text-sm leading-relaxed text-gray-300">
-          Welcome to NAO, the Health Intelligence Passport that pays you to live healthier!
-          <br /><br />
-          NAO is truly YOUR personal AI health assistant, designed to understand your unique body and goals. It's constantly learning from your progress, adapting to your needs, and providing hyper-personalized guidance for every step of your well-being journey.
-          <br /><br />
-          NAO doesn't just track your activity; it handles all your workouts, ensuring optimal intensity and progress. More importantly, it masterfully guides your recovery, delivering insights like "Your workout recovery is 92%—ideal day for strength training," or "Your stress levels spiked today—try 5 mins of breathwork now."
-          <br /><br />
-          As you hit your health goals, you'll earn $NAO – a USD-pegged stablecoin that’s incredibly versatile. Spend your rewards instantly via Apple Pay or Mastercard at your favorite local spots, or unlock global possibilities by redeeming $NAO with vendors worldwide through crypto and other exciting reward options.
-        </p>
-      </div>
-
-      {/* Main content with background */}
+    <div className="relative w-full h-screen bg-black text-white">
       <div className="relative flex-1">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
         />
-        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-12">
-          <div className="w-full max-w-3xl mb-12">
-            <h2 className="text-xl text-cyan-400 font-semibold mb-4">NAO AI Companion</h2>
-            <div className="border border-cyan-400/50 rounded-2xl p-4 bg-black/60 shadow-lg">
-              <EchoAssistant prompt="Begin your intelligence by typing here." />
-            </div>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full">
+          <h2 className="text-xl text-cyan-400 font-semibold mb-4">NAO AI Companion</h2>
+          <div className="border border-cyan-400/50 rounded-2xl p-4 bg-black/60 shadow-lg w-full max-w-3xl mb-12">
+            <EchoAssistant prompt="Begin your intelligence by typing here." />
           </div>
 
-          <div className="flex flex-col md:flex-row justify-center gap-6 items-center w-full max-w-4xl">
-            <button
-              className="min-w-[280px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-[0_0_20px_rgba(0,255,255,0.5)] transition hover:scale-105"
-              onClick={handleAppleHealthLink}
-              disabled={loadingWearable || wearableConnected}
-            >
-              {loadingWearable
-                ? "🔄 Checking Apple Health..."
-                : wearableConnected
-                ? "✅ Apple Health Linked"
-                : "📲 Link Apple Health"}
-            </button>
+          <button
+            onClick={handleAppleHealthLink}
+            disabled={loadingWearable || wearableConnected}
+            className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
+          >
+            {loadingWearable
+              ? "🔄 Checking Apple Health..."
+              : wearableConnected
+              ? "✅ Apple Health Linked"
+              : "📲 Link Apple Health"}
+          </button>
 
-            <button
-              className="min-w-[280px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-[0_0_20px_rgba(0,255,255,0.5)] transition hover:scale-105"
-              onClick={() => setCoinbaseLinked(true)}
-              disabled={coinbaseLinked}
-            >
-              {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
-            </button>
+          <button
+            onClick={() => setCoinbaseLinked(true)}
+            disabled={coinbaseLinked}
+            className="mt-6 px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
+          >
+            {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
+          </button>
 
-            <button
-              className="min-w-[280px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-[0_0_20px_rgba(0,255,255,0.5)] transition hover:scale-105"
-              onClick={() => setApplePaySynced(true)}
-              disabled={applePaySynced}
-            >
-              {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay for Stablecoin Usage"}
-            </button>
-          </div>
+          <button
+            onClick={() => setApplePaySynced(true)}
+            disabled={applePaySynced}
+            className="mt-6 px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
+          >
+            {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay"}
+          </button>
 
           {allowContinue && (
-            <div className="mt-10">
-              <button
-                className="px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105 transition"
-                onClick={handleFinish}
-              >
-                🚀 Mint My Health Passport
-              </button>
-            </div>
+            <button
+              onClick={handleFinish}
+              className="mt-10 px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:scale-105 transition"
+            >
+              🚀 Mint My Health Passport
+            </button>
           )}
         </div>
       </div>
