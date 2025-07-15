@@ -72,7 +72,7 @@ export default function FinalOnboarding() {
 
   return (
     <div className="relative w-full h-screen flex text-white">
-      {/* Sidebar with Description */}
+      {/* Sidebar */}
       <div className="hidden md:flex w-[420px] flex-col bg-gradient-to-b from-gray-800 to-gray-900 border-r border-gray-700 p-10">
         <h2 className="text-3xl font-bold text-cyan-400 mb-6">Welcome to NAO</h2>
         <p className="text-sm leading-relaxed text-gray-300">
@@ -83,21 +83,17 @@ export default function FinalOnboarding() {
           NAO doesn't just track your activity; it handles all your workouts, ensuring optimal intensity and progress. More importantly, it masterfully guides your recovery, delivering insights like "Your workout recovery is 92%—ideal day for strength training," or "Your stress levels spiked today—try 5 mins of breathwork now."
           <br /><br />
           As you hit your health goals, you'll earn $NAO – a USD-pegged stablecoin that’s incredibly versatile. Spend your rewards instantly via Apple Pay or Mastercard at your favorite local spots, or unlock global possibilities by redeeming $NAO with vendors worldwide through crypto and other exciting reward options.
-          <br /><br />
-          Say goodbye to generic plans and embrace personalized wellness with rewards that grow with you, opening up a world of possibilities.
         </p>
       </div>
 
-      {/* Right Side with Background, AI Chat, Buttons */}
+      {/* Main content with background */}
       <div className="relative flex-1">
-        {/* Background */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
         />
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
 
-        {/* Foreground Content */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-12">
           <div className="w-full max-w-3xl mb-12">
             <h2 className="text-xl text-cyan-400 font-semibold mb-4">NAO AI Companion</h2>
