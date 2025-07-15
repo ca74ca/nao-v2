@@ -30,23 +30,6 @@ export default function FinalOnboarding() {
   }, [router, setWallet]);
 
   useEffect(() => {
-    const checkWearable = async () => {
-      if (!user?.email) return;
-      setLoadingWearable(true);
-      try {
-        const res = await fetch(`/api/getUser?email=${encodeURIComponent(user.email)}`);
-        const data = await res.json();
-        setWearableConnected(Boolean(data?.whoopLinked || data?.appleHealthLinked));
-      } catch {
-        console.error("Wearable check failed");
-      } finally {
-        setLoadingWearable(false);
-      }
-    };
-    checkWearable();
-  }, [user]);
-
-  useEffect(() => {
     setAllowContinue(wearableConnected && coinbaseLinked && applePaySynced);
   }, [wearableConnected, coinbaseLinked, applePaySynced]);
 
@@ -72,23 +55,25 @@ export default function FinalOnboarding() {
 
   return (
     <div className="relative w-full h-screen bg-black text-white">
-      <div className="relative flex-1">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
-        />
-        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
+      />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full space-y-8 px-6">
+        <div className="w-full max-w-3xl">
           <h2 className="text-xl text-cyan-400 font-semibold mb-4">NAO AI Companion</h2>
-          <div className="border border-cyan-400/50 rounded-2xl p-4 bg-black/60 shadow-lg w-full max-w-3xl mb-12">
+          <div className="border border-cyan-400/50 rounded-2xl p-4 bg-black/60 shadow-lg">
             <EchoAssistant prompt="Begin your intelligence by typing here." />
           </div>
+        </div>
 
+        <div className="flex flex-col items-center space-y-6">
           <button
+            className="w-[300px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-lg font-semibold shadow-[0_0_30px_rgba(0,255,255,0.8)] hover:shadow-[0_0_40px_rgba(0,255,255,1)] transition-all"
             onClick={handleAppleHealthLink}
             disabled={loadingWearable || wearableConnected}
-            className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
           >
             {loadingWearable
               ? "🔄 Checking Apple Health..."
@@ -98,30 +83,30 @@ export default function FinalOnboarding() {
           </button>
 
           <button
+            className="w-[300px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-lg font-semibold shadow-[0_0_30px_rgba(0,255,255,0.8)] hover:shadow-[0_0_40px_rgba(0,255,255,1)] transition-all"
             onClick={() => setCoinbaseLinked(true)}
             disabled={coinbaseLinked}
-            className="mt-6 px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
           >
             {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
           </button>
 
           <button
+            className="w-[300px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-lg font-semibold shadow-[0_0_30px_rgba(0,255,255,0.8)] hover:shadow-[0_0_40px_rgba(0,255,255,1)] transition-all"
             onClick={() => setApplePaySynced(true)}
             disabled={applePaySynced}
-            className="mt-6 px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
           >
             {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay"}
           </button>
-
-          {allowContinue && (
-            <button
-              onClick={handleFinish}
-              className="mt-10 px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:scale-105 transition"
-            >
-              🚀 Mint My Health Passport
-            </button>
-          )}
         </div>
+
+        {allowContinue && (
+          <button
+            className="mt-10 w-[300px] px-10 py-5 rounded-full text-xl font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-[0_0_30px_rgba(0,255,0,0.8)] hover:shadow-[0_0_40px_rgba(0,255,0,1)] transition-all"
+            onClick={handleFinish}
+          >
+            🚀 Mint My Health Passport
+          </button>
+        )}
       </div>
     </div>
   );
