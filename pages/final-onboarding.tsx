@@ -76,7 +76,7 @@ export default function FinalOnboarding() {
     <div className="min-h-screen bg-black text-white flex flex-row relative"
       style={{
         backgroundImage: "url('/log_in_panel_3.png')",
-        backgroundSize: "contain",
+        backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
@@ -95,36 +95,23 @@ export default function FinalOnboarding() {
       {/* Fixed Finish Button Bottom Left */}
       <div className="absolute bottom-8 left-8 z-20">
         <button
-          className={`px-10 py-4 rounded-full text-lg font-bold ${
-            allowContinue
-              ? "bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:scale-105 transition"
-              : "bg-gray-700 text-gray-400 cursor-not-allowed"
-          }`}
+          className="px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:scale-105 transition"
           onClick={handleFinish}
-          disabled={!allowContinue}
         >
-          {allowContinue ? "🚀 Mint My Health Passport" : "⚠️ Finish setup to continue"}
+          🚀 Mint My Health Passport
         </button>
       </div>
 
-      <div className="absolute top-24 right-12 w-[45%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[65vh] overflow-y-auto space-y-4">
-  <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
-    Welcome to NAO: Your Health AI
-  </h1>
-
-        <p className="whitespace-pre-line">
-          Welcome to NAO, the worlds first Health AI that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized
-          guidance for your unique well-being journey and rewarding your efforts with real cash & real rewards. Hit your health goals, and you'll earn $NAO – a USD-pegged stablecoin that's truly usable anywhere, just like cash! Spend your rewards instantly via Apple Pay or Mastercard at your favorite gym, grocery store, 
-          or even for that post-workout smoothie. As your health improves, so do your earning opportunities, with higher rewards for consistent progress and milestones.
-
-          Say goodbye to generic plans and embrace truly personalized wellness with rewards that grow with you. Your comprehensive health data becomes a secure, living NFT you own on the blockchain, 
-          empowering you with unparalleled control and privacy.  
-
-          The $NAO stablecoin itself is designed for future-proof value: built on a robust blockchain framework, its stability and utility are continually enhanced through
-          community governance and potential algorithmic improvements, ensuring it remains a reliable, spendable asset as the Web3 ecosystem evolves. 
-
-          Ready to unlock a new era of proactive well-being where your fitness journey is uniquely yours, financially rewarding, and constantly improving? Just sync Apple Health or Whoop in 60 seconds, set your first AI-driven goal, and link your card. Your first $1 reward is waiting – tap below to begin your healthier, wealthier journey.
-        </p>
+      {/* AI Companion */}
+      <div className="absolute top-1/2 right-12 w-[45%] z-10 transform -translate-y-1/2">
+        <div className="w-full max-w-3xl">
+          <h2 className="text-xl mb-2 text-cyan-400 font-semibold">
+            NAO AI Companion
+          </h2>
+          <div className="border border-gray-600 rounded-2xl p-4 backdrop-blur-md bg-black/40">
+            <EchoAssistant prompt="Begin your intelligence by typing here." />
+          </div>
+        </div>
       </div>
 
 <div className="flex flex-col items-start gap-6 mt-16 ml-10">
