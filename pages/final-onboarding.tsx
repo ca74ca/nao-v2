@@ -1,4 +1,3 @@
-// ... [your existing imports stay the same]
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import EchoAssistant from "@/components/EchoAssistant";
@@ -16,8 +15,7 @@ export default function FinalOnboarding() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const stored =
-      typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
+    const stored = typeof window !== "undefined" ? localStorage.getItem("nao_user") : null;
     if (stored) {
       try {
         const parsedUser = JSON.parse(stored);
@@ -73,110 +71,69 @@ export default function FinalOnboarding() {
   const handleFinish = () => router.push("/mint");
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-row relative"
-      style={{
-        backgroundImage: "url('/log_in_panel_3.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="hidden md:flex relative z-10 flex-shrink-0 w-[420px] flex-col items-center justify-center">
-        <div className="sticky top-0 flex flex-col items-center w-full h-screen justify-center">
-          <div className="w-[320px] h-[480px] bg-gradient-to-b from-gray-800 to-gray-900 rounded-3xl shadow-2xl flex items-center justify-center border border-gray-700">
-            <span className="text-5xl font-bold text-cyan-400 tracking-tighter">NAO</span>
-            <div className="mt-8 text-center text-lg text-gray-300 px-4">
-              Meet your NAO model <br /> Your Health AI
-            </div>
-          </div>
-        </div>
+    <div className="relative w-full h-screen bg-black overflow-hidden">
+      {/* ✅ Background - fixed, no stretch */}
+      <div className="absolute inset-0 bg-black">
+        <div
+          className="absolute inset-0 bg-center bg-no-repeat bg-contain"
+          style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
+        />
       </div>
 
-      {/* Fixed Finish Button Bottom Left */}
-      <div className="absolute bottom-8 left-8 z-20">
-        <button
-          className="px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:scale-105 transition"
-          onClick={handleFinish}
-        >
-          🚀 Mint My Health Passport
-        </button>
-      </div>
-
-      {/* AI Companion */}
-      <div className="absolute top-1/2 right-12 w-[45%] z-10 transform -translate-y-1/2">
-        <div className="w-full max-w-3xl">
-          <h2 className="text-xl mb-2 text-cyan-400 font-semibold">
-            NAO AI Companion
-          </h2>
-          <div className="border border-gray-600 rounded-2xl p-4 backdrop-blur-md bg-black/40">
+      {/* ✅ Foreground Content */}
+      <div className="relative z-10 w-full h-full flex flex-col justify-center items-center p-8">
+        {/* AI Assistant Box */}
+        <div className="w-full max-w-3xl mb-12">
+          <h2 className="text-xl text-cyan-400 font-semibold mb-2">NAO AI Companion</h2>
+          <div className="border border-cyan-400/50 rounded-2xl p-4 backdrop-blur-md bg-black/50 shadow-lg">
             <EchoAssistant prompt="Begin your intelligence by typing here." />
           </div>
         </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
+          <button
+            className={`px-8 py-4 rounded-full text-lg font-semibold tracking-wide text-white transition-all duration-200 ease-out shadow-lg
+              ${wearableConnected ? "bg-green-600 hover:bg-green-700" : "bg-cyan-700/40 hover:bg-cyan-700 animate-pulse"}`}
+            onClick={handleAppleHealthLink}
+            disabled={loadingWearable || wearableConnected}
+          >
+            {loadingWearable
+              ? "🔄 Checking Apple Health..."
+              : wearableConnected
+              ? "✅ Apple Health Linked"
+              : "📲 Link Apple Health"}
+          </button>
+
+          <button
+            className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
+            onClick={() => setCoinbaseLinked(true)}
+            disabled={coinbaseLinked}
+          >
+            {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
+          </button>
+
+          <button
+            className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
+            onClick={() => setApplePaySynced(true)}
+            disabled={applePaySynced}
+          >
+            {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay for Stablecoin Usage"}
+          </button>
+        </div>
+
+        {/* Final Mint Button */}
+        {allowContinue && (
+          <div className="absolute bottom-8 left-8">
+            <button
+              className="px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:scale-105 transition"
+              onClick={handleFinish}
+            >
+              🚀 Mint My Health Passport
+            </button>
+          </div>
+        )}
       </div>
-
-<div className="flex flex-col items-start gap-6 mt-16 ml-10">
-        <button
-          className={`min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
-            backdrop-blur-md bg-white/5 border border-cyan-300/30 shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
-            transition-all duration-200 ease-out ring-1 ring-inset ring-white/10
-            hover:ring-cyan-400/50 hover:shadow-[0_4px_35px_0_rgba(0,255,255,0.45)]
-            active:scale-95 active:shadow-[0_0_20px_0_rgba(0,255,255,0.6)]
-            ${wearableConnected ? "text-white" : "text-cyan-100 animate-pulse"}`}
-          onClick={handleAppleHealthLink}
-          disabled={loadingWearable || wearableConnected}
-        >
-          {loadingWearable
-            ? "🔄 Checking Apple Health..."
-            : wearableConnected
-            ? "✅ Apple Health Linked"
-            : "📲 Link Apple Health"}
-        </button>
-
-       <div className="flex flex-col items-end gap-6 w-[45%] mx-auto mt-12 pr-4">
-  <button
-    style={{
-      minWidth: "280px",
-      padding: "14px 26px",
-      borderRadius: "9999px",
-      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
-      color: "white",
-      fontWeight: 600,
-      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
-      border: "none",
-      transition: "0.3s",
-      cursor: "pointer",
-      fontSize: "18px",
-      letterSpacing: "0.025em",
-    }}
-    onClick={() => setCoinbaseLinked(true)}
-    disabled={coinbaseLinked}
-  >
-    {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
-  </button>
-
-  <button
-    style={{
-      minWidth: "280px",
-      padding: "14px 26px",
-      borderRadius: "9999px",
-      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
-      color: "white",
-      fontWeight: 600,
-      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
-      border: "none",
-      transition: "0.3s",
-      cursor: "pointer",
-      fontSize: "18px",
-      letterSpacing: "0.025em",
-    }}
-    onClick={() => setApplePaySynced(true)}
-    disabled={applePaySynced}
-  >
-    {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay for Stablecoin Usage"}
-  </button>
-</div>
-
-</div>
     </div>
   );
 }
