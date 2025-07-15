@@ -113,16 +113,12 @@ export default function FinalOnboarding() {
   </h1>
 
         <p className="whitespace-pre-line">
-          Welcome to NAO, the worlds first Health Intelligence Passport that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized
-          guidance for your unique well-being journey and rewarding your efforts with real cash. Our advanced AI constantly analyzes your sleep, activity levels, and biomarkers (via Whoop/Apple Health),
-          delivering actionable insights. Whether it's suggesting optimal workout intensity, recommending recovery protocols like "Your workout recovery is 92%—ideal day for strength training," or nudging you 
-          with "Your stress levels spiked today—try 5 mins of breathwork now," NAO evolves with your progress. This dynamic learning ensures your fitness journey is always challenging, achievable, and truly yours.
-
-          Hit your health goals, and you'll earn $NAO – a USD-pegged stablecoin that's truly usable anywhere, just like cash! Spend your rewards instantly via Apple Pay or Mastercard at your favorite gym, grocery store, 
+          Welcome to NAO, the worlds first Health AI that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized
+          guidance for your unique well-being journey and rewarding your efforts with real cash & real rewards. Hit your health goals, and you'll earn $NAO – a USD-pegged stablecoin that's truly usable anywhere, just like cash! Spend your rewards instantly via Apple Pay or Mastercard at your favorite gym, grocery store, 
           or even for that post-workout smoothie. As your health improves, so do your earning opportunities, with higher rewards for consistent progress and milestones.
 
           Say goodbye to generic plans and embrace truly personalized wellness with rewards that grow with you. Your comprehensive health data becomes a secure, living NFT you own on the blockchain, 
-          empowering you with unparalleled control and privacy. This means seamless doctor visits by sharing a simple QR code, and robust security for all your health information. 
+          empowering you with unparalleled control and privacy.  
 
           The $NAO stablecoin itself is designed for future-proof value: built on a robust blockchain framework, its stability and utility are continually enhanced through
           community governance and potential algorithmic improvements, ensuring it remains a reliable, spendable asset as the Web3 ecosystem evolves. 
@@ -149,55 +145,51 @@ export default function FinalOnboarding() {
             : "📲 Link Apple Health"}
         </button>
 
-        <button
-          style={{
-            minWidth: "280px",
-            padding: "14px 26px",
-            borderRadius: "9999px",
-            background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
-            color: "white",
-            fontWeight: 600,
-            boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
-            border: "none",
-            transition: "0.3s",
-            cursor: "pointer",
-            fontSize: "18px",
-            letterSpacing: "0.025em"
-          }}
-          onClick={() => setCoinbaseLinked(true)}
-          disabled={coinbaseLinked}
-        >
-          {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
-        </button>
+       <div className="flex flex-col items-end gap-6 w-[45%] mx-auto mt-12 pr-4">
+  <button
+    style={{
+      minWidth: "280px",
+      padding: "14px 26px",
+      borderRadius: "9999px",
+      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
+      color: "white",
+      fontWeight: 600,
+      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
+      border: "none",
+      transition: "0.3s",
+      cursor: "pointer",
+      fontSize: "18px",
+      letterSpacing: "0.025em",
+    }}
+    onClick={() => setCoinbaseLinked(true)}
+    disabled={coinbaseLinked}
+  >
+    {coinbaseLinked ? "✅ Coinbase Wallet Linked" : "💰 Link Coinbase Wallet"}
+  </button>
 
-        <button
-          style={{
-            minWidth: "280px",
-            padding: "14px 26px",
-            borderRadius: "9999px",
-            background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
-            color: "white",
-            fontWeight: 600,
-            boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
-            border: "none",
-            transition: "0.3s",
-            cursor: "pointer",
-            fontSize: "18px",
-            letterSpacing: "0.025em"
-          }}
-          onClick={() => setApplePaySynced(true)}
-          disabled={applePaySynced}
-        >
-          {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay for Stablecoin Usage"}
-        </button>
-      </div>
+  <button
+    style={{
+      minWidth: "280px",
+      padding: "14px 26px",
+      borderRadius: "9999px",
+      background: "linear-gradient(90deg, #00ffc8, #2D9CFF)",
+      color: "white",
+      fontWeight: 600,
+      boxShadow: "0 0 12px #00ffc8, 0 0 4px #2D9CFF",
+      border: "none",
+      transition: "0.3s",
+      cursor: "pointer",
+      fontSize: "18px",
+      letterSpacing: "0.025em",
+    }}
+    onClick={() => setApplePaySynced(true)}
+    disabled={applePaySynced}
+  >
+    {applePaySynced ? "✅ Apple Pay Synced" : "💳 Sync Apple Pay for Stablecoin Usage"}
+  </button>
+</div>
 
-      <div className="w-full max-w-3xl mt-8 mx-auto">
-        <h2 className="text-xl mb-2 text-cyan-400 font-semibold">NAO AI Companion</h2>
-        <div className="border border-gray-600 rounded-2xl p-4">
-          <EchoAssistant prompt="Begin your intelligence by typing here." />
-        </div>
-      </div>
+</div>
     </div>
   );
 }
