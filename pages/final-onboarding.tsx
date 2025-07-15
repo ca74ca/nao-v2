@@ -71,7 +71,7 @@ export default function FinalOnboarding() {
   const handleFinish = () => router.push("/mint");
 
   return (
-    <div className="relative w-full h-screen flex text-white">
+    <div className="relative w-full h-screen flex text-white bg-black">
       {/* Sidebar */}
       <div className="hidden md:flex w-[420px] flex-col bg-gradient-to-b from-gray-800 to-gray-900 border-r border-gray-700 p-10">
         <h2 className="text-3xl font-bold text-cyan-400 mb-6">Welcome to NAO</h2>
@@ -92,7 +92,7 @@ export default function FinalOnboarding() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
         />
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-black/20"></div>
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full px-12">
           <div className="w-full max-w-3xl mb-12">
