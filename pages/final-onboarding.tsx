@@ -7,16 +7,18 @@ export default function FinalOnboarding() {
   const handleContinue = () => router.push("/mint");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-black text-white px-8 space-y-12">
-
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-black text-white font-roboto px-8 space-y-12">
+      
       <div className="max-w-3xl text-center space-y-8">
-        <h1 className="text-5xl font-bold text-cyan-400 drop-shadow-[0_0_20px_rgba(0,255,255,0.8)]">Welcome to NAO</h1>
+        <h1 className="text-5xl font-bold text-cyan-400 drop-shadow-[0_0_20px_rgba(0,255,255,0.8)]">
+          Welcome to NAO
+        </h1>
 
         <p className="text-lg leading-relaxed text-gray-300 drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
           NAO is your AI-powered health companion that pays you to thrive. Smarter habits, real money.
         </p>
 
-        <div className="text-center space-y-6">
+        <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-cyan-400 drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">How NAO Works:</h2>
           <ul className="list-none space-y-3 text-lg text-gray-300 drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
             <li><span className="font-bold text-white">AI-Driven Health Tracking:</span> NAO learns from your habits, workouts, and recovery — no wearables required.</li>
@@ -39,7 +41,9 @@ export default function FinalOnboarding() {
       </div>
 
       <div className="w-full max-w-3xl">
-        <h2 className="text-center text-2xl font-semibold text-cyan-400 mb-4 drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">NAO AI Companion</h2>
+        <h2 className="text-center text-2xl font-semibold text-cyan-400 mb-4 drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">
+          NAO AI Companion
+        </h2>
         <div className="border border-cyan-400/50 rounded-2xl p-4 bg-black/60 shadow-lg">
           <EchoAssistant prompt="Begin your intelligence by typing here." />
         </div>
