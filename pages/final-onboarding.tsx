@@ -71,18 +71,28 @@ export default function FinalOnboarding() {
   const handleFinish = () => router.push("/mint");
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* ✅ Background - fixed, no stretch */}
-      <div className="absolute inset-0 bg-black">
-        <div
-          className="absolute inset-0 bg-center bg-no-repeat bg-contain"
-          style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
-        />
+    <div className="relative min-h-screen bg-black text-white flex flex-row overflow-hidden">
+      <div className="hidden md:flex flex-col justify-center w-[420px] bg-gradient-to-b from-gray-800 to-gray-900 border-r border-gray-700 px-6">
+        <h2 className="text-3xl font-bold text-cyan-400 mb-6">Welcome to NAO</h2>
+        <p className="text-sm leading-relaxed text-gray-300 space-y-4">
+          Welcome to NAO, the Health Intelligence Passport that pays you to live healthier!
+          <br /><br />
+          NAO is truly YOUR personal AI health assistant, designed to understand your unique body and goals. It's constantly learning from your progress, adapting to your needs, and providing hyper-personalized guidance for every step of your well-being journey.
+          <br /><br />
+          NAO doesn't just track your activity; it handles all your workouts, ensuring optimal intensity and progress. More importantly, it masterfully guides your recovery, delivering insights like "Your workout recovery is 92%—ideal day for strength training," or "Your stress levels spiked today—try 5 mins of breathwork now."
+          <br /><br />
+          As you hit your health goals, you'll earn $NAO – a USD-pegged stablecoin that’s incredibly versatile. Spend your rewards instantly via Apple Pay or Mastercard at your favorite local spots, or unlock global possibilities by redeeming $NAO with vendors worldwide through crypto and other exciting reward options.
+          <br /><br />
+          Say goodbye to generic plans and embrace personalized wellness with rewards that grow with you, opening up a world of possibilities.
+        </p>
       </div>
 
-      {/* ✅ Foreground Content */}
-      <div className="relative z-10 w-full h-full flex flex-col justify-center items-center p-8">
-        {/* AI Assistant Box */}
+      <div
+        className="absolute inset-0 md:left-[420px] bg-no-repeat bg-cover bg-center"
+        style={{ backgroundImage: "url('/log_in_panel_3.png')" }}
+      />
+
+      <div className="relative z-10 flex flex-col justify-center items-center h-screen w-full p-8">
         <div className="w-full max-w-3xl mb-12">
           <h2 className="text-xl text-cyan-400 font-semibold mb-2">NAO AI Companion</h2>
           <div className="border border-cyan-400/50 rounded-2xl p-4 backdrop-blur-md bg-black/50 shadow-lg">
@@ -90,11 +100,10 @@ export default function FinalOnboarding() {
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center mt-4">
+        <div className="flex flex-col md:flex-row gap-6 items-center">
           <button
-            className={`px-8 py-4 rounded-full text-lg font-semibold tracking-wide text-white transition-all duration-200 ease-out shadow-lg
-              ${wearableConnected ? "bg-green-600 hover:bg-green-700" : "bg-cyan-700/40 hover:bg-cyan-700 animate-pulse"}`}
+            className={`min-w-[280px] px-8 py-5 rounded-full text-lg font-semibold tracking-wide text-white
+              bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_20px_rgba(0,255,255,0.5)] transition transform hover:scale-105`}
             onClick={handleAppleHealthLink}
             disabled={loadingWearable || wearableConnected}
           >
@@ -106,7 +115,7 @@ export default function FinalOnboarding() {
           </button>
 
           <button
-            className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
+            className="min-w-[280px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-[0_0_20px_rgba(0,255,255,0.5)] transition transform hover:scale-105"
             onClick={() => setCoinbaseLinked(true)}
             disabled={coinbaseLinked}
           >
@@ -114,7 +123,7 @@ export default function FinalOnboarding() {
           </button>
 
           <button
-            className="px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition"
+            className="min-w-[280px] px-8 py-5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold shadow-[0_0_20px_rgba(0,255,255,0.5)] transition transform hover:scale-105"
             onClick={() => setApplePaySynced(true)}
             disabled={applePaySynced}
           >
@@ -122,11 +131,10 @@ export default function FinalOnboarding() {
           </button>
         </div>
 
-        {/* Final Mint Button */}
         {allowContinue && (
           <div className="absolute bottom-8 left-8">
             <button
-              className="px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:scale-105 transition"
+              className="px-10 py-4 rounded-full text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 text-white shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105 transition"
               onClick={handleFinish}
             >
               🚀 Mint My Health Passport
