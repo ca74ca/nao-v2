@@ -107,10 +107,11 @@ export default function FinalOnboarding() {
         </button>
       </div>
 
-      <div className="absolute top-[50%] left-[50%] w-[45%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[65vh] overflow-y-auto space-y-4" style={{ transform: 'translate(-50%, -50%)' }}>
-        <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
-          Welcome to NAO: Your Health AI
-        </h1>
+      <div className="absolute top-24 right-12 w-[45%] z-10 text-cyan-200 text-[15px] leading-7 border border-cyan-500/40 rounded-2xl p-6 backdrop-blur-md bg-black/40 shadow-2xl max-h-[65vh] overflow-y-auto space-y-4">
+  <h1 className="text-4xl font-extrabold mb-4 text-cyan-300 drop-shadow-lg">
+    Welcome to NAO: Your Health AI
+  </h1>
+
         <p className="whitespace-pre-line">
           Welcome to NAO, the worlds first Health Intelligence Passport that pays you to thrive. NAO is your personal AI health companion, designed to adapt and learn with you, providing hyper-personalized
           guidance for your unique well-being journey and rewarding your efforts with real cash. Our advanced AI constantly analyzes your sleep, activity levels, and biomarkers (via Whoop/Apple Health),
