@@ -1,5 +1,5 @@
+import React from "react";
 import { useRouter } from "next/router";
-import EchoAssistant from "@/components/EchoAssistant";
 
 export default function FinalOnboarding() {
   const router = useRouter();
@@ -7,53 +7,39 @@ export default function FinalOnboarding() {
   const handleContinue = () => router.push("/mint");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-black text-white font-roboto px-8 space-y-12">
-      
-      <div className="max-w-3xl text-center space-y-8">
-        <h1 className="text-5xl font-bold text-cyan-400 drop-shadow-[0_0_20px_rgba(0,255,255,0.8)]">
-          Welcome to NAO
-        </h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white text-center px-8 space-y-8">
+      <h1 className="text-5xl font-bold text-cyan-400 drop-shadow-[0_0_20px_rgba(0,255,255,0.8)]">
+        Welcome to NAO: Your Fitness, Rewarded!
+      </h1>
 
-        <p className="text-lg leading-relaxed text-gray-300 drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-          NAO is your AI-powered health companion that pays you to thrive. Smarter habits, real money.
-        </p>
+      <div className="max-w-3xl text-gray-300 space-y-6 text-lg leading-relaxed">
+        <p>Congratulations! You're officially onboarded with NAO, where your dedication to any form of fitness translates directly into tangible cash rewards. We believe your hard work deserves more than just personal bests—it deserves real financial incentives. And the best part? We don't believe in streaks or complicated algorithms; we believe in consistent effort. So even if life gets in the way and you miss a day, your progress and rewards are safe with us.</p>
 
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold text-cyan-400 drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">How NAO Works:</h2>
-          <ul className="list-none space-y-3 text-lg text-gray-300 drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-            <li><span className="font-bold text-white">AI-Driven Health Tracking:</span> NAO learns from your habits, workouts, and recovery — no wearables required.</li>
-            <li><span className="font-bold text-white">Earn Real Money:</span> $NAO stablecoin (USD-pegged) rewards your consistency.</li>
-            <li><span className="font-bold text-white">Spend Anywhere:</span> Apple Pay, Mastercard, Coinbase, crypto, fiat. Your rewards, your choice.</li>
-          </ul>
+        <h2 className="text-cyan-400 font-semibold text-xl">Track Your Progress</h2>
+        <p>NAO is your all-in-one smart AI assistant, providing workouts, logging your sessions, and saving all your key fitness data. This means you don't even need wearables to track your activity. We'll automatically monitor your progress, whether it's walking, yoga, running, cross-training, or any other exercise, ensuring every bit of effort counts toward your earnings.</p>
 
-          <h2 className="text-2xl font-semibold text-cyan-400 drop-shadow-[0_0_15px_rgba(0,255,255,0.8)] pt-4">Example Rewards:</h2>
-          <ul className="list-none space-y-3 text-lg text-gray-300 drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-            <li>✅ $0.50 for hitting weekly sleep goals</li>
-            <li>✅ $3 for completing training streaks</li>
-            <li>✅ Bigger rewards for consistency & milestones</li>
-          </ul>
-        </div>
+        <h2 className="text-cyan-400 font-semibold text-xl">Earn Rewards</h2>
+        <p>As you hit your training milestones, complete workouts, and achieve new personal records, NAO will reward you with real cash. Our transparent system ensures you know exactly how much you're earning for your efforts.</p>
 
-        <p className="text-lg text-gray-300 pt-4 drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-          <span className="font-bold text-white">Train. Earn. Redeem. Repeat.</span><br />
-          No waiting. No complicated apps. Just real money for real progress.
-        </p>
-      </div>
+        <h2 className="text-cyan-400 font-semibold text-xl">Redeem Your Earnings</h2>
+        <p>Cashing out your rewards is simple and flexible. Choose your preferred method:</p>
+        <ul className="list-disc list-inside text-left space-y-2">
+          <li>Apple Pay: For quick and easy access to your funds on the go.</li>
+          <li>Mastercard: Transfer your earnings directly to your Mastercard for everyday spending.</li>
+          <li>Coinbase or Other Crypto: For those who prefer to manage their rewards in digital currencies.</li>
+        </ul>
 
-      <div className="w-full max-w-3xl">
-        <h2 className="text-center text-2xl font-semibold text-cyan-400 mb-4 drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">
-          NAO AI Companion
-        </h2>
-        <div className="border border-cyan-400/50 rounded-2xl p-4 bg-black/60 shadow-lg">
-          <EchoAssistant prompt="Begin your intelligence by typing here." />
-        </div>
+        <h2 className="text-cyan-400 font-semibold text-xl">No Gimmicks—Just Results</h2>
+        <p>At NAO, we're committed to a straightforward and rewarding experience. There are no hidden fees, complicated algorithms, or deceptive schemes. We're here to empower your fitness journey by providing genuine, measurable incentives for your commitment and progress.</p>
+
+        <p>Ready to turn your sweat into rewards?</p>
       </div>
 
       <button
         onClick={handleContinue}
-        className="mt-8 w-[320px] px-10 py-5 rounded-3xl text-xl font-bold tracking-wide text-cyan-400 bg-black border border-cyan-400 shadow-[0_0_40px_rgba(0,255,255,0.6)] hover:shadow-[0_0_80px_rgba(0,255,255,1)] hover:border-cyan-300 transition-all duration-300"
+        className="mt-8 px-12 py-5 rounded-full text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-[0_0_40px_rgba(0,255,255,0.7)] hover:scale-105 hover:shadow-[0_0_80px_rgba(0,255,255,1)] transition"
       >
-        🚀 Enter NAO Rewards Dashboard
+        🚀 Go to My Rewards Dashboard
       </button>
     </div>
   );
