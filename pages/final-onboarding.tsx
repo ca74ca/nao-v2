@@ -131,7 +131,7 @@ export default function FinalOnboarding() {
         </p>
       </div>
 
-      <div className="w-full flex flex-wrap justify-center gap-8 mt-12 max-w-6xl mx-auto">
+<div className="flex flex-col items-start gap-6 mt-16 ml-10">
         <button
           className={`min-w-[280px] px-8 py-5 rounded-3xl text-lg font-semibold tracking-wide text-white
             backdrop-blur-md bg-white/5 border border-cyan-300/30 shadow-[0_2px_25px_0_rgba(0,255,255,0.25)]
