@@ -31,10 +31,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const currentLevel = user.level || 1;
     const nextLevel = Math.min(currentLevel + 1, 5);
     const xp = user.xp || 0;
+    const currentBalance = user.rewardBalance || 0;
+    const newBalance = Math.max(currentBalance - 50, 0); // Prevent negative balance
 
     await users.updateOne(
       { email },
-      { $set: { level: nextLevel, xp } }
+      { $set: { level: nextLevel, xp, rewardBalance: newBalance } }
     );
 
     const contract = await sdk.getContract(contractAddress, 'nft');
@@ -64,13 +66,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
     });
 
+    // Fetch the newly updated user for latest reward balance
     const updatedUser = await users.findOne({ email });
+
     res.status(200).json({
       level: nextLevel,
       xp,
       walletId: wallet,
       email,
       evolutionLevel: nextLevel,
+      rewardBalance: updatedUser?.rewardBalance || 0, // ✅ Return this for frontend sync
+      tokenId,
     });
   } catch (err) {
     console.error('Evolve Error:', err);

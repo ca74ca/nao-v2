@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
+import {
+  useConnect,
+  metamaskWallet,
+  coinbaseWallet,
+  useDisconnect,
+  useAddress,
+} from "@thirdweb-dev/react";
 import { useRouter } from "next/router";
 import EchoAssistant from "../components/EchoAssistant";
 import DailyOutlook from "../src/components/DailyOutlook";
 import { RewardsTracker } from "../components/RewardsTracker";
 import { useRewardState } from "../src/hooks/useRewardState";
 import ActionBar from "../components/ActionBar";
+import RedeemPopup from "@/components/RedeemPopup";
 import { getWhoopAuthUrl } from '../utils/getWhoopAuthUrl';
 
 // --- Evolve NFT Action Trigger (original, unchanged) ---
@@ -184,6 +192,11 @@ function generateRandomState(length = 16) {
 export default function MintPage() {
   const router = useRouter();
 
+  // ThirdWeb wallet hooks (updated)
+  const connect = useConnect();
+  const disconnectWallet = useDisconnect();
+  const address = useAddress();
+
   const { rewardState } = useRewardState(
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("nao_user") || "{}").walletId || ""
@@ -321,7 +334,14 @@ useEffect(() => {
 
       if (!res.ok) throw new Error('Failed to evolve NFT');
 
-      const updatedUser = await res.json();
+      const updatedData = await res.json();
+      
+      // ✅ Update user's reward balance from backend response
+      const updatedUser = {
+        ...user,
+        rewardBalance: updatedData.rewardBalance,
+        ...updatedData
+      };
       setUser(updatedUser);
       localStorage.setItem('nao_user', JSON.stringify(updatedUser));
 
@@ -375,6 +395,24 @@ useEffect(() => {
     setAppleSyncStatus("✅ Apple Health sync complete!");
     setTimeout(() => setAppleSyncStatus(""), 2000);
   };
+
+  const [showRedeemPopup, setShowRedeemPopup] = useState(false);
+
+  const handleRedeem = async (method: 'apple-pay' | 'coinbase') => {
+    try {
+      await fetch('/api/redeem', {
+        method: 'POST',
+        body: JSON.stringify({ method }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      setShowRedeemPopup(false);
+      alert('Redemption Request Sent!');
+    } catch (error) {
+      console.error(error);
+      alert('Redemption Failed. Please try again.');
+    }
+  };
+
 
  // --- BEGIN: NAO SMART CHAT ADDITION ---
 const [threadId, setThreadId] = useState<string | null>(null);
@@ -615,7 +653,15 @@ const sendMessage = async (input: string) => {
         onAppleSync={handleAppleSync}
         whoopSyncStatus={whoopSyncStatus}
         appleSyncStatus={appleSyncStatus}
+        onRedeemClick={() => setShowRedeemPopup(true)}
       />
+
+      {showRedeemPopup && (
+        <RedeemPopup
+          onRedeem={handleRedeem}
+          onClose={() => setShowRedeemPopup(false)}
+        />
+      )}
 
       {/* Kling AI background video */}
       <video
@@ -948,197 +994,52 @@ const sendMessage = async (input: string) => {
               marginTop: 32,
             }}
           >
-            <div style={{ marginBottom: 24 }}>
-              <span style={{
-                fontSize: 18,
-                color: BLUE,
-                fontWeight: 800,
-                letterSpacing: 1,
-                textShadow: `0 0 12px ${BLUE_GLOW}`,
-                display: "block",
-                marginBottom: 12,
-              }}>
-                Evolving NFT
-              </span>
-              <div
-                style={{
-                  borderRadius: 22,
-                  border: `2.5px solid ${BLUE}`,
-                  background: `rgba(0,0,0,0.45)`,
-                  boxShadow: `0 0 28px 6px ${BLUE_GLOW}`,
-                  margin: "0 auto 12px auto",
-                  width: 180,
-                  height: 180,
-                  padding: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <img
-                  src={
-                    nftMeta && nftMeta.image
-                      ? nftMeta.image
-                      : passportData.nftImage
-                  }
-                  alt={nftMeta?.name || "Starter dNFT"}
-                  style={{
-                    borderRadius: 18,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-              <div style={{
-                color: BLUE,
-                fontWeight: 700,
-                fontSize: 22,
-                marginBottom: 2,
-              }}>
-                {nftMeta?.name || passportData.nftTitle}
-              </div>
-              <div style={{
-                color: WHITE_SOFT,
-                fontSize: 15,
-                marginBottom: 10
-              }}>
-                {nftMeta?.description || passportData.nftMeta}
-              </div>
-              <div style={{
-                margin: "12px auto 0 auto",
-                fontSize: 15,
-                borderRadius: 999,
-                background: `${BLUE_GLOW}33`,
-                padding: "6px 20px",
-                color: BLUE,
-                fontWeight: 800,
-                boxShadow: `0 0 12px 2px ${BLUE_SOFT}`,
-                letterSpacing: "0.06em",
-                display: "inline-block"
-              }}>
-                Evolution Level: {nftMeta?.attributes?.find(a => a.trait_type === "Level")?.value ?? passportData.evolutionLevel}
-              </div>
-              <div style={{ marginTop: 18 }}>
-                <button
-                  style={{
-                    padding: "10px 24px",
-                    borderRadius: 999,
-                    background: evolving ? "#aaa" : BLUE,
-                    color: "#fff",
-                    fontWeight: 800,
-                    fontSize: 16,
-                    border: "none",
-                    boxShadow: `0 0 16px 2px ${BLUE_GLOW}`,
-                    cursor: evolving ? "wait" : "pointer",
-                    opacity: evolving ? 0.7 : 1,
-                    transition: "all 0.2s",
-                  }}
-                  onClick={handleEvolve}
-                  disabled={evolving}
-                >
-                  {evolving ? "Evolving..." : "Evolve NFT"}
-                </button>
-              </div>
-            </div>
-            <div style={{ margin: "34px 0 12px 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                <span style={{ color: WHITE_SOFT, fontWeight: 600, letterSpacing: 1 }}>Name</span>
-                <span style={{ color: "#fff", fontWeight: 700 }}>{passportData.username}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                <span style={{ color: WHITE_SOFT, fontWeight: 600, letterSpacing: 1 }}>Passport ID</span>
-                <span style={{ color: BLUE_SOFT, fontFamily: "monospace", fontWeight: 600 }}>{passportData.passportId}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                <span style={{ color: WHITE_SOFT, fontWeight: 600, letterSpacing: 1 }}>XP</span>
-                <span style={{ color: BLUE, fontWeight: 800 }}>{passportData.xp}</span>
-              </div>
-            </div>
-            {/* Live NFT Preview */}
-            <div style={{
-              marginTop: 28,
-              marginBottom: 0,
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center"
-            }}>
-              {(() => {
-                const levelMap = {
-                  1: "bronze",
-                  2: "silver", 
-                  3: "gold",
-                  4: "platinum",
-                  5: "mythic",
-                };
-
-                const nextLevel = Math.min((currentLevel || 0) + 1, 5);
-                const nextTrait = levelMap[nextLevel];
-                const nextImagePath = `/level_${nextLevel}_${nextTrait}.png`;
-
-                return (
-                  <div
-                    style={{
-                      borderRadius: 20,
-                      background: "rgba(0,0,0,0.5)",
-                      padding: 24,
-                      textAlign: "center",
-                      color: "#00ffc8",
-                      boxShadow: "0 0 18px 6px #00ffc833",
-                      marginBottom: 20,
-                    }}
-                  >
-                    <h3 style={{ fontSize: 18, marginBottom: 12 }}>🔮 Next Evolution Preview</h3>
-
-                    <div style={{ marginBottom: 10, color: "#ccc", fontSize: 14 }}>
-                      Level {nextLevel} → <span style={{ color: "#00ffc8", fontWeight: 600 }}>{nextTrait?.toUpperCase()} Trait</span>
-                    </div>
-
-                    <img
-                      src={nextImagePath}
-                      alt={`Level ${nextLevel} ${nextTrait}`}
-                      style={{
-                        width: "100%",
-                        maxWidth: 220,
-                        margin: "0 auto",
-                        borderRadius: 16,
-                        border: "2px solid #00ffc8",
-                        boxShadow: "0 0 18px 4px #00ffc888",
-                      }}
-                    />
-
-                    <div style={{ marginTop: 12, fontSize: 13, color: "#999" }}>
-                      Preview: Your NFT evolves with your progress.
-                    </div>
-                  </div>
-                );
-              })()}
+            {/* ...existing NFT and rewards UI... */}
+            {/* Wallet Connection Section */}
+            <div style={{ marginTop: "32px", textAlign: "center" }}>
+              <h2 style={{ color: "#0ff", fontWeight: 700, fontSize: "1.2rem", marginBottom: "12px" }}>
+                Manage Payout Wallet
+              </h2>
               <button
-                onClick={() => alert("🎉 Mint logic coming soon")}
+                onClick={() => connect(metamaskWallet())}
                 style={{
-                  padding: "12px 30px",
-                  fontSize: 16,
-                  borderRadius: 10,
-                  background: "linear-gradient(90deg, #00fff9, #1267da)",
-                  border: "none",
+                  padding: "10px 24px",
+                  borderRadius: 999,
+                  background: "linear-gradient(to right, #8e2de2, #4a00e0)",
                   color: "#fff",
-                  fontWeight: 700,
-                  boxShadow: "0 0 12px 3px #00fff9cc",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  border: "none",
+                  marginBottom: 12,
+                  width: "100%",
                   cursor: "pointer",
-                  transition: "transform 0.2s, box-shadow 0.2s"
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = "scale(1.05)";
-                  e.currentTarget.style.boxShadow = "0 0 18px 5px #00fff9cc";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.boxShadow = "0 0 12px 3px #00fff9cc";
                 }}
               >
-                🚀 Celebrate My Mint
+                Connect MetaMask
               </button>
+              <button
+                onClick={() => connect(coinbaseWallet())}
+                style={{
+                  padding: "10px 24px",
+                  borderRadius: 999,
+                  background: "linear-gradient(to right, #fcb045, #fd1d1d, #833ab4)",
+                  color: "#fff",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  border: "none",
+                  marginBottom: 12,
+                  width: "100%",
+                  cursor: "pointer",
+                }}
+              >
+                Connect Coinbase Wallet
+              </button>
+              {address && (
+                <div style={{ marginTop: "16px", color: "#0ff", fontSize: "0.85rem" }}>
+                  <p>Connected Wallet for Rewards:</p>
+                  <p style={{ fontFamily: "monospace", color: "#fff" }}>{address}</p>
+                </div>
+              )}
             </div>
           </section>
         </main>

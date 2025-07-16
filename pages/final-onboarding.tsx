@@ -35,6 +35,10 @@ export default function FinalOnboarding() {
         <p>Ready to turn your sweat into rewards?</p>
       </div>
 
+      <p className="text-cyan-400 text-lg font-semibold tracking-wide drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+        Move → Track → Earn → Redeem
+      </p>
+
       <button
         onClick={handleContinue}
         className="mt-8 px-12 py-5 rounded-full text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-[0_0_40px_rgba(0,255,255,0.7)] hover:scale-105 hover:shadow-[0_0_80px_rgba(0,255,255,1)] transition"

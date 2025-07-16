@@ -5,11 +5,13 @@ export default function ActionBar({
   onAppleSync,
   whoopSyncStatus,
   appleSyncStatus,
+  onRedeemClick,
 }: {
   onWhoopSync: () => void;
   onAppleSync: () => void;
   whoopSyncStatus: string;
   appleSyncStatus: string;
+  onRedeemClick: () => void;
 }) {
   return (
     <div
@@ -67,6 +69,24 @@ export default function ActionBar({
         disabled={!!appleSyncStatus}
       >
         {appleSyncStatus ? appleSyncStatus : "Sync Apple Health"}
+      </button>
+      <button
+        onClick={onRedeemClick}
+        style={{
+          padding: "10px 22px",
+          borderRadius: 999,
+          background: "linear-gradient(to right, #22c55e, #16a34a)",
+          color: "#fff",
+          fontWeight: 700,
+          fontSize: 16,
+          border: "2px solid #2D9CFF",
+          cursor: "pointer",
+          letterSpacing: "0.04em",
+          boxShadow: "0 0 16px 2px #60C6FF",
+          transition: "background 0.15s",
+        }}
+      >
+        Redeem Rewards
       </button>
     </div>
   );
