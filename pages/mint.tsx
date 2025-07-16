@@ -1035,9 +1035,68 @@ const sendMessage = async (input: string) => {
               Connect Coinbase Wallet
             </button>
             {address && (
-              <div style={{ marginTop: "16px", color: "#0ff", fontSize: "0.85rem" }}>
-                <p>Connected Wallet for Rewards:</p>
-                <p style={{ fontFamily: "monospace", color: "#fff" }}>{address}</p>
+              <div>
+                <div style={{ marginTop: "16px", color: "#0ff", fontSize: "0.85rem" }}>
+                  <p>Connected Wallet for Rewards:</p>
+                  <p style={{ fontFamily: "monospace", color: "#fff" }}>{address}</p>
+                </div>
+                <div style={{ marginBottom: "20px", width: "100%" }}>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/payout", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            toWallet: address, // User's wallet from useAddress()
+                            amount: "10",      // Example: 10 USDC
+                          }),
+                        });
+                        if (!res.ok) throw new Error("Payout failed");
+                        alert("✅ 10 USDC payout sent to your wallet!");
+                      } catch (err) {
+                        console.error(err);
+                        alert("❌ Payout failed. Please try again later.");
+                      }
+                    }}
+                    style={{
+                      padding: "12px 32px",
+                      borderRadius: 999,
+                      background: "linear-gradient(to right, #00c6ff, #0072ff)",
+                      color: "#fff",
+                      fontWeight: 800,
+                      fontSize: 16,
+                      border: "none",
+                      boxShadow: "0 0 15px rgba(0, 198, 255, 0.6)",
+                      cursor: "pointer",
+                      marginBottom: "20px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      width: "100%",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.boxShadow = "0 0 30px rgba(0, 198, 255, 0.8)")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.boxShadow = "0 0 15px rgba(0, 198, 255, 0.6)")
+                    }
+                  >
+                    <span
+                      style={{
+                        textShadow: "1px 1px 2px #00c6ff, -1px -1px 2px #0072ff",
+                        fontWeight: 900,
+                        fontSize: "1.2rem",
+                        color: "#00ffcc",
+                      }}
+                    >
+                      $
+                    </span>
+                    Send Payout (10 USDC)
+                  </button>
+                </div>
               </div>
             )}
           </div>
