@@ -656,12 +656,7 @@ const sendMessage = async (input: string) => {
         onRedeemClick={() => setShowRedeemPopup(true)}
       />
 
-      {showRedeemPopup && (
-        <RedeemPopup
-          onRedeem={handleRedeem}
-          onClose={() => setShowRedeemPopup(false)}
-        />
-      )}
+      // ...existing code...
 
       {/* Kling AI background video */}
       <video
