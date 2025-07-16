@@ -1079,6 +1079,20 @@ const sendMessage = async (input: string) => {
           />
         </div>
       </div>
+      {showRedeemPopup && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowRedeemPopup(false)} />
+          <div className="fixed z-50 top-1/3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white p-8 border border-cyan-500 rounded-2xl shadow-2xl max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-cyan-400">Redeem Rewards</h2>
+            <p className="mb-6 text-sm text-gray-300">Choose your redemption method below:</p>
+            <div className="space-y-4">
+              <button onClick={() => handleRedeem('apple-pay')}>Apple Pay</button>
+              <button onClick={() => handleRedeem('coinbase')}>Coinbase</button>
+              <button onClick={() => setShowRedeemPopup(false)}>Cancel</button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
