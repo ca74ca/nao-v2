@@ -952,23 +952,11 @@ const sendMessage = async (input: string) => {
       {/* RIGHT: RewardsTracker + dNFT Passport Card */}
       <div
         className="flex-1 flex justify-end items-center"
-        style={{
-          flex: 1,
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-        }}
+        style={{ flex: 1, display: "flex", justifyContent: "flex-end", alignItems: "center" }}
       >
-        <main
-          className="w-full max-w-md mr-6 md:mr-14"
-          style={{
-            width: "100%",
-            maxWidth: 420,
-            marginRight: 34,
-            position: "relative",
-          }}
-        >
-          {/* 1. Show connected progress values */}
+        <main className="w-full max-w-md mr-6 md:mr-14" style={{ position: "relative" }}>
+          {/* Your existing dNFT Card, Evolution Info, XP Progress */}
+          {/* Replace <YourDNFTComponent /> with your actual NFT card/component, e.g. RewardsTracker and NFT preview */}
           <RewardsTracker
             state={{
               calories: caloriesBurned,
@@ -977,71 +965,87 @@ const sendMessage = async (input: string) => {
               recoveryScore: whoopRecovery,
             }}
           />
-
-          {/* 2. Show NFT art + evolution UI */}
-          <section
-            style={{
-              borderRadius: 32,
-              border: `2.5px solid ${BLUE}`,
-              background: `linear-gradient(135deg, ${BLUE_BG} 70%, ${BLUE_DARK} 100%)`,
-              boxShadow: `0 0 64px 10px ${BLUE_GLOW}, 0 0 16px 2px ${BLUE_SOFT}`,
-              backdropFilter: "blur(18px)",
-              padding: 36,
-              minWidth: 320,
-              maxWidth: 420,
-              margin: "auto",
-              textAlign: "center",
-              marginTop: 32,
-            }}
-          >
-            {/* ...existing NFT and rewards UI... */}
-            {/* Wallet Connection Section */}
-            <div style={{ marginTop: "32px", textAlign: "center" }}>
-              <h2 style={{ color: "#0ff", fontWeight: 700, fontSize: "1.2rem", marginBottom: "12px" }}>
-                Manage Payout Wallet
-              </h2>
-              <button
-                onClick={() => connect(metamaskWallet())}
-                style={{
-                  padding: "10px 24px",
-                  borderRadius: 999,
-                  background: "linear-gradient(to right, #8e2de2, #4a00e0)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontSize: 14,
-                  border: "none",
-                  marginBottom: 12,
-                  width: "100%",
-                  cursor: "pointer",
-                }}
-              >
-                Connect MetaMask
-              </button>
-              <button
-                onClick={() => connect(coinbaseWallet())}
-                style={{
-                  padding: "10px 24px",
-                  borderRadius: 999,
-                  background: "linear-gradient(to right, #fcb045, #fd1d1d, #833ab4)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontSize: 14,
-                  border: "none",
-                  marginBottom: 12,
-                  width: "100%",
-                  cursor: "pointer",
-                }}
-              >
-                Connect Coinbase Wallet
-              </button>
-              {address && (
-                <div style={{ marginTop: "16px", color: "#0ff", fontSize: "0.85rem" }}>
-                  <p>Connected Wallet for Rewards:</p>
-                  <p style={{ fontFamily: "monospace", color: "#fff" }}>{address}</p>
-                </div>
-              )}
+          {/* Example NFT image preview (optional, you can customize) */}
+          <div style={{ margin: "32px auto 18px auto", textAlign: "center" }}>
+            <img
+              src="/start_user_2nft.png"
+              alt="Your NFT"
+              style={{ width: 180, borderRadius: 24, boxShadow: `0 0 32px 8px ${BLUE_GLOW}` }}
+            />
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 18, marginTop: 8 }}>
+              {passportData.nftTitle}
             </div>
-          </section>
+            <div style={{ color: "#0ff", fontSize: 14, marginTop: 2 }}>
+              {passportData.nftMeta}
+            </div>
+          </div>
+          <button
+            style={{
+              padding: "10px 24px",
+              borderRadius: 999,
+              background: evolving ? "#aaa" : BLUE,
+              color: "#fff",
+              fontWeight: 800,
+              fontSize: 16,
+              border: "none",
+              boxShadow: `0 0 16px 2px ${BLUE_GLOW}`,
+              cursor: evolving ? "wait" : "pointer",
+              opacity: evolving ? 0.7 : 1,
+              transition: "all 0.2s",
+              marginBottom: 12,
+              width: "100%",
+            }}
+            onClick={handleEvolve}
+            disabled={evolving}
+          >
+            {evolving ? "Evolving..." : "Evolve NFT"}
+          </button>
+          {/* ✅ Wallet Connect BELOW all of the above, as separate section */}
+          <div style={{ marginTop: "32px", textAlign: "center" }}>
+            <h2 style={{ color: "#0ff", fontWeight: 700, fontSize: "1.2rem", marginBottom: "12px" }}>
+              Manage Payout Wallet
+            </h2>
+            <button
+              onClick={() => connect(metamaskWallet())}
+              style={{
+                padding: "10px 24px",
+                borderRadius: 999,
+                background: "linear-gradient(to right, #8e2de2, #4a00e0)",
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: 14,
+                border: "none",
+                marginBottom: 12,
+                width: "100%",
+                cursor: "pointer",
+              }}
+            >
+              Connect MetaMask
+            </button>
+            <button
+              onClick={() => connect(coinbaseWallet())}
+              style={{
+                padding: "10px 24px",
+                borderRadius: 999,
+                background: "linear-gradient(to right, #fcb045, #fd1d1d, #833ab4)",
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: 14,
+                border: "none",
+                marginBottom: 12,
+                width: "100%",
+                cursor: "pointer",
+              }}
+            >
+              Connect Coinbase Wallet
+            </button>
+            {address && (
+              <div style={{ marginTop: "16px", color: "#0ff", fontSize: "0.85rem" }}>
+                <p>Connected Wallet for Rewards:</p>
+                <p style={{ fontFamily: "monospace", color: "#fff" }}>{address}</p>
+              </div>
+            )}
+          </div>
         </main>
       </div>
       <EvolveActionBar onEvolve={handleEvolve} evolving={evolving} />
