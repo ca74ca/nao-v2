@@ -2,7 +2,6 @@ import React from "react";
 import { useConnect, metamaskWallet, coinbaseWallet, useAddress } from "@thirdweb-dev/react";
 import { useRouter } from "next/router";
 
-// SiteButton component for consistent button styling
 const SiteButton: React.FC<{
   children: React.ReactNode;
   onClick?: () => void;
@@ -14,9 +13,9 @@ const SiteButton: React.FC<{
     <button
       onClick={onClick}
       className={`
-        w-full py-3 rounded-full font-extrabold text-white
+        w-full py-3 rounded-full font-extrabold text-black
         bg-gradient-to-r ${gradient || defaultGradient}
-        shadow-lg hover:opacity-90 transition-all
+        shadow-xl hover:opacity-90 transition-all tracking-wide uppercase
         ${className}
       `}
       {...props}
@@ -40,77 +39,76 @@ const FinalOnboarding: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-8 py-16 space-y-10 relative overflow-hidden">
-      {/* FULL PAGE WATERMARK LOGO BACKGROUND */}
+    <main className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-16 overflow-hidden">
+      {/* 🔥 Fullscreen Background Visual */}
       <img
         src="/nao_circle_logo_fo.png"
-        alt="NAO Logo Watermark"
+        alt="NAO Watermark"
         className="fixed inset-0 w-full h-full object-cover opacity-10 pointer-events-none select-none"
         style={{ zIndex: 0 }}
       />
 
-      {/* Main Content Layered Above Watermark */}
-      <div className="relative z-10 max-w-xl w-full flex flex-col items-center">
-        {/* Optional: Small logo for branding above content */}
-        <img
-          src="/nao_circle_logo_fo.png"
-          alt="NAO Logo"
-          className="w-40 opacity-30 mb-4"
-        />
-
-        <h1 className="text-4xl md:text-5xl font-bold text-center mt-8 drop-shadow-lg">
-          Welcome to NAO: Your Fitness, Rewarded!
+      {/* 🔥 NAO Cinematic Container */}
+      <div className="relative z-10 max-w-2xl w-full text-center space-y-8">
+        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent drop-shadow-xl">
+          Welcome to NAO
         </h1>
 
-        <p className="text-center text-lg leading-relaxed mt-4 max-w-2xl">
-          Congratulations! You're officially onboarded with NAO, where your dedication to any form of fitness translates directly into tangible cash rewards. <br /><br />
-          We believe your hard work deserves more than just personal bests — it deserves real financial incentives.
+        <p className="text-lg leading-relaxed max-w-2xl mx-auto text-white/90">
+          Congratulations, you’re officially onboarded. <br /> Your fitness. Your data. Your rewards — powered by AI and blockchain.
+          <br />
+          <br />
+          NAO rewards your effort with real incentives. This is health, evolved.
         </p>
       </div>
 
-      <section className="relative z-10 text-left max-w-lg space-y-6">
-        <h2 className="text-cyan-400 font-semibold text-xl">Track Your Progress</h2>
-        <p>NAO tracks your fitness activity and rewards your effort.</p>
+      {/* 🔥 Key Benefits Section */}
+      <section className="relative z-10 mt-10 max-w-xl space-y-8 text-center text-lg">
+        <div className="space-y-2">
+          <h2 className="text-cyan-400 font-bold text-2xl">Track Your Progress</h2>
+          <p>AI verifies your sessions. NAO tracks it all — no wearables required.</p>
+        </div>
 
-        <h2 className="text-cyan-400 font-semibold text-xl">Earn Rewards</h2>
-        <p>Hit milestones, get paid.</p>
+        <div className="space-y-2">
+          <h2 className="text-cyan-400 font-bold text-2xl">Earn Real Rewards</h2>
+          <p>Complete goals. Level up. Get paid.</p>
+        </div>
 
-        <h2 className="text-cyan-400 font-semibold text-xl">Redeem Your Earnings</h2>
-        <ul className="list-disc list-inside space-y-2">
-          <li>Apple Pay</li>
-          <li>Mastercard</li>
-          <li>Coinbase</li>
-        </ul>
-
-        <h2 className="text-cyan-400 font-semibold text-xl">No Gimmicks—Just Results</h2>
-        <p>
-          NAO makes fitness rewarding and simple. No tricks. Real incentives.
-        </p>
+        <div className="space-y-2">
+          <h2 className="text-cyan-400 font-bold text-2xl">Withdraw How You Want</h2>
+          <p>Apple Pay. Mastercard. Crypto. Your rewards, your choice.</p>
+        </div>
       </section>
 
-      <div className="relative z-10 space-y-4 w-full max-w-xs">
+      {/* 🔥 Wallet Actions */}
+      <div className="relative z-10 mt-12 space-y-4 w-full max-w-xs">
         {!address && (
           <>
             <SiteButton onClick={() => connect(metamaskWallet())} gradient="from-purple-500 to-indigo-900">
               Connect MetaMask
             </SiteButton>
-            <SiteButton onClick={() => connect(coinbaseWallet())} gradient="from-yellow-500 via-pink-500 to-purple-500">
+            <SiteButton onClick={() => connect(coinbaseWallet())} gradient="from-yellow-400 via-pink-500 to-purple-500">
               Connect Coinbase Wallet
             </SiteButton>
           </>
         )}
 
         {address && (
-          <div className="text-center">
-            <p className="text-cyan-300">Connected Wallet:</p>
-            <p className="font-mono">{address}</p>
+          <div className="text-center space-y-1">
+            <p className="text-cyan-300 uppercase tracking-wider text-sm">Connected Wallet:</p>
+            <p className="font-mono text-white text-xs">{address}</p>
           </div>
         )}
 
-        <SiteButton onClick={handleContinue} className="w-full">
-          SYNC LIVE REWARD DASHBOARD HERE
+        <SiteButton onClick={handleContinue} className="w-full" gradient="from-cyan-400 to-blue-600">
+          Sync My NAO Rewards
         </SiteButton>
       </div>
+
+      {/* 🔥 Footer NAO Branding */}
+      <p className="relative z-10 mt-16 text-xs text-white/50 tracking-wide uppercase">
+        Powered by NAO • AI. Rewards. Blockchain.
+      </p>
     </main>
   );
 };
