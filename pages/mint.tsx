@@ -673,7 +673,7 @@ const sendMessage = async (input: string) => {
           objectFit: "cover",
           zIndex: -1,
           pointerEvents: "none",
-          opacity: 0.7,
+          opacity: 1,
         }}
       >
         <source src="/ai_second_video1.mp4" type="video/mp4" />
