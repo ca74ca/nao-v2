@@ -1110,21 +1110,8 @@ const sendMessage = async (input: string) => {
         xp={passportData.xp}
         xpGoal={xpGoal}
       />
-    <div
-  style={{
-    position: "fixed",
-    left: "50%",
-    bottom: "10vh",
-    transform: "translateX(-50%)",
-    width: "100%",            // ✅ Full width, allow pass-through
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    pointerEvents: "none",     // ✅ Let clicks pass through this layer
-    zIndex: 2,                 // ✅ Under wallet buttons
-  }}
->
-  <div style={{ pointerEvents: "auto", width: "fit-content" }}>
+   <div className="nao-echo-container">
+  <div className="nao-echo-inner">
     <EchoAssistant
       initialMessage={`Here is your health passport. You're doing great! You're on level ${passportData.evolutionLevel} with ${passportData.xp} reward points and your streak is 5 days.`}
       inputPlaceholder="Awaken NAO"
