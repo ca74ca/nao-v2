@@ -1110,18 +1110,18 @@ const sendMessage = async (input: string) => {
         xp={passportData.xp}
         xpGoal={xpGoal}
       />
-      <div
+    <div
   style={{
     position: "fixed",
     left: "50%",
     bottom: "10vh",
     transform: "translateX(-50%)",
-    width: "fit-content", // ✅ FIX THIS LINE
+    width: "100%",            // ✅ Full width, allow pass-through
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    zIndex: 10, // ✅ Safer under your wallet connect (wallet is 20+)
-    pointerEvents: "auto",
+    pointerEvents: "none",     // ✅ Let clicks pass through this layer
+    zIndex: 2,                 // ✅ Under wallet buttons
   }}
 >
   <div style={{ pointerEvents: "auto", width: "fit-content" }}>
@@ -1132,6 +1132,7 @@ const sendMessage = async (input: string) => {
     />
   </div>
 </div>
+
 
       {showRedeemPopup && (
         <>
