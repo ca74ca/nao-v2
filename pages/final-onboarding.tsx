@@ -40,29 +40,28 @@ const FinalOnboarding: React.FC = () => {
 
   return (
     <main className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-16 overflow-hidden">
-      {/* 🔥 Fullscreen Background Visual */}
+      {/* 🔥 Fullscreen Watermark Background, no tiling, no repeats */}
       <img
         src="/nao_circle_logo_fo.png"
         alt="NAO Watermark"
-        className="fixed inset-0 w-full h-full object-cover opacity-10 pointer-events-none select-none"
+        className="fixed top-0 left-0 w-screen h-screen object-cover opacity-10 pointer-events-none select-none"
         style={{ zIndex: 0 }}
       />
 
-      {/* 🔥 NAO Cinematic Container */}
+      {/* 🔥 Foreground Content */}
       <div className="relative z-10 max-w-2xl w-full text-center space-y-8">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent drop-shadow-xl">
           Welcome to NAO
         </h1>
 
         <p className="text-lg leading-relaxed max-w-2xl mx-auto text-white/90">
-          Congratulations, you’re officially onboarded. <br /> Your fitness. Your data. Your rewards — powered by AI and blockchain.
-          <br />
-          <br />
-          NAO rewards your effort with real incentives. This is health, evolved.
+          Congratulations! You're officially onboarded with NAO, where your dedication to any form of fitness translates directly into tangible cash rewards.
+          <br /><br />
+          We believe your hard work deserves more than just personal bests — it deserves real financial incentives. This is health, evolved.
         </p>
       </div>
 
-      {/* 🔥 Key Benefits Section */}
+      {/* 🔥 Key Benefits */}
       <section className="relative z-10 mt-10 max-w-xl space-y-8 text-center text-lg">
         <div className="space-y-2">
           <h2 className="text-cyan-400 font-bold text-2xl">Track Your Progress</h2>
