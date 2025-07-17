@@ -1111,28 +1111,28 @@ const sendMessage = async (input: string) => {
         xpGoal={xpGoal}
       />
       <div
-        style={{
-          position: "fixed",
-          left: "50%",
-          bottom: "10vh",
-          transform: "translateX(-50%)",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          zIndex: 20,
-        }}
-      >
-        <div style={{ pointerEvents: "auto", width: "fit-content" }}>
-          <EchoAssistant
-            initialMessage={
-              `Here is your health passport. You're doing great! You're on level ${passportData.evolutionLevel} with ${passportData.xp} reward points and your streak is 5 days.`
-            }
-            inputPlaceholder="Awaken NAO"
-            onSend={sendMessage}
-          />
-        </div>
-      </div>
+  style={{
+    position: "fixed",
+    left: "50%",
+    bottom: "10vh",
+    transform: "translateX(-50%)",
+    width: "fit-content", // ✅ FIX THIS LINE
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    zIndex: 10, // ✅ Safer under your wallet connect (wallet is 20+)
+    pointerEvents: "auto",
+  }}
+>
+  <div style={{ pointerEvents: "auto", width: "fit-content" }}>
+    <EchoAssistant
+      initialMessage={`Here is your health passport. You're doing great! You're on level ${passportData.evolutionLevel} with ${passportData.xp} reward points and your streak is 5 days.`}
+      inputPlaceholder="Awaken NAO"
+      onSend={sendMessage}
+    />
+  </div>
+</div>
+
       {showRedeemPopup && (
         <>
           <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowRedeemPopup(false)} />
