@@ -128,7 +128,7 @@ export default async function handler(
       status: 'success',
       message: 'User onboarded successfully',
       walletAddress,
-      redirectUrl: `/final-onboarding?userId=${encodeURIComponent(email)}`,
+redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
     });
 
   } catch (error: any) {
