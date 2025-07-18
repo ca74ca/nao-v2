@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import NaoOnboardingForm from "../components/NaoOnboardingForm";
-
 import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
 import Image from "next/image";
@@ -487,29 +486,28 @@ export default function Home() {
     }
 
     try {
-  // Retrieve walletId from localStorage
-  const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
-  const walletId = user.walletId;
+      // Retrieve walletId from localStorage
+      const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
+      const walletId = user.walletId;
 
-  const res = await fetch("/api/message", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      threadId,
-      message: input,
-      walletId, // <-- ADD THIS LINE
-    }),
-  });
-  if (!res.ok) {
-    const errorText = await res.text();
-    setMessages((msgs) => [
-      ...msgs,
-      { sender: "System", text: "Error from server: " + errorText }
-    ]);
-    setLoading(false);
-    return;
-  }
-  // ...rest of your code...
+      const res = await fetch("/api/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          threadId,
+          message: input,
+          walletId, // <-- ADD THIS LINE
+        }),
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: "System", text: "Error from server: " + errorText }
+        ]);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       setMessages((msgs) => [...msgs, { sender: "NAO", text: data.reply }]);
     } catch (err) {
@@ -525,11 +523,38 @@ export default function Home() {
   return (
     <div style={{
       position: "relative",
-      width: "200vw",
-      height: "200vh",
+      minHeight: "100vh",
+      width: "100vw",
       overflow: "hidden",
       color: "#fff"
     }}>
+      {/* Slogan above chat box */}
+      <div
+        style={{
+          position: "fixed",
+          top: "10vh",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          pointerEvents: "none",
+          zIndex: 2,
+        }}
+        className="animate-fadeInSlow"
+      >
+        <p
+          style={{
+            color: "#00fff9",
+            fontSize: 18,
+            maxWidth: "90vw",
+            textAlign: "center",
+          }}
+        >
+          Your sweat pays off. Every workout. Every rep. You evolve. You earn.
+        </p>
+      </div>
+
       <div
         style={{
           position: "fixed",

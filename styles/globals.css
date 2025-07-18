@@ -17,3 +17,29 @@
   justify-content: center;
   max-width: 400px;
 }
+
+/* ✅ Responsive Fix for iPad / Mobile ONLY */
+@media (max-width: 768px) {
+  .nao-echo-container {
+    width: 90vw;
+    bottom: 5vh;
+  }
+
+  .nao-echo-inner {
+    max-width: 90vw;
+    width: 90vw;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  .nao-echo-inner input {
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .nao-echo-inner button {
+    font-size: 14px;
+    padding: 0.5rem 1rem;
+    width: auto;
+  }
+}
