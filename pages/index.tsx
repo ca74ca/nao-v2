@@ -528,32 +528,7 @@ export default function Home() {
       overflow: "hidden",
       color: "#fff"
     }}>
-      {/* Slogan above chat box */}
-      <div
-        style={{
-          position: "fixed",
-          top: "10vh",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          pointerEvents: "none",
-          zIndex: 2,
-        }}
-        className="animate-fadeInSlow"
-      >
-        <p
-          style={{
-            color: "#00fff9",
-            fontSize: 18,
-            maxWidth: "90vw",
-            textAlign: "center",
-          }}
-        >
-          Your sweat pays off. Every workout. Every rep. You evolve. You earn.
-        </p>
-      </div>
+      
 
       <div
         style={{
@@ -572,7 +547,7 @@ export default function Home() {
           boxShadow: "0 0 10px rgba(8, 8, 8, 0.67)",
         }}
       >
-        N A O HEALTH INTELLIGENCE REWARDED
+        N A O HEALTH INTELLIGENCE REWARDED YOUR SWEAT PAYS OFF EVERy WORKOUT EVERY REP ...YOU EVOLVE ..YOU EARN
       </div>
       <video
         autoPlay
