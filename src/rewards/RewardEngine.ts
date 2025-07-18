@@ -1,4 +1,5 @@
 // NAO RewardEngine: Handles user XP/credit gain, streaks, reward triggers, NFT evolution, and payout eligibility.
+import { RewardState } from "../types/RewardState";
 
 export type RewardEvent =
   | { type: "calories"; value: number; goal: number }
@@ -7,15 +8,7 @@ export type RewardEvent =
   | { type: "strain"; value: number } // Added for WHOOP strain score
   | { type: "custom"; reason: string; xp: number };
 
-export type RewardState = {
-  xp: number;
-  energyCredits: number;
-  streak: number;
-  evolutionLevel: number;
-  lastActivity: Date | null;
-  rewardsReady: boolean;
-  strainScore?: number; // Track latest strain score
-};
+
 
 export type RewardResult = {
   state: RewardState;
@@ -103,15 +96,17 @@ export class RewardEngine {
     }
 
     // Compose new state
-    const newState: RewardState = {
-      xp,
-      energyCredits,
-      streak,
-      evolutionLevel,
-      lastActivity: new Date(),
-      rewardsReady,
-      strainScore,
-    };
+const newState: RewardState = {
+  xp,
+  energyCredits,
+  streak,
+  evolutionLevel,
+  usdcReward: state.usdcReward, // ✅ ADD THIS LINE
+  lastActivity: new Date(),
+  rewardsReady,
+  strainScore,
+};
+
 
     return {
       state: newState,

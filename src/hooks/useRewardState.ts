@@ -1,22 +1,32 @@
 import { useState, useEffect } from "react";
-import { RewardEngine, RewardState, RewardEvent, RewardResult } from "../rewards/RewardEngine";
+import { RewardEngine, RewardEvent, RewardResult } from "../rewards/RewardEngine";
+import { RewardState } from "../types/RewardState"; // ✅ Correct source for RewardState
 
 export const initialRewardState: RewardState = {
   xp: 0,
   energyCredits: 0,
   streak: 0,
   evolutionLevel: 1,
+  usdcReward: 0,
   lastActivity: null,
   rewardsReady: false,
 };
 
 const BACKEND = process.env.NEXT_PUBLIC_NAO_BACKEND_URL || "https://nao-sdk-api.onrender.com";
 
+// ✅ Add proper typing to your backend response
+interface BackendRewardResponse {
+  totalXP: number;
+  rewardPoints: number;
+  streak: number;
+  level: number;
+  usdcReward: number;
+}
+
 export function useRewardState(userId: string) {
   const [rewardState, setRewardState] = useState<RewardState>(initialRewardState);
   const [loading, setLoading] = useState(true);
 
-  // Fetch reward state from backend on mount
   useEffect(() => {
     async function fetchRewardState() {
       setLoading(true);
@@ -27,12 +37,15 @@ export function useRewardState(userId: string) {
           body: JSON.stringify({ userId }),
         });
         if (!res.ok) throw new Error("Failed to fetch reward state");
-        const data = await res.json();
+
+        const data: BackendRewardResponse = await res.json();
+
         setRewardState({
           xp: data.totalXP,
           energyCredits: data.rewardPoints || 0,
           streak: data.streak,
           evolutionLevel: data.level,
+          usdcReward: data.usdcReward || 0,
           lastActivity: null,
           rewardsReady: true,
         });
@@ -47,42 +60,37 @@ export function useRewardState(userId: string) {
     if (userId) fetchRewardState();
   }, [userId]);
 
-  // Apply reward event using existing backend logic
   async function applyRewardEvent(event: RewardEvent): Promise<RewardResult> {
     try {
-      // Use RewardEngine client-side for immediate feedback
       const result = RewardEngine.applyEvent(rewardState, event);
-      
-      // Update state optimistically
       setRewardState(result.state);
-      
-      // If it's a workout event, sync with backend via verifyWorkout
+
       if (event.type === "workout" && event.complete) {
         try {
           const workoutRes = await fetch(`${BACKEND}/api/verifyWorkout`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              userId, 
-              workoutText: "Manual workout logged via app" 
+            body: JSON.stringify({
+              userId,
+              workoutText: "Manual workout logged via app"
             }),
           });
-          
+
           if (workoutRes.ok) {
-            // Refresh state from backend to get accurate data
             const statusRes = await fetch(`${BACKEND}/api/getRewardStatus`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ userId }),
             });
-            
+
             if (statusRes.ok) {
-              const data = await statusRes.json();
+              const data: BackendRewardResponse = await statusRes.json();
               setRewardState({
                 xp: data.totalXP,
                 energyCredits: data.rewardPoints,
                 streak: data.streak,
                 evolutionLevel: data.level,
+                usdcReward: data.usdcReward || 0,
                 lastActivity: new Date(),
                 rewardsReady: true,
               });
@@ -92,11 +100,10 @@ export function useRewardState(userId: string) {
           console.warn("Backend sync failed, using client-side result:", syncErr);
         }
       }
-      
+
       return result;
     } catch (err) {
       console.error("applyRewardEvent error:", err);
-      // Rollback on error
       setRewardState(rewardState);
       throw err;
     }
