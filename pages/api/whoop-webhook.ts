@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { RewardEngine, RewardState, RewardEvent } from '../../src/rewards/RewardEngine';
+import { RewardEngine, RewardEvent } from '../../src/rewards/RewardEngine';
+import { RewardState } from '../../src/types/RewardState';
 import { findNaoUserByWhoopId, updateUser } from '../../lib/userMap';
 import { getUserRewardState, saveRewardState } from '../../lib/rewardStore';
 
