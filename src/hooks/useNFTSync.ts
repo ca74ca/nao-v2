@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { RewardState } from "../rewards/RewardEngine";
+import { RewardState } from "../types/RewardState";
 
 /**
  * Hook to sync NFT evolution with reward state level-ups.
