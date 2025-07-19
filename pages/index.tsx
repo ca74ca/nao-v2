@@ -547,7 +547,7 @@ export default function Home() {
           boxShadow: "0 0 10px rgba(8, 8, 8, 0.67)",
         }}
       >
-        N A O HEALTH INTELLIGENCE REWARDED YOUR SWEAT PAYS OFF EVERy WORKOUT EVERY REP ...YOU EVOLVE ..YOU EARN
+        N A O HEALTH INTELLIGENCE REWARDED YOUR SWEAT PAYS OFF EVERY WORKOUT EVERY REP ...YOU EVOLVE ..YOU EARN
       </div>
       <video
         autoPlay

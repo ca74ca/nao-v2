@@ -122,3 +122,5 @@ const newState: RewardState = {
     };
   }
 }
+
+export { RewardState };

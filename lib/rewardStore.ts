@@ -1,6 +1,6 @@
 // Stores and retrieves user reward state (in-memory)
 
-import { RewardState } from '../src/rewards/RewardEngine';
+import { RewardState } from '../src/types/RewardState'; // ✅ This is the fixed import
 
 // Define your initial reward state for new users
 export const initialRewardState: RewardState = {
@@ -10,6 +10,7 @@ export const initialRewardState: RewardState = {
   evolutionLevel: 0,
   lastActivity: null,
   rewardsReady: false,
+  usdcReward: 0,
 };
 
 const rewardStateStore: Record<string, RewardState> = {};
