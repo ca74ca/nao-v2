@@ -563,111 +563,111 @@ export default function Home() {
 />
 
 
-      {/* --- Modern Chat UI --- */}
-      <div className="nao-echo-container">
-        <div className="nao-echo-inner">
-          <div className="chat-message" style={{ marginBottom: 8, fontWeight: 600, color: "#00fff9" }}>
-            Welcome! I’m NAO. Ready to start earning rewards for your workouts?
-          </div>
+   {/* --- Modern Chat UI --- */}
+<div className="nao-echo-container">
+  <div className="nao-echo-inner">
 
-          <div style={{
-            maxHeight: 110,
-            overflowY: "auto",
-            marginBottom: 8,
-            scrollBehavior: "smooth",
-            background: "rgba(8,18,30,0.95)",
-            borderRadius: 8,
-            padding: "7px 10px",
-            width: "100%",
-            fontSize: "1rem",
-            boxShadow: "0 0 0.5rem #00fff944",
-          }}>
-            {messages.map((msg, i) => (
-              <div key={i} className="chat-message" style={{
-                color:
-                  msg.sender === "NAO"
-                    ? "#00fff9"
-                    : msg.sender === "System"
-                    ? "#ff6b6b"
-                    : "#cceeff",
-                fontWeight: msg.sender === "NAO" ? 700 : 400,
-                margin: "2px 0",
-                letterSpacing: 0.1,
-                fontSize: "0.98em"
-              }}>
-                <b>{msg.sender}:</b> {msg.text}
-              </div>
-            ))}
-          </div>
-
-          <form
-            onSubmit={sendMessage}
-            style={{
-              display: "flex",
-              gap: "0.75rem",
-              width: "100%",
-              marginBottom: 2
-            }}
-          >
-            <input
-              type="text"
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter your email to begin..."
-              style={{
-                flex: 1,
-                padding: "0.65rem 1rem",
-                fontSize: 16,
-                borderRadius: 16,
-                background: "#0e192a",
-                color: "#cceeff",
-                border: "1.5px solid #00fff9",
-                outline: "none",
-                fontWeight: 500,
-                textAlign: "center",
-                transition: "border 0.18s",
-                minWidth: 0,
-              }}
-              autoFocus
-              disabled={loading}
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: "0.65rem 1.8rem",
-                background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
-                color: "#fff",
-                border: "none",
-                borderRadius: 16,
-                fontWeight: 700,
-                fontSize: 16,
-                cursor: loading ? "not-allowed" : "pointer",
-                transition: "background 0.18s",
-                boxShadow: "0 2px 10px #00fff933",
-                letterSpacing: 0.2
-              }}
-            >
-              {loading ? "..." : "Send"}
-            </button>
-          </form>
-        </div>
-      </div>
-    {/* --- Global Reward Tracker Below Chat --- */}
     <div style={{
-      position: "relative",
+      maxHeight: 110,
+      overflowY: "auto",
+      marginBottom: 8,
+      scrollBehavior: "smooth",
+      background: "rgba(8,18,30,0.95)",
+      borderRadius: 8,
+      padding: "7px 10px",
       width: "100%",
-      marginTop: "2rem",
-      padding: "1rem 2rem",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 1,
+      fontSize: "1rem",
+      boxShadow: "0 0 0.5rem #00fff944",
     }}>
-      <GlobalStats />
+      {messages.map((msg, i) => (
+        <div key={i} className="chat-message" style={{
+          color:
+            msg.sender === "NAO"
+              ? "#00fff9"
+              : msg.sender === "System"
+              ? "#ff6b6b"
+              : "#cceeff",
+          fontWeight: msg.sender === "NAO" ? 700 : 400,
+          margin: "2px 0",
+          letterSpacing: 0.1,
+          fontSize: "0.98em"
+        }}>
+          <b>{msg.sender}:</b> {msg.text}
+        </div>
+      ))}
     </div>
-  </>
-);
-}
+
+    <form
+      onSubmit={sendMessage}
+      style={{
+        display: "flex",
+        gap: "0.75rem",
+        width: "100%",
+        marginBottom: 2
+      }}
+    >
+      <input
+        type="text"
+        ref={inputRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Enter your email to begin..."
+        style={{
+          flex: 1,
+          padding: "0.65rem 1rem",
+          fontSize: 16,
+          borderRadius: 16,
+          background: "#0e192a",
+          color: "#cceeff",
+          border: "1.5px solid #00fff9",
+          outline: "none",
+          fontWeight: 500,
+          textAlign: "center",
+          transition: "border 0.18s",
+          minWidth: 0,
+        }}
+        autoFocus
+        disabled={loading}
+      />
+      <button
+        type="submit"
+        disabled={loading}
+        style={{
+          padding: "0.65rem 1.8rem",
+          background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
+          color: "#fff",
+          border: "none",
+          borderRadius: 16,
+          fontWeight: 700,
+          fontSize: 16,
+          cursor: loading ? "not-allowed" : "pointer",
+          transition: "background 0.18s",
+          boxShadow: "0 2px 10px #00fff933",
+          letterSpacing: 0.2
+        }}
+      >
+        {loading ? "..." : "Send"}
+      </button>
+    </form>
+
+  </div>
+</div>
+
+{/* --- Global Reward Tracker Below Chat --- */}
+<div style={{
+  position: "relative",
+  width: "100%",
+  marginTop: "2rem",
+  padding: "1rem 2rem",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1,
+}}>
+  <GlobalStats />
+</div>
+
+        </>
+      );
+    }
