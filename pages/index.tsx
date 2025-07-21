@@ -86,7 +86,7 @@ export default function Home() {
       setMessages([
         {
           sender: "NAO",
-          text: "Welcome! I am NAO, your health intelligence. Do you already have a NAO health passport, or would you like to create one?",
+          text: "Welcome! I am NAO. Ready to start earning rewards for your workouts? Just enter your email to begin",
         },
       ]);
       setHasShownWelcome(true);
@@ -520,16 +520,12 @@ export default function Home() {
     if (inputRef.current) inputRef.current.focus();
   };
 
-  return (
-    <div style={{
-      position: "relative",
-      minHeight: "100vh",
-      width: "100vw",
-      overflow: "hidden",
-      color: "#fff"
-    }}>
-      
+  // Assume you have address and rewardState in scope.
+  // If not, connect wallet logic goes here.
+  const address = user?.walletId;
 
+  return (
+    <>
       <div
         style={{
           position: "fixed",
@@ -549,88 +545,66 @@ export default function Home() {
       >
         N A O HEALTH INTELLIGENCE REWARDED YOUR SWEAT PAYS OFF EVERY WORKOUT EVERY REP ...YOU EVOLVE ..YOU EARN
       </div>
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        aria-hidden="true"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          objectFit: "cover",
-          zIndex: 0
-        }}
-      >
-        <source src="/ai_intro_video1.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
       <div
-        style={{
-          position: "fixed",
-          left: "50%",
-          transform: "translateX(-50%)",
-          bottom: "10vh",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          pointerEvents: "none",
-          zIndex: 2
-        }}
-      >
-        <div
-          style={{
-            pointerEvents: "auto",
-            maxWidth: 700,
-            width: "95vw",
-            background: "rgba(13, 32, 60, 0.38)",
-            border: "2px solid #00fff9",
-            boxShadow: "0 0 18px 2px #00fff9cc, 0 0 4px 1px #00fff9",
-            borderRadius: 30,
-            padding: 14,
-            backdropFilter: "blur(10px)",
-            marginBottom: 6,
-            minHeight: 0,
-          }}
-        >
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      backgroundImage: "url('/index_backgrounnd_4.png')",
+      backgroundPosition: "center",
+      backgroundSize: "cover",
+      backgroundRepeat: "no-repeat",
+      zIndex: 0
+    }}
+/>
+
+
+      {/* --- Modern Chat UI --- */}
+      <div className="nao-echo-container">
+        <div className="nao-echo-inner">
+          <div className="chat-message" style={{ marginBottom: 8, fontWeight: 600, color: "#00fff9" }}>
+            Welcome! I’m NAO. Ready to start earning rewards for your workouts?
+          </div>
+
           <div style={{
             maxHeight: 110,
             overflowY: "auto",
             marginBottom: 8,
             scrollBehavior: "smooth",
+            background: "rgba(8,18,30,0.95)",
+            borderRadius: 8,
+            padding: "7px 10px",
+            width: "100%",
+            fontSize: "1rem",
+            boxShadow: "0 0 0.5rem #00fff944",
           }}>
             {messages.map((msg, i) => (
-              <div key={i} style={{
-                margin: "0.25rem 0",
-                color: msg.sender === "NAO"
-                  ? "#00fff9"
-                  : msg.sender === "System"
+              <div key={i} className="chat-message" style={{
+                color:
+                  msg.sender === "NAO"
+                    ? "#00fff9"
+                    : msg.sender === "System"
                     ? "#ff6b6b"
                     : "#cceeff",
-                textShadow: msg.sender === "NAO"
-                  ? "0 0 8px #00fff9, 0 0 2px #00fff9"
-                  : msg.sender === "System"
-                    ? "0 0 6px #ff6b6b"
-                    : "0 0 6px #338fff",
-                fontSize: 17,
-                lineHeight: 1.33,
-                letterSpacing: 0.2,
+                fontWeight: msg.sender === "NAO" ? 700 : 400,
+                margin: "2px 0",
+                letterSpacing: 0.1,
+                fontSize: "0.98em"
               }}>
                 <b>{msg.sender}:</b> {msg.text}
               </div>
             ))}
           </div>
+
           <form
             onSubmit={sendMessage}
             style={{
               display: "flex",
-              gap: 8,
+              gap: "0.75rem",
               width: "100%",
-              pointerEvents: "auto"
+              marginBottom: 2
             }}
           >
             <input
@@ -638,21 +612,20 @@ export default function Home() {
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="AWAKEN NAO..."
+              placeholder="Enter your email to begin..."
               style={{
                 flex: 1,
-                padding: "10px 18px",
+                padding: "0.65rem 1rem",
                 fontSize: 16,
-                borderRadius: 18,
-                background: "rgba(20, 30, 60, 0.5)",
-                color: "#bbffff",
-                border: "2px solid #00fff9",
+                borderRadius: 16,
+                background: "#0e192a",
+                color: "#cceeff",
+                border: "1.5px solid #00fff9",
                 outline: "none",
-                boxShadow: "0 0 8px 2px #00fff9",
                 fontWeight: 500,
                 textAlign: "center",
-                backdropFilter: "blur(2px)",
-                transition: "box-shadow 0.2s",
+                transition: "border 0.18s",
+                minWidth: 0,
               }}
               autoFocus
               disabled={loading}
@@ -661,22 +634,103 @@ export default function Home() {
               type="submit"
               disabled={loading}
               style={{
-                padding: "10px 28px",
+                padding: "0.65rem 1.8rem",
                 background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
                 color: "#fff",
                 border: "none",
-                borderRadius: 18,
-                fontWeight: "bold",
-                boxShadow: "0 0 12px 2px #00fff9",
+                borderRadius: 16,
+                fontWeight: 700,
+                fontSize: 16,
                 cursor: loading ? "not-allowed" : "pointer",
-                transition: "box-shadow 0.2s, background 0.2s"
+                transition: "background 0.18s",
+                boxShadow: "0 2px 10px #00fff933",
+                letterSpacing: 0.2
               }}
             >
               {loading ? "..." : "Send"}
             </button>
           </form>
+
+          {/* --- Wallet & USDC Info Section --- */}
+          {address && (
+            <div style={{ width: "100%" }}>
+              <div style={{ marginTop: "16px", color: "#0ff", fontSize: "0.85rem", textAlign: "center" }}>
+                <p>Connected Wallet for Rewards:</p>
+                <p style={{ fontFamily: "monospace", color: "#fff" }}>{address}</p>
+              </div>
+              <div style={{ margin: "12px 0 0 0", width: "100%" }}>
+                <button
+                  onClick={async () => {
+                    try {
+                      const payoutAmount = rewardState?.usdcReward || 0;
+                      const res = await fetch("/api/payout", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          toWallet: address,
+                          amount: payoutAmount.toString(),
+                        }),
+                      });
+                      if (!res.ok) throw new Error("Payout failed");
+                      alert(`✅ ${payoutAmount} USDC payout sent to your wallet!`);
+                    } catch (err) {
+                      console.error(err);
+                      alert("❌ Payout failed. Please try again later.");
+                    }
+                  }}
+                  style={{
+                    padding: "0.75rem 2.2rem",
+                    borderRadius: 999,
+                    background: "linear-gradient(to right, #00c6ff, #0072ff)",
+                    color: "#fff",
+                    fontWeight: 800,
+                    fontSize: 16,
+                    border: "none",
+                    boxShadow: "0 0 10px #00c6ff55",
+                    cursor: "pointer",
+                    marginBottom: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    width: "100%",
+                    transition: "all 0.18s",
+                  }}
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.boxShadow = "0 0 30px #00c6ff99")
+                  }
+                  onMouseOut={(e) =>
+                    (e.currentTarget.style.boxShadow = "0 0 10px #00c6ff55")
+                  }
+                >
+                  <span
+                    style={{
+                      textShadow: "1px 1px 2px #00c6ff, -1px -1px 2px #0072ff",
+                      fontWeight: 900,
+                      fontSize: "1.2rem",
+                      color: "#00ffcc",
+                    }}
+                  >
+                    $
+                  </span>
+                  Send Payout ({rewardState?.usdcReward || 0} USDC)
+                </button>
+                <p
+                  style={{
+                    color: "#0ff",
+                    fontSize: "0.85rem",
+                    marginBottom: "12px",
+                    textAlign: "center",
+                  }}
+                >
+                  💡 <strong>New:</strong> NAO rewards you in <strong>USDC</strong> — a stablecoin backed by dollars. Instant, global, secure.
+                </p>
+              </div>
+            </div>
+          )}
+          {/* --- End Wallet & USDC Info Section --- */}
         </div>
       </div>
-    </div>
+    </>
   );
 }
