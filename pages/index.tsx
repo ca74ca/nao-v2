@@ -3,17 +3,14 @@ import { useRouter } from "next/router";
 import NaoOnboardingForm from "../components/NaoOnboardingForm";
 import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
-import Image from "next/image";
 import { RewardsTracker } from "../components/RewardsTracker";
 import GlobalStats from "@/components/GlobalStats";
-
 
 // Simulated NFT tokenId for demo (replace with actual user's NFT token id)
 const NFT_TOKEN_ID = "demo-nft-123";
 
 // Example: function to build the new NFT traits per level
 function getUpdatedTraits(level: number) {
-  // Replace this with your actual NFT trait logic
   return { color: level > 2 ? "gold" : "silver", aura: level };
 }
 
@@ -55,7 +52,6 @@ export default function Home() {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [showLogo, setShowLogo] = useState(false);
 
   // Onboarding state and router
   const [isOnboarded, setIsOnboarded] = useState(false);
@@ -103,11 +99,6 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => setThreadId(data.threadId))
       .catch(() => setThreadId(null));
-  }, []);
-
-  // Trigger fade-in effect for logo
-  useEffect(() => {
-    setShowLogo(true);
   }, []);
 
   // INTENT RECOGNITION for smarter onboarding
@@ -174,7 +165,6 @@ export default function Home() {
 
     // --- Chat-based onboarding steps with INTENT CHECKS ---
     if (onboardingStep) {
-      // Check if the user is switching intent during onboarding
       const detectedIntent = checkIntentSwitch(input);
       if (detectedIntent === "login") {
         setMessages((msgs) => [
@@ -202,7 +192,6 @@ export default function Home() {
         return;
       }
 
-      // --- HANDLE loginUsername step ---
       if (onboardingStep === "loginUsername") {
         if (!input.includes("@") && input.length < 3) {
           setMessages((msgs) => [
@@ -225,7 +214,6 @@ export default function Home() {
         return;
       }
 
-      // --- HANDLE loginPassword step with "forgot" logic ---
       if (onboardingStep === "loginPassword") {
         if (
           ["forgot", "don't know", "do not know", "cant remember", "can't remember", "reset"].some(phrase =>
@@ -262,7 +250,6 @@ export default function Home() {
             ...msgs,
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
-          // --- PATCH: Merge and preserve walletId and other fields ---
           const prev = JSON.parse(localStorage.getItem("nao_user") || "{}");
           localStorage.setItem("nao_user", JSON.stringify({
             ...prev,
@@ -275,7 +262,6 @@ export default function Home() {
         return;
       }
 
-      // --- HANDLE resetPassword step ---
       if (onboardingStep === "resetPassword") {
         if (input.length < 6) {
           setMessages((msgs) => [
@@ -295,7 +281,6 @@ export default function Home() {
             ...msgs,
             { sender: "NAO", text: "Welcome back! You are now signed in!" }
           ]);
-          // --- PATCH: Merge and preserve walletId and other fields ---
           const prev = JSON.parse(localStorage.getItem("nao_user") || "{}");
           localStorage.setItem("nao_user", JSON.stringify({
             ...prev,
@@ -307,8 +292,6 @@ export default function Home() {
         }, 1600);
         return;
       }
-
-      // --- SIGNUP FLOW ---
 
       if (onboardingStep === "username") {
         if (input.length < 3 || /\s/.test(input)) {
@@ -364,7 +347,6 @@ export default function Home() {
         setLoading(false);
         return;
       }
-      // 🟡 NEW: Ask for health goals after email
       if (onboardingStep === "email") {
         if (!/\S+@\S+\.\S+/.test(input)) {
           setMessages((msgs) => [
@@ -386,7 +368,6 @@ export default function Home() {
         setLoading(false);
         return;
       }
-      // 🟢 NEW: Ask for connectWearables after health goals
       if (onboardingStep === "healthGoals") {
         setOnboardFields((fields) => ({ ...fields, healthGoals: input }));
         setOnboardingStep("connectWearables");
@@ -400,7 +381,6 @@ export default function Home() {
         setLoading(false);
         return;
       }
-      // 🟣 NEW: After connectWearables, POST everything to backend
       if (onboardingStep === "connectWearables") {
         const wantsWearables = /^y(es)?$/i.test(input.trim());
         setOnboardFields((fields) => ({ ...fields, connectWearables: wantsWearables }));
@@ -471,7 +451,6 @@ export default function Home() {
       return;
     }
 
-    // ⬇️ Example: Command triggers for reward events
     if (/workout/i.test(input)) {
       applyRewardEvent({ type: "workout", complete: true });
       setMessages((msgs) => [
@@ -488,7 +467,6 @@ export default function Home() {
     }
 
     try {
-      // Retrieve walletId from localStorage
       const user = JSON.parse(localStorage.getItem("nao_user") || "{}");
       const walletId = user.walletId;
 
@@ -498,7 +476,7 @@ export default function Home() {
         body: JSON.stringify({
           threadId,
           message: input,
-          walletId, // <-- ADD THIS LINE
+          walletId,
         }),
       });
       if (!res.ok) {
@@ -522,152 +500,156 @@ export default function Home() {
     if (inputRef.current) inputRef.current.focus();
   };
 
-  // Assume you have address and rewardState in scope.
-  // If not, connect wallet logic goes here.
   const address = user?.walletId;
 
   return (
     <>
+      {/* --- Fixed Header Slogan --- */}
       <div
         style={{
           position: "fixed",
           top: 20,
-          left: 24,
+          left: "50%",
+          transform: "translateX(-50%)",
           zIndex: 100,
-          fontSize: 18,
-          fontWeight: 500,
-          letterSpacing: 2,
+          fontSize: 16,
+          fontWeight: 600,
           color: "#00fff9",
-          textShadow: "0 0 6px rgb(208, 223, 223), 0 0 2px rgb(232, 239, 239)",
-          fontFamily: "inherit",
-          background: "rgba(0, 0, 0, 0.3)",
-          padding: "4px 10px",
-          boxShadow: "0 0 10px rgba(8, 8, 8, 0.67)",
+          textShadow: "0 0 6px #00fff9, 0 0 3px #00fff9",
+          background: "rgba(0, 0, 0, 0.5)",
+          padding: "6px 16px",
+          borderRadius: 12,
         }}
       >
-        N A O HEALTH INTELLIGENCE REWARDED YOUR SWEAT PAYS OFF EVERY WORKOUT EVERY REP ...YOU EVOLVE ..YOU EARN
+        N A O HEALTH INTELLIGENCE REWARDED - EVERY REP ... YOU EVOLVE ... YOU EARN
       </div>
+
+      {/* --- Full Screen Background --- */}
       <div
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      backgroundImage: "url('/index_backgrounnd_4.png')",
-      backgroundPosition: "center",
-      backgroundSize: "cover",
-      backgroundRepeat: "no-repeat",
-      zIndex: 0
-    }}
-/>
-
-
-   {/* --- Modern Chat UI --- */}
-<div className="nao-echo-container">
-  <div className="nao-echo-inner">
-
-    <div style={{
-      maxHeight: 110,
-      overflowY: "auto",
-      marginBottom: 8,
-      scrollBehavior: "smooth",
-      background: "rgba(8,18,30,0.95)",
-      borderRadius: 8,
-      padding: "7px 10px",
-      width: "100%",
-      fontSize: "1rem",
-      boxShadow: "0 0 0.5rem #00fff944",
-    }}>
-      {messages.map((msg, i) => (
-        <div key={i} className="chat-message" style={{
-          color:
-            msg.sender === "NAO"
-              ? "#00fff9"
-              : msg.sender === "System"
-              ? "#ff6b6b"
-              : "#cceeff",
-          fontWeight: msg.sender === "NAO" ? 700 : 400,
-          margin: "2px 0",
-          letterSpacing: 0.1,
-          fontSize: "0.98em"
-        }}>
-          <b>{msg.sender}:</b> {msg.text}
-        </div>
-      ))}
-    </div>
-
-    <form
-      onSubmit={sendMessage}
-      style={{
-        display: "flex",
-        gap: "0.75rem",
-        width: "100%",
-        marginBottom: 2
-      }}
-    >
-      <input
-        type="text"
-        ref={inputRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter your email to begin..."
         style={{
-          flex: 1,
-          padding: "0.65rem 1rem",
-          fontSize: 16,
-          borderRadius: 16,
-          background: "#0e192a",
-          color: "#cceeff",
-          border: "1.5px solid #00fff9",
-          outline: "none",
-          fontWeight: 500,
-          textAlign: "center",
-          transition: "border 0.18s",
-          minWidth: 0,
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          backgroundImage: "url('/index_backgrounnd_4.png')",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
         }}
-        autoFocus
-        disabled={loading}
       />
-      <button
-        type="submit"
-        disabled={loading}
+
+      {/* --- Chat UI --- */}
+      <div
         style={{
-          padding: "0.65rem 1.8rem",
-          background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
-          color: "#fff",
-          border: "none",
+          position: "relative",
+          width: "100%",
+          maxWidth: 480,
+          margin: "auto",
+          marginTop: "20vh",
+          padding: "1rem",
+          background: "rgba(8, 18, 30, 0.9)",
           borderRadius: 16,
-          fontWeight: 700,
-          fontSize: 16,
-          cursor: loading ? "not-allowed" : "pointer",
-          transition: "background 0.18s",
-          boxShadow: "0 2px 10px #00fff933",
-          letterSpacing: 0.2
+          boxShadow: "0 0 10px #00fff933",
+          zIndex: 10,
         }}
       >
-        {loading ? "..." : "Send"}
-      </button>
-    </form>
+        <div
+          style={{
+            maxHeight: 160,
+            overflowY: "auto",
+            marginBottom: 8,
+            scrollBehavior: "smooth",
+            padding: "0 4px",
+          }}
+        >
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              style={{
+                color:
+                  msg.sender === "NAO"
+                    ? "#00fff9"
+                    : msg.sender === "System"
+                    ? "#ff6b6b"
+                    : "#cceeff",
+                fontWeight: msg.sender === "NAO" ? 600 : 400,
+                margin: "3px 0",
+                fontSize: "0.95em",
+              }}
+            >
+              <b>{msg.sender}:</b> {msg.text}
+            </div>
+          ))}
+        </div>
 
-  </div>
-</div>
+        <form
+          onSubmit={sendMessage}
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            width: "100%",
+          }}
+        >
+          <input
+            type="text"
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Enter your email to begin..."
+            style={{
+              flex: 1,
+              padding: "0.5rem 1rem",
+              fontSize: 14,
+              borderRadius: 14,
+              background: "#0e192a",
+              color: "#cceeff",
+              border: "1px solid #00fff9",
+              outline: "none",
+              textAlign: "center",
+            }}
+            autoFocus
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: "0.5rem 1.5rem",
+              background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
+              color: "#fff",
+              border: "none",
+              borderRadius: 14,
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: loading ? "not-allowed" : "pointer",
+              transition: "background 0.2s",
+            }}
+          >
+            {loading ? "..." : "Send"}
+          </button>
+        </form>
+      </div>
 
-{/* --- Global Reward Tracker Below Chat --- */}
-<div style={{
-  position: "relative",
-  width: "100%",
-  marginTop: "2rem",
-  padding: "1rem 2rem",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 1,
-}}>
-  <GlobalStats />
-</div>
-
-        </>
-      );
-    }
+      {/* --- Global Reward Tracker Below --- */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: 1280,
+          margin: "4rem auto 0",
+          padding: "2rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2rem",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1,
+        }}
+      >
+        <GlobalStats />
+      </div>
+    </>
+  );
+}
