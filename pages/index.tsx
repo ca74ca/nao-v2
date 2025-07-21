@@ -5,6 +5,8 @@ import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
 import Image from "next/image";
 import { RewardsTracker } from "../components/RewardsTracker";
+import GlobalStats from "@/components/GlobalStats";
+
 
 // Simulated NFT tokenId for demo (replace with actual user's NFT token id)
 const NFT_TOKEN_ID = "demo-nft-123";
@@ -650,87 +652,22 @@ export default function Home() {
               {loading ? "..." : "Send"}
             </button>
           </form>
-
-          {/* --- Wallet & USDC Info Section --- */}
-          {address && (
-            <div style={{ width: "100%" }}>
-              <div style={{ marginTop: "16px", color: "#0ff", fontSize: "0.85rem", textAlign: "center" }}>
-                <p>Connected Wallet for Rewards:</p>
-                <p style={{ fontFamily: "monospace", color: "#fff" }}>{address}</p>
-              </div>
-              <div style={{ margin: "12px 0 0 0", width: "100%" }}>
-                <button
-                  onClick={async () => {
-                    try {
-                      const payoutAmount = rewardState?.usdcReward || 0;
-                      const res = await fetch("/api/payout", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          toWallet: address,
-                          amount: payoutAmount.toString(),
-                        }),
-                      });
-                      if (!res.ok) throw new Error("Payout failed");
-                      alert(`✅ ${payoutAmount} USDC payout sent to your wallet!`);
-                    } catch (err) {
-                      console.error(err);
-                      alert("❌ Payout failed. Please try again later.");
-                    }
-                  }}
-                  style={{
-                    padding: "0.75rem 2.2rem",
-                    borderRadius: 999,
-                    background: "linear-gradient(to right, #00c6ff, #0072ff)",
-                    color: "#fff",
-                    fontWeight: 800,
-                    fontSize: 16,
-                    border: "none",
-                    boxShadow: "0 0 10px #00c6ff55",
-                    cursor: "pointer",
-                    marginBottom: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    width: "100%",
-                    transition: "all 0.18s",
-                  }}
-                  onMouseOver={(e) =>
-                    (e.currentTarget.style.boxShadow = "0 0 30px #00c6ff99")
-                  }
-                  onMouseOut={(e) =>
-                    (e.currentTarget.style.boxShadow = "0 0 10px #00c6ff55")
-                  }
-                >
-                  <span
-                    style={{
-                      textShadow: "1px 1px 2px #00c6ff, -1px -1px 2px #0072ff",
-                      fontWeight: 900,
-                      fontSize: "1.2rem",
-                      color: "#00ffcc",
-                    }}
-                  >
-                    $
-                  </span>
-                  Send Payout ({rewardState?.usdcReward || 0} USDC)
-                </button>
-                <p
-                  style={{
-                    color: "#0ff",
-                    fontSize: "0.85rem",
-                    marginBottom: "12px",
-                    textAlign: "center",
-                  }}
-                >
-                  💡 <strong>New:</strong> NAO rewards you in <strong>USDC</strong> — a stablecoin backed by dollars. Instant, global, secure.
-                </p>
-              </div>
-            </div>
-          )}
-          {/* --- End Wallet & USDC Info Section --- */}
         </div>
       </div>
-    </>
-  );
+    {/* --- Global Reward Tracker Below Chat --- */}
+    <div style={{
+      position: "relative",
+      width: "100%",
+      marginTop: "2rem",
+      padding: "1rem 2rem",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1,
+    }}>
+      <GlobalStats />
+    </div>
+  </>
+);
 }
