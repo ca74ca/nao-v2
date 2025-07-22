@@ -47,8 +47,10 @@ const startupTips = [
 ];
 
 
-const randomTip = startupTips[Math.floor(Math.random() * startupTips.length)];
-
+const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+const daySeed = today.split('-').join(''); // "20250721"
+const seededIndex = parseInt(daySeed) % startupTips.length;
+const dailyTip = startupTips[seededIndex];
 
 export default function DailyOutlook({
   date,

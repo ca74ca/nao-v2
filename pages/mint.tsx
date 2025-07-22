@@ -15,6 +15,10 @@ import ActionBar from "../components/ActionBar";
 import RedeemPopup from "@/components/RedeemPopup";
 import { getWhoopAuthUrl } from '../utils/getWhoopAuthUrl';
 import { RewardState } from "../src/types/RewardState";
+import { getDailyTip } from "@/utils/tips";
+
+const dailyTip = getDailyTip();
+
 
 
 // --- Evolve NFT Action Trigger (original, unchanged) ---
@@ -710,16 +714,18 @@ const sendMessage = async (input: string) => {
         <div style={{ fontSize: 16, color: WHITE_SOFT, marginBottom: 8 }}>
           {`Weather in New York: ${weather}`}
         </div>
-        <div
-          style={{
-            fontSize: 16,
-            color: WHITE_SOFT,
-            marginBottom: 16,
-            fontStyle: "italic",
-          }}
-        >
-          🚀 Startup tip: Stay hydrated and sync your health data for maximum rewards!
-        </div>
+<div
+  style={{
+    fontSize: 16,
+    color: WHITE_SOFT,
+    marginBottom: 16,
+    fontStyle: "italic",
+  }}
+>
+  <div style={{ color: "#aaa", marginTop: "1rem" }}>
+    Startup tip: {dailyTip}
+  </div>
+</div>
         <div
           style={{
             display: "flex",
