@@ -66,7 +66,7 @@ const AuthModal = ({ onClose }: { onClose: () => void }) => {
         background: "#0e192a",
         padding: "3rem",
         borderRadius: "1rem",
-        boxShadow: "0 0 30px rgba(200, 200, 200, 0.7)", // soft grey glow
+        boxShadow: "0 0 30px rgba(200, 200, 200, 0.7)",
         width: "90%",
         maxWidth: 420,
         color: "#cceeff",
@@ -124,6 +124,11 @@ const AuthModal = ({ onClose }: { onClose: () => void }) => {
             <button onClick={handleSubmit} style={submitButtonStyle} disabled={loading}>
               {loading ? "Logging In..." : "Log In and Start Earning"}
             </button>
+            <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#ccc" }}>
+              <a href="/reset-password" style={{ color: "lime", textDecoration: "underline" }}>
+                Forgot password? Reset here.
+              </a>
+            </p>
           </>
         )}
 
