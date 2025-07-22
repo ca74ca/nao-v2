@@ -123,45 +123,42 @@ export default function Home() {
     setLoading(true);
 
     // --- Account Choice Interception ---
-    if (awaitingAccountChoice) {
-      const msg = input.toLowerCase();
-      if (
-        ["yes", "already", "i have one", "login"].some((phrase) => msg.includes(phrase))
-      ) {
-        setAwaitingAccountChoice(false);
-        setOnboardingStep("loginUsername");
-        setMessages((msgs) => [
-          ...msgs,
-          { sender: "NAO", text: "Please enter your username or email to sign in." }
-        ]);
-        setLoading(false);
-        return;
-      } else if (
-        ["no", "create", "sign up", "new"].some((phrase) => msg.includes(phrase))
-      ) {
-        setAwaitingAccountChoice(false);
-        setOnboardingStep("username");
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "NAO",
-            text: "Great! Let's create your NAO health passport. What would you like your username to be?",
-          },
-        ]);
-        setLoading(false);
-        return;
-      } else {
-        setMessages((msgs) => [
-          ...msgs,
-          {
-            sender: "NAO",
-            text: "Please say 'yes' if you already have a NAO profile, or 'no' to create your health passport.",
-          },
-        ]);
-        setLoading(false);
-        return;
-      }
-    }
+if (awaitingAccountChoice) {
+  const intent = checkIntentSwitch(input);
+  if (intent === "login") {
+    setAwaitingAccountChoice(false);
+    setOnboardingStep("loginUsername");
+    setMessages((msgs) => [
+      ...msgs,
+      { sender: "NAO", text: "Got it. Please enter your username or email to sign in." }
+    ]);
+    setLoading(false);
+    return;
+  } else if (intent === "signup") {
+    setAwaitingAccountChoice(false);
+    setOnboardingStep("username");
+    setMessages((msgs) => [
+      ...msgs,
+      {
+        sender: "NAO",
+        text: "Let's create your NAO health passport. What would you like your username to be?",
+      },
+    ]);
+    setLoading(false);
+    return;
+  } else {
+    setMessages((msgs) => [
+      ...msgs,
+      {
+        sender: "NAO",
+        text: "Just clarify for me: are you here to sign in, or are we creating a new account together?",
+      },
+    ]);
+    setLoading(false);
+    return;
+  }
+}
+
 
     // --- Chat-based onboarding steps with INTENT CHECKS ---
     if (onboardingStep) {
