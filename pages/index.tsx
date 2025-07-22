@@ -4,6 +4,7 @@ import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
 import GlobalStats from "@/components/GlobalStats";
 import AuthModal from "../components/AuthModal";
+import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
 
 const NFT_TOKEN_ID = "demo-nft-123";
 
@@ -209,7 +210,7 @@ export default function Home() {
 
         <div style={{ flex: 1 }}></div>
 
-        {/* Footer */}
+        {/* Footer (keep ONLY this one) */}
         <footer style={{ padding: "1rem 2rem", color: "#cceeff", textAlign: "center" }}>
           &copy; 2025 NAOVERSE. All rights reserved.
         </footer>
@@ -232,10 +233,13 @@ export default function Home() {
         }}
       >
         <GlobalStats />
+        <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
+          <LeftColumnLiveFeed />
+        </div>
       </div>
 
       {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
       {showModal && <AuthModal onClose={() => setShowModal(false)} />}
     </>
   );
-};
+}
