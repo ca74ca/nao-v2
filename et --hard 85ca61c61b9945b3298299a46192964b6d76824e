@@ -1,0 +1,1844 @@
+[33mcommit a3c14703db5be7f2f3eaaf4c19aaa931802f7a4e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 21 23:38:16 2025 +0000
+
+    Updated landing page: global tracker, columns, footer image, removed slogan, refined layout
+
+[33mcommit a63351032381dfca995a0095cda566faa8eee341[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 21 21:55:36 2025 +0000
+
+    Update header slogan color to space blue and remove text glow
+
+[33mcommit 2a8935c9f2b598189056386bfca44ef9475eca98[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 21 21:28:39 2025 +0000
+
+    Refactored GlobalStats styling to neon green; fixed Chat UI sizing and background behavior for mobile and desktop
+
+[33mcommit 85ca61c61b9945b3298299a46192964b6d76824e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 21 20:57:11 2025 +0000
+
+    Clean final index.tsx layout fixed for mobile and desktop
+
+[33mcommit b11aaaf5414d5842d634809ff7063c4d1557b55e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 21 20:40:31 2025 +0000
+
+    Cleaned index.tsx: removed duplicate chat slogan and added GlobalStats to bottom
+
+[33mcommit 6c50152d6c37ca2f523953f6c1a71c6be2df6fae[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 21 20:00:49 2025 +0000
+
+    Updated index page: removed payout UI, added GlobalStats below chat
+
+[33mcommit 8be17b8643100d72ee352d7a78474cb57dc0f678[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 21 19:09:57 2025 +0000
+
+    Updated index page: removed video, added background image, cleaned chat UI
+
+[33mcommit 373ae5dbf0fb9649ce1d9bb54d93a3b33f4fd474[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 19 21:33:20 2025 +0000
+
+    Final cleanup: RewardState imports confirmed clean, repo error-free
+
+[33mcommit 9a1f393e6e9d5a0b3c169494b5bb2961f4dd2200[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 19 21:21:39 2025 +0000
+
+    Pre-push code scan passed, all RewardState and API logic confirmed clean
+
+[33mcommit 134b3acc75610d694166a4c3b5cd554752609d80[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 19 20:44:15 2025 +0000
+
+    Cleaned up RewardEngine.ts, finalized rewardDelta return structure
+
+[33mcommit c381221cc52605d4554e5ffe1711ed22bc9de2d5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 19 20:35:37 2025 +0000
+
+    Added dynamic NAO daily tips to DailyOutlook, fixed quote formatting errors
+
+[33mcommit aa757dbafc0fd09ae968584d4be4b64c37db2c77[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 18 21:03:27 2025 +0000
+
+    Cleaned RewardEngine, unified RewardState with usdcReward and strainScore, fixed payout
+
+[33mcommit df8ba08dbf99a42bab8e2358bd877f8f30297cab[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 18 16:31:25 2025 +0000
+
+    Remove temporary NAO slogan block from index page
+
+[33mcommit 1afcd12a6c686d796da66a1396b8d9a1cd3e84f6[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 18 16:00:35 2025 +0000
+
+    Add NAO slogan and update globals.css for responsive chat container
+
+[33mcommit 5d73ee62065fb438abb21dbc3934532816315ca1[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 22:37:54 2025 +0000
+
+    Clean redirect: onboarding sends users to /mint
+
+[33mcommit 1b870111ea44391aac6ab406ef8273174980ea87[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 22:14:15 2025 +0000
+
+    Overwrite with NAO Cinematic FinalOnboarding (black bg, gradients, buttons)
+
+[33mcommit 76a7f31699b7fb292926ef9a6b523bcb6b62c1f5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 22:00:36 2025 +0000
+
+    Overwrite FinalOnboarding with NAO Cinematic version, fix deploy
+
+[33mcommit 3bbfaefa022cd5911bbc541cdb78add445e579e9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 21:50:55 2025 +0000
+
+    Update FinalOnboarding with full watermark and personal onboarding message
+
+[33mcommit ce41904985dc382cecd5a2d9781a8112077d26ea[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 20:58:42 2025 +0000
+
+    Finalize onboarding page and prepare for mint dashboard
+
+[33mcommit 84daedda79d2db907f782e070e4e85af5026ba6d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 19:45:24 2025 +0000
+
+    Fix background video opacity to 1 to remove white film effect
+
+[33mcommit c04f28e0a64579939775fd8c5cdb910a343ce4a1[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 19:07:20 2025 +0000
+
+    ✅ Fix: Centered NAO Echo chat box with correct pointer events and layout
+
+[33mcommit 9dd471fcf4cd8bcfc30dc241a775f28422560ea1[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 18:08:30 2025 +0000
+
+    �� Add payout API endpoint
+
+[33mcommit 82f74125119424a5df8e2bd7590491a4688d9009[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 18:08:19 2025 +0000
+
+    ♻️ Refactor: Move EchoAssistant container styles to globals.css for clean layout and click fix
+
+[33mcommit 1676342805a88a1cf5fd990747fe2ff2450debbf[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 17:25:20 2025 +0000
+
+    Final fix: EchoAssistant container uses pointer-events none for wallet clicks
+
+[33mcommit 4c57ed8bf25cdc942d3c711df3e29d3a28801989[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 17 12:36:15 2025 +0000
+
+    Fix Echo chat box width and z-index to prevent blocking wallet buttons
+
+[33mcommit 7000a87a829d97518f14f928afcfd7e26e4a3660[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 16 22:39:48 2025 +0000
+
+    Add payout button with styled dollar sign near wallet connects
+
+[33mcommit 4a2839282c5a074ed5aede38724e98bfecebae0d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 16 22:19:05 2025 +0000
+
+    Remove old RedeemPopup component, keep clean right-side modal
+
+[33mcommit e9c239219c89e64e8241d161a2b9e261ecf61963[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 16 22:00:52 2025 +0000
+
+    Remove duplicate RedeemPopup, finalize placement
+
+[33mcommit 44d0a3b4acfe264a0e5a6f8da2397cd4f7f9aa37[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 16 20:37:52 2025 +0000
+
+    Fix Redeem popup positioning, Cancel button, and finalize wallet connect UI
+
+[33mcommit 4b69396056ecb299630ae53870c45eb75698dbeb[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 16 20:11:51 2025 +0000
+
+    Restore dNFT art to right-side UI and finalize updated layout
+
+[33mcommit 8292a3a53594a20d6f25611b2313d4f2228b637b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 16 19:50:45 2025 +0000
+
+    Add wallet connect UI (MetaMask / Coinbase) and integrate payout address management
+
+[33mcommit 5b38e25b18568867778fefb917ee240ed2752da4[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 23:48:11 2025 +0000
+
+    Update Hyrox confirmation email with PREMETEAM details and NAO rewards info
+
+[33mcommit 06f521f3a4aa335811e74a9f90b09179eea1aa12[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 22:11:09 2025 +0000
+
+    Final onboarding clean: rewards messaging, glowing button to dashboard
+
+[33mcommit a1aaf6b43594d854c8333e84d4f3998c992972b3[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 19:16:12 2025 +0000
+
+    Final onboarding clean with centered NAO branding and Roboto
+
+[33mcommit 4fc116f0a7c98da04ec8fccfe92f17421b39ec28[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 18:47:52 2025 +0000
+
+    Clean centered FinalOnboarding with NAO glow, AI chat, glowing CTA
+
+[33mcommit d880c12a0a533f781ec1022ab8ef486d5664b586[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 18:35:07 2025 +0000
+
+    Final onboarding with full description, AI chat, glowing CTA
+
+[33mcommit 54fa15ad43b0cd187c44252f576410f2bffba79a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 18:21:39 2025 +0000
+
+    Final onboarding: Clean intro, AI chat, glowing CTA to mint
+
+[33mcommit 7fe048d99e2aade0da3ae4e4e7e283c0b316bbc5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 18:04:06 2025 +0000
+
+    Strip down to full-screen background, AI chat, glowing buttons, working onboarding
+
+[33mcommit 10ba50392c6052d6bc3b727572d011d958128747[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 17:53:31 2025 +0000
+
+    Restore FinalOnboarding with clean logic, AI chat, background image, and onboarding flow
+
+[33mcommit 7b60a16dbf610dc52c3a2d98b8988b44ad9e7e7a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 17:31:39 2025 +0000
+
+    Fix FinalOnboarding background overlay and base bg-black for visibility
+
+[33mcommit 7e59b073c541af88ddb62bafd09545f9a181789b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 17:17:34 2025 +0000
+
+    Restore working FinalOnboarding with full sidebar, AI chat, glowing buttons, and background
+
+[33mcommit 73264afc8a3d6b133abe913d6e861ad12ef15d33[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 17:06:45 2025 +0000
+
+    Fix FinalOnboarding layout: restore sidebar, AI chat, buttons, and background
+
+[33mcommit a3a169c8b117d778715a002d4886d198bda771e5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 16:30:37 2025 +0000
+
+    Restore full FinalOnboarding with left panel, glowing buttons, fixed layout
+
+[33mcommit a073f45ed43cea9ac5b1a81cc1a5bdb5dc5d0fc8[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 16:14:08 2025 +0000
+
+    Fix FinalOnboarding layout and background containment
+
+[33mcommit d68a98411a511c8378dd498d86f8b57a48396705[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 15:39:42 2025 +0000
+
+    🎨 Align sync buttons to right under onboarding paragraph
+
+[33mcommit c349d1865dbaa91a8babce6b25c2d5d4ee7741b4[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 15:19:25 2025 +0000
+
+    🎨 Align sync buttons to right under onboarding paragraph
+
+[33mcommit 6984c4d6d83f6b996a0cc971e2c1b6f312417b21[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 00:51:07 2025 +0000
+
+    🎨 Align sync buttons to right, below onboarding paragraph
+
+[33mcommit 7f029607badc5143ae2bb6f39ba26376db2c9586[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 15 00:35:16 2025 +0000
+
+    ✅ Adjust onboarding paragraph to right side position
+
+[33mcommit 896bd426a1c28ffb604ff4ee6f29c5d9f4090051[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 23:26:27 2025 +0000
+
+    🔥 Finalize FinalOnboarding UI with correct paragraph, buttons, and background
+
+[33mcommit 043893505471db3594a74a2e13baaf10634b4a0e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 23:04:37 2025 +0000
+
+    💫 Finalized FinalOnboarding.tsx with clean responsive UI and logic
+
+[33mcommit 56a11e6c4bd19faf1e85a0aa967b9ccce25a29e4[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 22:48:29 2025 +0000
+
+    Fix final-onboarding layout: properly center description panel and fix background stretching
+
+[33mcommit ce507ac7474a94f8ad94627f3b0fb02e79e99538[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 22:33:03 2025 +0000
+
+    Improve final-onboarding layout: center description panel and move continue button to top-right
+
+[33mcommit e0ab7d2c2a6dab6ec3c6eb5af678e4749c4f0677[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 22:15:06 2025 +0000
+
+    Replace video background with PNG image in final-onboarding page
+
+[33mcommit 5e11c23bcb66591aa10c018d58ca68b8872a4c50[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 21:08:53 2025 +0000
+
+    🔧 Fix evolve endpoint with correct Thirdweb clientId and env usage
+
+[33mcommit 80b7807f8afb3e5deaae1f23c2bb92b4fdd08616[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 20:40:49 2025 +0000
+
+    🔧 Fixed DailyOutlookProps to include WHOOP types
+
+[33mcommit bf2c8e3cd9b8c7cc47ec3d00aced853ab61d701e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 20:28:18 2025 +0000
+
+    🔥 Fixed evolve.ts with proper updateMetadata logic for dNFT
+
+[33mcommit 804f0518fc77e130ad21e95bfe883af134b7cfd5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 20:23:15 2025 +0000
+
+    🚀 Fix evolve endpoint alignment and state updates
+
+[33mcommit ef51a04f17c583da24a9e234a802df4120af0581[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 19:50:26 2025 +0000
+
+    ♻️ Refactor DailyOutlook for live XP progress and removed Whoop
+
+[33mcommit d3c4a31256d16ab4e83cf30df684cd21cf371279[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 18:37:45 2025 +0000
+
+    🔥 Fix: ensure localStorage syncs user data on mint for production
+
+[33mcommit 350da2d0a246e3aa68684e750f0b2fefd83a36c9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 14 18:22:50 2025 +0000
+
+    🔧 Fix: sync nao_user to localStorage on mint page
+
+[33mcommit e4d3d5cefeb9ffed88302c7e50a8d080fd3f50c6[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 11 19:52:46 2025 +0000
+
+    🧬 Add dNFT evolution images and prepare for NFT metadata integration
+
+[33mcommit 49d99bf14d427518cbf5aedc59cf4aa8f2defbe7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 10 17:51:24 2025 +0000
+
+    Fix welcome email import and confirm onboarding email flow
+
+[33mcommit 5a7cebddbbaaf35c38b74fd1567fe0565e0c84c9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 21:44:37 2025 +0000
+
+    🛠️ Fix: Include walletId during new user onboarding
+
+[33mcommit 52d6131cdd6358c15dca34fcb2546b44cc1ffe4c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 21:28:06 2025 +0000
+
+    🐛 Fix db() import in getDNFT and minor adjustments in getRewardStatus
+
+[33mcommit 55aa39f04056ae17dee7a60d28a7aed4dabd753e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 20:05:03 2025 +0000
+
+    ✅ Fix: Converted User.js to Mongoose model for reward engine
+
+[33mcommit db642cd4776b27aa9683ba5d887feccd1d9c53e7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 19:34:45 2025 +0000
+
+    🐛 Fix ethers provider for v5 compatibility
+
+[33mcommit 76d70d2e93835adca607df4d38ff38f802ed793b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 18:22:23 2025 +0000
+
+    ➕ Add redeem route to backend/routes
+
+[33mcommit d916a8586c62457fb80931e9a99f2737ecc242ae[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 18:15:02 2025 +0000
+
+    🔗 Register /api/redeem route in server.js
+
+[33mcommit f197734a0ba5c41e9989d1d442c62e6d23473720[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 12:22:39 2025 +0000
+
+    🐛 Fix: correct Workout model path for Render
+
+[33mcommit 617f04ed642f1dc3e757965cea281b8b7b2e4708[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 12:15:30 2025 +0000
+
+    ✅ Fix: Updated DB paths in getDNFT and getRewardStatus for Render compatibility
+
+[33mcommit 4fe903847cefa0dd1d2701737583679f544f4178[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 9 12:07:07 2025 +0000
+
+    🚀 Added /api/dnft route with NFT metadata, art, and tier logic
+
+[33mcommit 7e57c3bedc26c9f397b6a1a72a5b3c5c9a40feef[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 22:13:36 2025 +0000
+
+    🐛 Fix path to generateDailyMessage in dailyGreeting route
+
+[33mcommit acec72c6b1538a4155a783bdb361b8d38ef7629a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 22:03:27 2025 +0000
+
+    ✅ Register /api/history route in server.js
+
+[33mcommit 844893130e47e06e3e863ef5348f673a58bf8054[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 21:35:07 2025 +0000
+
+    🔁 Force backend redeploy
+
+[33mcommit d8a43b90dcf0096bccd4fc29dff8013cb2def984[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 21:11:08 2025 +0000
+
+    Fix OpenAI tool history API call to use backend server directly
+    
+    - Updated get_user_history/getRecentWorkouts tool handler to call https://nao-sdk-api.onrender.com/api/history/
+    - This fixes the 'HTML instead of JSON' error by calling the actual backend server
+    - Removed attempt to create Next.js proxy API route - direct backend call is cleaner
+    - Tool now uses proper fallback: args.userId || args.walletId || walletId
+
+[33mcommit 9d9f99727d3ed99ad02c5b1563064ece25a5b956[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 20:50:33 2025 +0000
+
+    ✅ Fix workout history tool call with fallback to walletId
+
+[33mcommit 5f2a6deec3de485e67697425e402c6f28ccc00d5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 20:27:35 2025 +0000
+
+    🛠 Fix getRecentWorkouts fetch route in EchoAssistant
+
+[33mcommit 45510532e5dfda86cd59245124e9bc4434c7ae9e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 20:15:40 2025 +0000
+
+    ⚡️ Update EchoAssistant with full tool handling logic
+
+[33mcommit eb32bb3220e59660740737f5184e4bf0f9d1b752[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 19:04:58 2025 +0000
+
+    ✅ Add dailyGreeting route and message generator
+
+[33mcommit 5a47e5a520d061e517cffb38c2f67f0772a222d8[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 12:40:01 2025 +0000
+
+    🔥 Fix: Save walletId during onboarding
+
+[33mcommit 490cb6cddb42d1fd0bd99dd5823510507dcef803[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 8 12:11:12 2025 +0000
+
+    ✅ Register history route and fix userId/timestamp mismatch
+
+[33mcommit 749b930840a2d5b7be44ddc2b41cd5eedde8e38a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 23:47:00 2025 +0000
+
+    ✨ Final onboarding buttons styled + logic improvements
+
+[33mcommit c3d2766ae40e8ab3ff3587a9fa1ef535c8576e35[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 23:15:26 2025 +0000
+
+    💄 UI update: reposition onboarding text next to NAO model
+
+[33mcommit 7218794b2e768456506f2fd4c109dca55b521e3f[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 22:18:50 2025 +0000
+
+    Complete useRewardState hook implementation
+    
+    - Fix TypeScript compilation error with proper RewardResult type
+    - Implement real applyRewardEvent function using existing backend endpoints
+    - Add client-side RewardEngine for immediate feedback with backend sync
+    - Map energyCredits to actual rewardPoints from backend
+    - Remove all placeholders - fully functional for production users
+    - Add optimistic updates with rollback on errors
+    - Integrate with existing verifyWorkout endpoint for workout events
+
+[33mcommit 420e88a064ec131819b68ef595ffa8e8f7040310[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 19:25:48 2025 +0000
+
+    ✅ Updated useRewardState to use backend POST route
+
+[33mcommit 3fbc1b8f4b0ad543df796f01dffc1af9faea7e3c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 17:26:02 2025 +0000
+
+    🔧 mount /api/getRewardStatus in server.js
+
+[33mcommit 82a447822a6ac00ac1080fe62cc07ae446856819[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 16:48:36 2025 +0000
+
+    🔁 switch /getRewardStatus from GET to POST to match frontend
+
+[33mcommit d7dccfd43fc6ab51131183258c9b029d381cb540[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 16:30:27 2025 +0000
+
+    ♻️ restore RewardEngine schema + logic, patch reward logging
+
+[33mcommit c755769d0e395223d35067bba8e8e8f095a241d0[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jul 7 16:05:48 2025 +0000
+
+    ✅ Web3 compliance: Refactored userId to String in Workout model and fixed ObjectId validation issues
+
+[33mcommit 891b598139a5789f6c9ffa4ae26211e5566ce61d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jul 6 16:23:44 2025 +0000
+
+    Fix threadId naming and case-insensitive wallet lookup
+    
+    - Changed thread_id to threadId in message.ts API to match frontend
+    - Fixed case-insensitive wallet lookup in RewardEngine.js using regex
+    - Resolves 'User not found' error for wallet address matching
+
+[33mcommit c31357c0cded4e938ac6182623e8cb28dba6d69d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jul 6 15:51:46 2025 +0000
+
+    🚑 Fix: Restore threadId logic to match frontend and fix assistant
+
+[33mcommit 520ba57dfc19585726082c7b213dc90eba668bb6[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jul 6 13:31:10 2025 +0000
+
+    🚑 Revert: restore threadId usage in NAOCommandInput and fix jsconfig
+
+[33mcommit ad7f235a89bc365298ceae7fd9d8afdb4307ab2b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jul 6 13:02:44 2025 +0000
+
+    ✅ Fix: unify thread_id and walletId logic across assistant functions
+
+[33mcommit a19068cd37fa6f315ba356b7864e914b4edb39e7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jul 6 12:28:56 2025 +0000
+
+    Include walletId in all /api/message requests
+
+[33mcommit a32bab03c1f379feced6df30f8d16abee1c3d6f6[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 5 21:01:05 2025 +0000
+
+    ✅ Fix: enforce walletId in logWorkout tool call
+
+[33mcommit 554875e4b5cc181ce0a2aebf4556124b647b757c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 5 20:25:14 2025 +0000
+
+    ✅ Add verifyWorkout proxy and fix walletId logging
+
+[33mcommit 5798b0e2d7e732e7fb62505ac49efc299d837860[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 5 20:10:04 2025 +0000
+
+    Add Next.js API proxy for /api/verifyWorkout endpoint
+
+[33mcommit cd63bf71e117bf58d13c8a154060f190cb0298be[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jul 5 19:21:39 2025 +0000
+
+    Fix: Normalize walletId lookups and improve workout verification logging
+
+[33mcommit d30033cd542e29beccf370bb86176f80ff687de7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 21:38:08 2025 +0000
+
+    Fix user lookup to use walletId in RewardEngine.js for NAO
+
+[33mcommit a443fefbda6c9a489798db00779ece8daf01ae84[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 19:52:32 2025 +0000
+
+    Revise backend models for NAO gamification
+
+[33mcommit 5ee945c01204f8f325ab85cf79cae517894725c1[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 19:31:06 2025 +0000
+
+    Add User model for backend
+
+[33mcommit 29ecd9d641ca4f22c677e29b78f651844ce01742[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 19:21:46 2025 +0000
+
+    🔥 Fix: remove TypeScript from RewardEngine.js for clean Node.js deploy
+
+[33mcommit 7a02775ae23fe60f5c9a7b3ddad61b5dbb1377a3[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 19:12:42 2025 +0000
+
+    ✅ Fix RewardEngine.js import in verifyWorkout route
+
+[33mcommit 9d7a676e17628207e85ef188292f063cb079bec1[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 18:37:54 2025 +0000
+
+    🚀 Retry deploy
+
+[33mcommit a9425e505fbc66d34c88de38376f0ec94eed18a3[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 18:34:27 2025 +0000
+
+    🚑 Add RewardEngine.js for backend deploy compatibility
+
+[33mcommit c85b83803ba18767b978dc3532ec74db97569f75[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 18:24:36 2025 +0000
+
+    ✅ Final fix: require RewardEngine correctly
+
+[33mcommit 798fe046aef4236448401339ad716630492d2c6d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 17:43:51 2025 +0000
+
+    ✅ Switch to ES module import for RewardEngine
+
+[33mcommit 795496d95007c4106cb3036850b1dd73eb41b3a9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 17:35:05 2025 +0000
+
+    🔁 Add frontend proxy route for getRewardStatus
+
+[33mcommit 72926554a113be3dd80ac25d80c991476c3a9bc5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 15:41:24 2025 +0000
+
+    ✅ Add getUserStatus helper and new /getRewardStatus route
+
+[33mcommit 8bbe40b7076e735127a046351591dc6bdcdfb724[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 15:05:21 2025 +0000
+
+    ⚙️ Upgrade RewardEngine: log workouts & rewards
+
+[33mcommit f79ad3c7e0bec2780acf6f00ecaf817b5ea32ccf[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 14:58:52 2025 +0000
+
+    ✅ Fix User model with ES module export for RewardEngine compatibility
+
+[33mcommit d18a9981ea5cec44a3d6c82bce66cdb12f8c3b62[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 14:43:26 2025 +0000
+
+    ✅ Connected verifyWorkout to live RewardEngine
+
+[33mcommit 6c2405b7b20efe00bb08cc5f5d7d03674ab22a3a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jul 4 14:28:32 2025 +0000
+
+    🧠 Add MongoDB models for Workout & RewardEvent
+
+[33mcommit a5b5a4859a362ad68ea67d17e5e9b1c2112718b1[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 3 21:24:30 2025 +0000
+
+    Fix mint page: safe passportData access, fallback logic
+
+[33mcommit 874c166d7b8c1836cfef2972c4ebdf373401ab5d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 3 21:11:59 2025 +0000
+
+    Fix mint page: safe passportData access, fallback logic
+
+[33mcommit 199f27548f85c1aa3b4c812dfd2ec9636ad92ee2[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 3 20:59:20 2025 +0000
+
+    Fix: resolve passportData usage before declaration and fallback logic
+
+[33mcommit 782bd34b699b33ed1ac22643c1848e05d5c0e4a0[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 3 21:57:05 2025 +0000
+
+    💾 Temp commit before rebase
+
+[33mcommit 367cfaf6053cf51825dd7704c24558600ea675f4[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 3 16:17:32 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 5d8c9d3ec53717ee36f83584c1ee1c6ade30bea2[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 3 01:49:09 2025 +0000
+
+    🔧 Fix: pass walletId to useRewardState in mint page
+
+[33mcommit e68d4c6efbafb59357bcb09e39e81b84f65ba64e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jul 3 01:38:25 2025 +0000
+
+    ✅ Fix walletId argument for useRewardState
+
+[33mcommit 32f8c0c525af213e16545ad8b9041a82fca9d88c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 2 23:45:43 2025 +0000
+
+    Connect useRewardState hook to backend API for live rewards
+
+[33mcommit 9029305d9c672c7f1ae2cdad713963ef64bd514c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 2 16:36:29 2025 +0000
+
+    Enable getRewardStatus tool + expose tool list
+
+[33mcommit 0a29e85e21da3f8c7ecf9a7574e2b25673d59c2a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 2 03:01:10 2025 +0000
+
+    Add /getRewardStatus route
+
+[33mcommit 8d204f84c3e27062232897c104e9d2b3a4b075bf[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 2 02:00:04 2025 +0000
+
+    Fix: stable message.ts for NAO
+
+[33mcommit 4a33991ff47a2f7674d9cbf6b67677ab75b8e13a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 2 01:50:07 2025 +0000
+
+    🔁 Revert message.ts to last working AI assistant state
+
+[33mcommit 28f7d8c15bfd13bda719b2115db0e31cdf08929a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jul 2 00:05:04 2025 +0000
+
+    ✅ Updated verifyWorkout route with reward logic and debug logs
+
+[33mcommit 691d55ba4d84d98b7fba77df39e9726e25b5faee[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 23:47:59 2025 +0000
+
+    Update: finalize NAO message API with smart tools and reward logic
+
+[33mcommit f15e3c9e79bb66b70c152440e0be868e70859721[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 23:10:44 2025 +0000
+
+    Fix: hook up verifyWorkout + reward message
+
+[33mcommit 7a8d161dd892d916416d11de356422ec1ddcc950[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 22:52:59 2025 +0000
+
+    Fix backend router reference and frontend await-in-non-async error
+
+[33mcommit 55d2855a98258a6232448ede940982cc26c3eeeb[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 20:06:16 2025 +0000
+
+    Fix: update assistant UI scroll height to 40vh
+
+[33mcommit ecda4952a31dc9b3b18e2d015a17558a860e8cdd[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 16:04:31 2025 -0400
+
+    Update EchoAssistant.tsx
+
+[33mcommit bcfa377a28739a9575284e0ba7cac41546d35d9b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 18:56:07 2025 +0000
+
+    ✨ Add auto-scroll to EchoAssistant chat UI
+
+[33mcommit 5419dfcc768e1b9b971d43c7514746ca0df8fdfc[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 18:36:53 2025 +0000
+
+    Update message.ts (or your change description)
+
+[33mcommit 7a67040bad89f5a9fe6257c69e0159238d17d3b5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 17:33:07 2025 +0000
+
+    Prep for deployment: backend and frontend ready
+
+[33mcommit 7b6b38789c6f850b7c266b58abb20eaea05966b5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jul 1 01:24:11 2025 +0000
+
+    Final backend and frontend update for NAO deploy
+
+[33mcommit 385ee158dd03d5862aab799f79ee3fbcadc03eb0[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jun 29 15:09:23 2025 -0400
+
+    Update passport.tsx
+
+[33mcommit 37ae798fddf6cdf19ca36db8083ef306b88b887e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jun 29 14:56:22 2025 -0400
+
+    Create passport.tsx
+
+[33mcommit 94ea7bd283c0ee1c9a7e6ebf397570800958c3a3[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jun 29 14:41:03 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit 9c2e5a2bbab905f6618b93bcaac08a56ffa5f3df[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jun 29 14:27:14 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit e4c4411eac97c884902a2529bf08eae95c4ae7e0[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jun 29 14:23:38 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit aa1758f16bb80f6720396bd3e5ab07165d4927fc[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jun 29 14:20:45 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit a6955319c4dc54a2c03b44b104a5aa9406c073d8[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sun Jun 29 08:59:32 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit cbd40e7077e3f6f1da2c71769e68ee16e9537342[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jun 28 14:40:32 2025 -0400
+
+    Update whoop-auth.ts
+
+[33mcommit e6d743e1e832712cdcd95e3b90b4b797138f9668[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jun 28 14:23:16 2025 -0400
+
+    Update whoop-auth.ts
+
+[33mcommit d4bb894a3ea1a07ef6e35f6e95c6e157c4c6275f[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jun 28 13:54:22 2025 -0400
+
+    Update whoop-auth.ts
+
+[33mcommit 12b63b1fff0d4f57df2375d16a793225e6b5c261[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Sat Jun 28 13:48:27 2025 -0400
+
+    Update whoop-auth.ts
+
+[33mcommit 5729479c4b98f3a87d6826df63f0b7d3279bd3e5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 17:10:15 2025 -0400
+
+    Update server.js
+
+[33mcommit 7e95d5e8b5ebb4c70fdea4380bae2e106b1003cf[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 17:02:54 2025 -0400
+
+    Update server.js
+
+[33mcommit 2173aebb3bcdf6a148d4e089a1d9b62ff986dd64[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 16:59:24 2025 -0400
+
+    Update package.json
+
+[33mcommit 0326c495339a8feb042da30719ac5da8e42c1cc7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 16:53:07 2025 -0400
+
+    Update server.js
+
+[33mcommit e724bf89594e4c871e41667d47ea321ecb18602a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 14:44:44 2025 -0400
+
+    Update index.tsx
+
+[33mcommit b26bf8553f13b19c62db54f224823ec5cdd7bd51[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 14:33:51 2025 -0400
+
+    Update whoop-callback.ts
+
+[33mcommit bce46bef67ae66ee0750deda72ef932ea22aa508[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 14:15:48 2025 -0400
+
+    Update getWhoopAuthUrl.ts
+
+[33mcommit 99436997d06b9e4fadd11ee9095e3da58b7a6a77[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 13:55:53 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 4a5402269b3c672d2d9350c1dff52e3df0eea301[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 13:47:38 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit f8df2b7da97bbf88c609ca7678c935e39b962481[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 13:34:29 2025 -0400
+
+    Create getWhoopAuthUrl.ts
+
+[33mcommit f48ea703b0ecd7596918a29e1aef12e871d073c7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 13:18:55 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 0bd3572aafd7dfdaa95c1f2183a57747e3a9bde5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 13:15:21 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 1094c3efd57bf524bc006248e017c61ab730e80e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 12:10:37 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit 531e8be68445c7eb89d8c702c3f3accc6e057a91[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 12:06:37 2025 -0400
+
+    Update NaoOnboardingForm.tsx
+
+[33mcommit 5302ca9dbb85fda09d53920a833bb09c4ea5f6f5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 11:38:28 2025 -0400
+
+    Update getUser.ts
+
+[33mcommit c16b108b5fc12638c183e83371caa5e4ebf8a814[m
+Merge: 7fa3006 ce84c39
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 12:33:28 2025 +0000
+
+    Merge branch 'main' of https://github.com/ca74ca/nao-v2
+
+[33mcommit 7fa3006b7d5bbc4b09156e783624919fe767028b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 12:32:13 2025 +0000
+
+    Update onboarding and app files
+
+[33mcommit da8cd143084bb070048ff699a1a1110ee2122b96[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 11:59:47 2025 +0000
+
+    Add WalletContext and hydrate in final-onboarding
+
+[33mcommit ce84c39f70842f785fe8c63b30ccac4934d63b94[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Fri Jun 27 07:58:16 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit 6756d5e023f11a2ca81a1fc3437b9a27efe7eae7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 20:55:34 2025 -0400
+
+    Update WhoopLiveData.tsx
+
+[33mcommit 1ac9bff80ecbc871fc077ceb8608cf26f38a7c9f[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 20:43:37 2025 -0400
+
+    Update whoop-callback.ts
+
+[33mcommit 9a91e0c10f453ff860d21d5ef8a1f7e7c2187cf9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 20:05:13 2025 -0400
+
+    Update getUser.ts
+
+[33mcommit e1aa6199c7724a29cd142b13d474acdf79dc8c24[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 19:58:53 2025 -0400
+
+    Update getUser.ts
+
+[33mcommit 80e15599c2a86d3fa6765decaada7859a07ada49[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 19:48:18 2025 -0400
+
+    Update whoop-data.ts
+
+[33mcommit ed56e6c262269d0d34b6d3323099b8a1c6971bf0[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 19:40:46 2025 -0400
+
+    Update whoop-data.ts
+
+[33mcommit 6c6643973b939d2628343f7fc4e427ab1ab4fed5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 19:36:44 2025 -0400
+
+    Update whoop-data.ts
+
+[33mcommit 3ebdfb8eb95727e407ec52e424cce57dcf00a85e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 14:25:34 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit 422242becc365ee4c3e130294222caef911671f5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 13:41:13 2025 -0400
+
+    Update NaoOnboardingForm.tsx
+
+[33mcommit 308ea9c7b88f8a20fc20946a50390602457f60f6[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 13:03:43 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit 6d8cd2595d9c76a7583608af8ccc83664ba77aa1[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 12:40:24 2025 -0400
+
+    Update NaoOnboardingForm.tsx
+
+[33mcommit 9fa7146287523743809e90fe3cf918f89533120a[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 12:29:04 2025 -0400
+
+    Update NaoOnboardingForm.tsx
+
+[33mcommit ee370de82206b24238b614cb9f70fd8d3feca345[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Thu Jun 26 12:16:40 2025 -0400
+
+    Update index.tsx
+
+[33mcommit b038efe4c431af5f56a2e503f25190b407f49358[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 22:20:01 2025 +0000
+
+    Add/update final onboarding video and UI
+
+[33mcommit a2d2da7ddbcbd414b5461cfbe3dc1ebc52ca19f9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 21:54:52 2025 +0000
+
+    Fix video filename and update references
+
+[33mcommit 445cc46a8bf54b100f2c10bac0109b8acd69ff45[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 17:48:45 2025 -0400
+
+    Add files via upload
+
+[33mcommit d5ec52240d6a13f97b8c37aa7463824096d22d08[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 17:35:01 2025 -0400
+
+    Rename sign u_2sign_in_vid_2 copy.mp4 to sign_u_2sign_in_vid_2 copy.mp4
+
+[33mcommit f5aadd38c65e12168b62c4e753e171dade7cd82d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 17:33:58 2025 -0400
+
+    Rename sign u_sign_in_vidd_1.mp4 to sign_u_sign_in_vidd_1.mp4
+
+[33mcommit e4a312b365db779bc58a9cb761adb10b128ebc56[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 17:18:21 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit dd773084d33d8ab263786ce01203f1a6a8d77b34[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 16:55:36 2025 -0400
+
+    Update index.tsx
+
+[33mcommit 63d4cedc3399f07f4a291192cf463921617e5a9b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 16:30:38 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit df75c4bc05d0c812d947aaec4a13ae487f178dcb[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 16:14:02 2025 -0400
+
+    Update index.tsx
+
+[33mcommit 11738e26cda20dd6960246343a6879bb435e91ff[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 15:54:34 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit e1bdacd13221fa9584be1b7825c69911b546abd5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 15:41:52 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit bacb8fdbb04ac7aec8ea91766deaf3165ea17b21[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 15:11:44 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit 5af99487c349cdb8562d58d13e98f1aef9d0553e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 07:58:18 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit 6061b70a52799f524c85d090c4cffe9a1cf568a5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 07:52:43 2025 -0400
+
+    Update onboardUser.ts
+
+[33mcommit 99b958aa4ef7b1b3b98f39d3e30377bb9bf2c3aa[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 07:16:30 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit 19e309a1bd87c05faee267a93665aacbd7e2b070[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 07:14:15 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit 61d31c206030ad76cadd3a5951be75195fe0a954[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Wed Jun 25 07:11:22 2025 -0400
+
+    Update final-onboarding.tsx
+
+[33mcommit 15305c074a8a870bb0d3aa7390156935c49f1f2b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 21:35:16 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit c2d38c34de78b521b39961173d1eb70fde71296c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 20:51:32 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 0292bbce6a076c79c36ce3760c3a5854977b6b6f[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 20:17:20 2025 -0400
+
+    Update whoop-data.ts
+
+[33mcommit 6550f76d614bd9ac7ffb3b87714d2f614bf0751c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 19:15:46 2025 -0400
+
+    Update whoop-data.ts
+
+[33mcommit 002142b76110aa0423573756b5ed4e2db24d437c[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 17:58:47 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 3f56244328b6b8c97650b77544c64528236b4dea[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 17:55:08 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 3258bdd3f935cb348ecb7ab82c86e7aca24fc1c9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 17:40:31 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 77d9b372af3d853e0f5f2fc719aac91ad8719dc7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 17:37:08 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 13004063c8772053a82dbb0a6ffdeddd54ba9b70[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 17:28:58 2025 -0400
+
+    Update whoop-callback.ts
+
+[33mcommit 3e0f089c8ea18ba87182241ae6d87e30eb6836aa[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 17:20:31 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit b80352d86dc21af3131a4627b2f42505d8101549[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 16:24:09 2025 -0400
+
+    Update whoop-callback.ts
+
+[33mcommit 4a937e15c37f98d93f04a64636f7f3dda27b8a98[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 15:41:28 2025 -0400
+
+    Update whoop-data.ts
+
+[33mcommit 6465a0ad26ec0c81a9ffa8a3e2899ce5bfd99ed5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 15:35:10 2025 -0400
+
+    Update mint.tsx
+
+[33mcommit 961ff17ce216aa2dcda3171513213ede255e0f7b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Tue Jun 24 15:31:48 2025 -0400
+
+    Update whoop-data.ts
+
+[33mcommit d7df62a2d48159e3921e19fbd42a48d0f416d407[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 17:29:56 2025 -0400
+
+    Update next.config.mjs
+
+[33mcommit d90ab28d7efbb0a2edb00cdfce03950a28b45530[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 20:55:24 2025 +0000
+
+    🛠 Full push: updated files, ESLint config, and other fixes
+
+[33mcommit 87cb562cf02f7cf82e4c53996814260a4931a7cc[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 20:52:29 2025 +0000
+
+    Fix: ESLint flat config compatibility
+
+[33mcommit 8ee39b839d539ae75d38447b31259915113b5d65[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 20:48:58 2025 +0000
+
+    Update: latest code and config adjustments
+
+[33mcommit 4432a64fbd10b3fb6f16e1329df808a228075800[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 20:48:25 2025 +0000
+
+    Chore: add 'type: module' to support ESLint config
+
+[33mcommit 11f9751dbddef3b31c329471a0db493cad4b71af[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:47:55 2025 -0400
+
+    Update package.json
+
+[33mcommit 28c65e10f92c8599f078ce637cfc6642da7286db[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:36:45 2025 -0400
+
+    Update migrateUsersToMongo.ts
+
+[33mcommit 3b34f74d6eb052f0636108428b829bd58938b59b[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:34:27 2025 -0400
+
+    Update migrateUsersToMongo.ts
+
+[33mcommit 65a94a4e23a0057d618f0f8b55bbd9f1ddea919f[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:30:10 2025 -0400
+
+    Update EchoAssistant.tsx
+
+[33mcommit 1f125bab4e3789139587b8adbd963364ccbe1c85[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:25:44 2025 -0400
+
+    Update reply.ts
+
+[33mcommit 6eec957867b2f823a55654ad522d9f6d2fda73f5[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:23:12 2025 -0400
+
+    Update message.ts
+
+[33mcommit bbe0baa87aec32fe29fe429cc21bd545ac80ef3d[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:19:47 2025 -0400
+
+    Update message.ts
+
+[33mcommit a302b8b51f6c0363456b1382215fd7957a81fef7[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:16:23 2025 -0400
+
+    Update message.ts
+
+[33mcommit 4db88ebd04e0d63755feb6037d9f9845bfe5f75e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:11:17 2025 -0400
+
+    Update message.ts
+
+[33mcommit 774a67165204769d14c99c1a575f76a3b6e85354[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:07:39 2025 -0400
+
+    Update message.ts
+
+[33mcommit 0e26ce77a0ed154a2e21d744c0c534af8f6eb799[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 16:03:03 2025 -0400
+
+    Update generateMintSignature.ts
+
+[33mcommit 6b4452405b35d4e288ba3e4b53aa65c0ae19794f[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 15:56:10 2025 -0400
+
+    Update generateMintSignature.ts
+
+[33mcommit 9d4c4e5d168cf66e9817594e6f4981b94e3cc6f9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 15:53:31 2025 -0400
+
+    Update generateMintSignature.ts
+
+[33mcommit 6d3a3b579e805d05001598fc0213fab3c361cf90[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 19:46:23 2025 +0000
+
+    Chore: move unused GPTAssistant to archive to prevent build errors
+
+[33mcommit 8e827e2fcf69e03fecfbc491cf1a6eb44407bbfe[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 15:42:41 2025 -0400
+
+    Update tsconfig.json
+
+[33mcommit d6e082a45e199042cfd1ca817df2bfefad9c561e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 15:37:44 2025 -0400
+
+    Update page.tsx
+
+[33mcommit 41952616378092752fd0e9805b3ec42e0b3a7e9e[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 15:32:22 2025 -0400
+
+    Update page.tsx
+
+[33mcommit 3164edbce944ae0333836e3b3e07b5631879cbd8[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 15:20:30 2025 -0400
+
+    Update page.tsx
+
+[33mcommit 28baec7d829c208e2262421c85d5ee2f13e84ef9[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 15:04:33 2025 -0400
+
+    Update page.tsx
+
+[33mcommit e1fb9e82ddfe231660041f44148fb2d2081c8af4[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 14:58:00 2025 -0400
+
+    Update file-viewer.tsx
+
+[33mcommit 178a6827ed3b7e3871c330e8b7d75466d8aed875[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 14:48:22 2025 -0400
+
+    Update file-viewer.tsx
+
+[33mcommit c92efa2c57be31601b49d3fd07641e7f19ea7b45[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 14:41:54 2025 -0400
+
+    Update chat.tsx
+
+[33mcommit a542461d74504daa9d727dce673dddf14f34a638[m
+Author: ca74ca <ca74ca@gmail.com>
+Date:   Mon Jun 23 14:36:06 2025 -0400
+
+    Update chat.tsx
+
+[33mcommit 4d99d2861b0cfa2b977ea4123e3a8a22e5663e50[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Mon Jun 23 07:57:56 2025 -0400
+
+    Fix: Add null check for response.body in Assistant stream
+
+[33mcommit b78aaa83e3cb571d7e09bd8c91c29b2fa9a3ccc2[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Mon Jun 23 07:27:54 2025 -0400
+
+    🔁 Force redeploy with fixed API structure
+
+[33mcommit a484da478c0464e8209113f357150803d9cff9b1[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Mon Jun 23 07:06:07 2025 -0400
+
+    🔧 Fix assistant-config.ts for build
+
+[33mcommit 6de46a714edcf046f4afc06f381b597620f3dce2[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Mon Jun 23 06:52:51 2025 -0400
+
+    ✅ Removed app/api to fix build error and use pages/api only
+
+[33mcommit f67338b30692c3b07130bad0c98a9b450938aa2a[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 16:42:50 2025 -0400
+
+    ✅ Fix correct POST handler types
+
+[33mcommit b10fc6f1413bc69c3f243921bf1513af10439b03[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 16:34:22 2025 -0400
+
+    💾 Save current state
+
+[33mcommit e68868c7d3edd6d892bd138e06cb941d9c3f344d[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 16:08:20 2025 -0400
+
+    💾 Save current state
+
+[33mcommit 7a2054e36386d59a4fadf60f9e638bd71291e233[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 15:47:54 2025 -0400
+
+    ✅ Fix dynamic route POST signature for Next.js 15
+
+[33mcommit 91c9e832b94f7d0e144dd14ab19e9dbb44b25ecb[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 15:34:22 2025 -0400
+
+    🔥 Removed static route to prevent dynamic route conflict
+
+[33mcommit 325bbf4b731a729e1d5e85290a133375e4c3bef4[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 15:20:14 2025 -0400
+
+    Remove conflicting static API route files for dynamic route build fix
+
+[33mcommit 40e0722164f481b9bb6fec84bb81dbb4619da8ff[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 15:08:58 2025 -0400
+
+    Fix: Correct dynamic param typing for Vercel build
+
+[33mcommit eda669fdfba0d035ad963990e395c8cb88a08dc8[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 13:49:33 2025 -0400
+
+    Fix threadId param route handler
+
+[33mcommit 33380ef1c6808ae4dd341b8776d90143ba06afac[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 13:25:05 2025 -0400
+
+    Fix: correct POST handler for thread run creation
+
+[33mcommit a8159ba127230b5ca2694959f81ece95abd02e28[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 13:13:01 2025 -0400
+
+    Fix: correct POST handler for thread run creation
+
+[33mcommit fa5b5a33e4a61c84d296b8cdc3bebf7697f38f43[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 12:56:33 2025 -0400
+
+    Fix: correct POST handler for thread run creation
+
+[33mcommit 4779b4984480bb8d9921bdd248bdb65b064caf61[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 12:50:44 2025 -0400
+
+    ♻️ Fix POST handler for thread actions (Vercel deploy fix)
+
+[33mcommit cfa6d99db3e29ab866e8dda598eb00ccea750447[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 12:45:21 2025 -0400
+
+    Fix route POST handler for thread creation
+
+[33mcommit d82c71bc880d7981a941b7ebc791d13874ec9cd3[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Sun Jun 22 12:36:44 2025 -0400
+
+    Stable WHOOP version and working sync
+
+[33mcommit d5a616861f7106a494b1e92ad0e5f082bcdf35d1[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Fri Jun 20 13:39:53 2025 -0400
+
+    🔧 Cleaned up old NextAuth, added localStorage login, fixed mint + onboarding
+
+[33mcommit 5a313b9fdfabd20dd2f4f789c5b0ce10734b3859[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Thu Jun 19 21:32:31 2025 -0400
+
+    WIP: save current NAO progress
+
+[33mcommit cba31a607b082d2043a7d70f2cbc422ac02f149c[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Thu Jun 19 16:23:00 2025 -0400
+
+    save progress before break
+
+[33mcommit 8ffa3ccb73fe86cf87e5be95bb1a1810059c6581[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Wed Jun 18 21:17:02 2025 -0400
+
+    Complete final onboarding, update wearable logic, refactor EchoAssistant, and tweak UI
+
+[33mcommit 5afcb98b4db60d828b057099bcab57d1654e1659[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Wed Jun 18 12:04:19 2025 -0400
+
+    Add cors to dependencies
+
+[33mcommit 432836b5fcd14692187645ffa9328a6a3a881e59[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Tue Jun 17 23:35:58 2025 -0400
+
+    Fix server.js to run proper backend
+
+[33mcommit 6da5ebc9f37227833f2b5604237ff64fc18e74d3[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Tue Jun 17 23:27:58 2025 -0400
+
+    🔥 Update onboard route and dependencies
+
+[33mcommit c52a83518a098526b2afe1e61ed70d17b740bf9b[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Tue Jun 17 23:10:24 2025 -0400
+
+    Add app.js
+
+[33mcommit fbacefbfc290099fb97bb86dee9f6a8d52855b80[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Tue Jun 17 22:24:32 2025 -0400
+
+    Add backend/app.js as backend entry point
+
+[33mcommit 2423118a4e1d05de146155f531ca79cf6a7dcd5c[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Tue Jun 17 01:11:45 2025 -0400
+
+    Safe save before moving computer – removed pages and updated lockfile
+
+[33mcommit 74e7725011dba24477fc947cddf669525d013f2d[m
+Author: User <user@users-imac.mynetworksettings.com>
+Date:   Mon Jun 16 21:28:45 2025 -0400
+
+    Initial commit with backup
+
+[33mcommit 06fc2d444a5d41b574082080f4c7b2e48156b84f[m
+Merge: 7a392b0 d45b08f
+Author: Ilan Bigio <ilan@openai.com>
+Date:   Thu May 30 16:50:30 2024 -0400
+
+    Merge pull request #17 from aleksa-codes/upgrade-openai-model
+    
+    Upgrade to gpt-4o model
+
+[33mcommit d45b08ff78fcc6004c19f51912579ee4fbd2c3c2[m
+Author: aleksa-codes <stojsic.aleksa@gmail.com>
+Date:   Mon May 13 21:07:29 2024 +0200
+
+    Upgrade to gpt-4o model
+
+[33mcommit 7a392b0e48855971637fe13f770250c307ef59a7[m
+Merge: 30638cf de0366e
+Author: Romain Huet <romain.huet@gmail.com>
+Date:   Tue May 7 19:31:05 2024 +0200
+
+    Merge pull request #13 from jferrettiboke/patch-1
+    
+    fix(types): type `messagesEndRef` in `useRef`
+
+[33mcommit de0366e6d915513de0ace36d9ce18dff4cb7df06[m
+Merge: ea472dd 30638cf
+Author: Romain Huet <romain.huet@gmail.com>
+Date:   Tue May 7 19:30:37 2024 +0200
+
+    Merge branch 'main' into patch-1
+
+[33mcommit 30638cf20048be0a5229ce8a2d6bc94f2e87f986[m
+Merge: ce8e942 a9e9481
+Author: Romain Huet <romain.huet@gmail.com>
+Date:   Tue May 7 19:30:01 2024 +0200
+
+    Merge pull request #12 from KotaIkehara/fix/typo-in-chat
+    
+    Fix typo
+
+[33mcommit ea472dd81894832d193cb13178dc87234f63dcf7[m
+Author: Jesús Ferretti <jferrettiboke@users.noreply.github.com>
+Date:   Mon May 6 12:55:18 2024 +0200
+
+    fix(types): type `messagesEndRef` in `useRef`
+
+[33mcommit a9e948118662e1b6f00678160dd1cd104b873dbd[m
+Author: KotaIkehara <ikehara.aurora95@gmail.com>
+Date:   Sun May 5 11:27:37 2024 +0900
+
+    Fix typo
+
+[33mcommit ce8e942d31da515cdf0deda83b910c668acfcd87[m
+Merge: 1fa3266 2131970
+Author: Ilan Bigio <ilan@openai.com>
+Date:   Fri May 3 19:54:54 2024 -0400
+
+    Merge pull request #11 from akkadaska/feature/codeinterpreter-output-integration
+    
+    Integrate codeInterpreter output: fix file download link and display images in chat
+
+[33mcommit 2131970d06377568490efea89acec8b125188eb6[m
+Merge: fb8ce65 1fa3266
+Author: ibigio <ilanbigio@gmail.com>
+Date:   Fri May 3 19:47:37 2024 -0400
+
+    Merge branch 'main' into feature/codeinterpreter-output-integration
+
+[33mcommit fb8ce650dc814b8e36239702e105e434c22f7648[m
+Author: ibigio <ilanbigio@gmail.com>
+Date:   Fri May 3 19:47:27 2024 -0400
+
+    Tweak image styling.
+
+[33mcommit 1fa32661a7c8b9fe3381d527eb3888597a714f5f[m
+Merge: 33e714e 0830303
+Author: Ilan Bigio <ilan@openai.com>
+Date:   Fri May 3 19:24:18 2024 -0400
+
+    Merge pull request #4 from jaredpalmer/jp/make-it-deployable
+    
+    Make it deployable to Vercel
+
+[33mcommit 0830303837b2f3a1776517537fb90574fb703f97[m
+Merge: 18963d8 33e714e
+Author: Ilan Bigio <ilan@openai.com>
+Date:   Fri May 3 18:01:52 2024 -0400
+
+    Merge branch 'main' into jp/make-it-deployable
+
+[33mcommit 18963d824c7bc2b881a2822ecf771b60eaec7192[m
+Author: ibigio <ilanbigio@gmail.com>
+Date:   Fri May 3 18:00:34 2024 -0400
+
+    Make OPENAI_ASSISTANT_ID optional, and work with current setup flow.
+
+[33mcommit 33e714e01c84b9d5ef0e361fdb5d33bf02f9f5ba[m
+Merge: e5b843c 43f9342
+Author: Romain Huet <romain.huet@gmail.com>
+Date:   Fri May 3 23:05:53 2024 +0200
+
+    Merge pull request #10 from akkadaska/feature/replace-createAndStream-with-stream
+    
+    Remove deprecated createAndStream method, use stream instead
+
+[33mcommit c640d33c2b6242598fded1b6f2ff7975f28c96f4[m
+Author: akkadaska <akkadaska@gmail.com>
+Date:   Sat May 4 04:30:54 2024 +0900
+
+    Refactor: remove unused import
+
+[33mcommit 1718c24000a4be2869527161e2fc659aa259d730[m
+Author: akkadaska <akkadaska@gmail.com>
+Date:   Sat May 4 04:13:52 2024 +0900
+
+    Refactor: Remove unnecessary features and simplify code
+
+[33mcommit 7e23c9c0e7beae59ec518776aa3f2e73971e58f4[m
+Author: akkadaska <akkadaska@gmail.com>
+Date:   Sat May 4 03:43:32 2024 +0900
+
+    Add functionality to display images in chat interface
+
+[33mcommit b0fba4c47af9dec1b350471369f1fb6ea029cb5d[m
+Author: akkadaska <akkadaska@gmail.com>
+Date:   Sat May 4 03:17:15 2024 +0900
+
+    Fix CodeInterpreter file download link
+
+[33mcommit 43f9342b48542088c45e778a86e4f6e6d2dfa7a9[m
+Author: akkadaska <akkadaska@gmail.com>
+Date:   Fri May 3 22:46:49 2024 +0900
+
+    Remove deprecated createAndStream method, use stream instead
+
+[33mcommit e5b843cedc5972aefe4da1293f3fff83445dcf2e[m
+Merge: 06f2e03 c462428
+Author: Romain Huet <romain.huet@gmail.com>
+Date:   Thu May 2 20:55:45 2024 +0200
+
+    Merge pull request #5 from jaredpalmer/jp/fix-up-nextjs
+    
+    Fix small Next.js x TypeScript nits
+
+[33mcommit 06f2e03d9d811bd8b1588290a12bf43258805d67[m
+Merge: b37bf49 636b491
+Author: Romain Huet <romain.huet@gmail.com>
+Date:   Thu May 2 20:53:45 2024 +0200
+
+    Merge pull request #7 from eltociear/patch-1
+    
+    Update README
+
+[33mcommit 636b4913c404511ebcef22046964b1ccb38284aa[m
+Author: Ikko Eltociear Ashimine <eltociear@gmail.com>
+Date:   Thu May 2 18:39:41 2024 +0900
+
+    Update README.md
+    
+    minor fix
+
+[33mcommit c4624289ca6602583ea031ebd9769182c23e00a9[m
+Author: Jared Palmer <jared@jaredpalmer.com>
+Date:   Wed May 1 17:39:05 2024 -0700
+
+    Fix small Next.js x TypeScript nits
+
+[33mcommit b37bf49f710aa5374107bbf76f18c5ba9c219c7d[m
+Author: Romain Huet <romain.huet@gmail.com>
+Date:   Wed May 1 17:37:46 2024 -0700
+
+    Update README
+
+[33mcommit c6d1318ae1eaefe77209d31cc6294ce84683b519[m
+Merge: 821180d 07143e3
+Author: Jared Palmer <jared@jaredpalmer.com>
+Date:   Wed May 1 17:17:12 2024 -0700
+
+    Merge branch 'main' into jp/make-it-deployable
+
+[33mcommit 821180dfcf884a6d011c1375b5322bb78f554442[m
+Author: Jared Palmer <jared@jaredpalmer.com>
+Date:   Wed May 1 17:15:59 2024 -0700
+
+    Clean up readme
+
+[33mcommit 53f7a7eb2a71e3dbbb0dec9b78d5fa527c036dce[m
+Author: Jared Palmer <jared@jaredpalmer.com>
+Date:   Wed May 1 17:11:59 2024 -0700
+
+    Add Vercel deploy button
+
+[33mcommit 07143e3dfddbf4c78b5f032ef9c1446117333cc2[m
+Author: Ilan Bigio <ilan@openai.com>
+Date:   Wed May 1 20:04:21 2024 -0400
+
+    Update README.md - (correctly) update feedback form
+
+[33mcommit 4d1f81541be1996346b318eb0c00bb6f2463a945[m
+Author: Jared Palmer <jared@jaredpalmer.com>
+Date:   Wed May 1 17:02:51 2024 -0700
+
+    Make it deployable to Vercel
+
+[33mcommit 455365aed10df28758a66cc3cddd095992a14f58[m
+Author: Ilan Bigio <ilan@openai.com>
+Date:   Wed May 1 20:01:08 2024 -0400
+
+    Update README.md - update feedback form
+
+[33mcommit a3917bb231db121ad4435824751d0f7255208300[m
+Merge: 15cc623 8a4b3b0
+Author: Ilan Bigio <ilan@openai.com>
+Date:   Wed May 1 19:56:20 2024 -0400
+
+    Merge pull request #2 from Defimatt/main
+    
+    Update route.ts to fix BadRequestError
+
+[33mcommit 8a4b3b0ceadcdc96c2c6d8a60f762898109dae07[m
+Author: Matt <github@matt-duffin.com>
+Date:   Thu May 2 00:13:11 2024 +0100
+
+    Update route.ts to fix BadRequestError
+
+[33mcommit 15cc6234edea62517d7c0fd2137450a8ea21cc50[m
+Author: ibigio <ilanbigio@gmail.com>
+Date:   Wed May 1 17:36:43 2024 -0400
+
+    Initial commit

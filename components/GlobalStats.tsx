@@ -26,7 +26,7 @@ const GlobalStats: React.FC = () => {
         padding: "2rem",
         marginTop: "4rem",
         width: "100%",
-        color: "#e0e0e0",
+        color: "#39FF14", // soft neon green for labels
         fontFamily: "Inter, sans-serif",
         fontWeight: 500,
       }}
@@ -42,12 +42,13 @@ const GlobalStats: React.FC = () => {
 const StatBlock = ({ label, value }: { label: string; value: number }) => (
   <div
     style={{
-      background: "rgba(255, 255, 255, 0.05)",
-      border: "1px solid #333",
+      background: "rgba(0, 0, 0, 0.6)",
+      border: "1px solid #1f1f1f",
       borderRadius: "16px",
       padding: "1.5rem",
       textAlign: "center",
-      boxShadow: "0 0 8px rgba(0, 255, 249, 0.2)",
+      boxShadow: "0 0 12px rgba(57, 255, 20, 0.4)",
+      transition: "all 0.3s ease-in-out",
     }}
   >
     <h2
@@ -55,8 +56,8 @@ const StatBlock = ({ label, value }: { label: string; value: number }) => (
         fontSize: "2rem",
         fontWeight: 700,
         marginBottom: "0.5rem",
-        color: "#00fff9",
-        textShadow: "0 0 8px #00fff9aa",
+        color: "#39FF14",
+        textShadow: "0 0 12px rgba(57, 255, 20, 0.7)",
       }}
     >
       {value.toLocaleString()}

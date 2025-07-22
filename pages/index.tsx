@@ -504,26 +504,7 @@ export default function Home() {
 
   return (
     <>
-      {/* --- Fixed Header Slogan --- */}
-      <div
-        style={{
-          position: "fixed",
-          top: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 100,
-          fontSize: 16,
-          fontWeight: 600,
-          color: "#00fff9",
-          textShadow: "0 0 6px #00fff9, 0 0 3px #00fff9",
-          background: "rgba(0, 0, 0, 0.5)",
-          padding: "6px 16px",
-          borderRadius: 12,
-        }}
-      >
-        N A O HEALTH INTELLIGENCE REWARDED - EVERY REP ... YOU EVOLVE ... YOU EARN
-      </div>
-
+  
       {/* --- Full Screen Background --- */}
       <div
         style={{
@@ -532,7 +513,7 @@ export default function Home() {
           left: 0,
           width: "100vw",
           height: "100vh",
-          backgroundImage: "url('/index_backgrounnd_4.png')",
+          backgroundImage: "url('/index_background_4.png')",
           backgroundPosition: "center",
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
