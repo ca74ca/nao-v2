@@ -62,15 +62,15 @@ const AuthModal = ({ onClose }: { onClose: () => void }) => {
       zIndex: 50,
     }}>
       <div style={{
-        background: "#0e192a",
-        padding: "3rem",
-        borderRadius: "1rem",
-        boxShadow: "0 0 30px lime",
-        width: "90%",
-        maxWidth: 420,
-        color: "#cceeff",
-        textAlign: "center",
-      }}>
+    background: "#0e192a",
+    padding: "3rem",
+    borderRadius: "1rem",
+    boxShadow: "0 0 30px rgba(200, 200, 200, 0.7)", // soft grey glow
+    width: "90%",
+    maxWidth: 420,
+    color: "#cceeff",
+    textAlign: "center",
+}}>
         {/* Big NAO Logo */}
         <div
           style={{
@@ -82,14 +82,15 @@ const AuthModal = ({ onClose }: { onClose: () => void }) => {
         >
           <span
             style={{
-              display: "inline-block",
-              transform: "rotate(45deg)",
-              width: "50px",
-              height: "50px",
-              borderRight: "5px solid lime",
-              borderTop: "5px solid lime",
-              boxShadow: "0 0 20px lime",
-            }}
+  display: "inline-block",
+  transform: "rotate(45deg)",
+  width: "50px",
+  height: "50px",
+  borderRight: "5px solid white",
+  borderTop: "5px solid white",
+  boxShadow: "0 0 20px lime",
+}}
+
           />
         </div>
 
@@ -128,9 +129,24 @@ const AuthModal = ({ onClose }: { onClose: () => void }) => {
 
         {error && <p style={{ color: "red", marginTop: "1rem", fontSize: "0.9rem" }}>{error}</p>}
 
-        <button onClick={onClose} style={{ marginTop: "2rem", color: "lime", fontWeight: 600 }}>
-          Close
-        </button>
+       <button
+  onClick={onClose}
+  style={{
+    marginTop: "2rem",
+    padding: "0.75rem 2rem",
+    background: "rgba(255, 255, 255, 0.1)",
+    color: "#cceeff",
+    border: "1px solid #cceeff",
+    borderRadius: "9999px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    transition: "all 0.3s",
+  }}
+>
+  Close
+</button>
+
       </div>
     </div>
   );

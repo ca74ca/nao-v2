@@ -175,6 +175,7 @@ export default function Home() {
       borderRight: "8px solid lime",
       borderTop: "8px solid lime",
       boxShadow: "0 0 30px lime",
+      pointerEvents: "none",
     }}
   />
 </div>
