@@ -660,26 +660,8 @@ const sendMessage = async (input: string) => {
 
       // ...existing code...
 
-      {/* Kling AI background video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed inset-0 w-full h-full object-cover z-[-1] pointer-events-none"
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100vw",
-          height: "100vh",
-          objectFit: "cover",
-          zIndex: -1,
-          pointerEvents: "none",
-          opacity: 1,
-        }}
-      >
-        <source src="/ai_second_video1.mp4" type="video/mp4" />
-      </video>
+     
+    
 
       {/* LEFT: NAO Logo, subtitle, new initialized buttons, and DailyOutlook */}
       <div
