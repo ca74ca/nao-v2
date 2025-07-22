@@ -1,8 +1,9 @@
-import React from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
 import GlobalStats from "@/components/GlobalStats";
+import AuthModal from "../components/AuthModal";
 
 const NFT_TOKEN_ID = "demo-nft-123";
 
@@ -28,6 +29,8 @@ async function evolveNFT({
 
 export default function Home() {
   const router = useRouter();
+    const [showModal, setShowModal] = useState(false); // ✅ This must come BEFORE return.
+  const [modalType, setModalType] = useState<"login" | "signup">("login");
   const user = typeof window !== "undefined"
     ? JSON.parse(localStorage.getItem("nao_user") || "{}")
     : {};
@@ -177,19 +180,24 @@ export default function Home() {
 </div>
 
             <button
-              onClick={() => router.push("/mint")}
-              style={{
-                padding: "1rem 3rem",
-                background: "linear-gradient(90deg, #00fff9 0%, #1267da 100%)",
-                color: "#fff",
-                border: "none",
-                borderRadius: 20,
-                fontWeight: 700,
-                fontSize: "1.25rem",
-                cursor: "pointer",
-                marginTop: "2rem",
-              }}
-            >
+  onClick={() => setShowModal(true)}
+  style={{
+    padding: "1rem 3rem",
+    background: "linear-gradient(90deg, lime 0%, #39FF14 100%)",
+    color: "#000",
+    border: "none",
+    borderRadius: "9999px",
+    fontWeight: 700,
+    fontSize: "1.25rem",
+    cursor: "pointer",
+    marginTop: "2rem",
+    display: "inline-block",
+    width: "auto",
+    maxWidth: "300px",
+    textAlign: "center",
+    boxShadow: "0 0 15px lime",
+  }}
+>
               Start Earning
             </button>
         </div>
