@@ -224,6 +224,8 @@ export default function Home() {
         }}
       >
         <GlobalStats />
+        {showModal && <AuthModal onClose={() => setShowModal(false)} />}
+
       </div>
     </>
   );
