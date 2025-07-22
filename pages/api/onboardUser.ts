@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import clientPromise from '../../lib/mongodb'; // adjust path if needed
+import clientPromise from '../../lib/mongodb';
 import { sendConfirmationEmail as sendWelcomeEmail } from '../../utils/sendConfirmationEmail';
 
 /**
@@ -18,7 +18,7 @@ type OnboardRequest = {
 type BackendResponse = {
   status: 'success' | 'exists' | 'error';
   message: string;
-  walletAddress?: string;
+  walletId?: string;
   redirectUrl?: string;
   error?: string;
 };
@@ -26,12 +26,10 @@ type BackendResponse = {
 /**
  * -------------------------------
  *  Stub: Mint or fetch a wallet
- *  (replace with real logic)
  * -------------------------------
  */
 async function mintOrGetWalletAddress(email: string): Promise<string> {
-  // ❗ Replace this with your real wallet-minting code.
-  // Deterministic dummy wallet for now:
+  // Replace this with your real wallet-minting logic later
   return `0x${Buffer.from(email).toString('hex').slice(0, 40)}`;
 }
 
@@ -73,17 +71,15 @@ export default async function handler(
   try {
     // ------------------ Connect to MongoDB ------------------
     const client = await clientPromise;
-    const db = client.db(); // default DB or change to your db name
+    const db = client.db();
     const users = db.collection('users');
 
     // ------------------ Check for existing user ------------------
     const existingUser = await users.findOne({ email });
 
-    // ========== EXISTING USER ==========
     if (existingUser) {
       let walletAddress: string | undefined = existingUser.walletId;
 
-      // If the user exists but has **no** wallet, mint and save one now
       if (!walletAddress) {
         walletAddress = await mintOrGetWalletAddress(email);
         await users.updateOne(
@@ -95,17 +91,14 @@ export default async function handler(
       return res.status(200).json({
         status: 'exists',
         message: 'User already exists',
-        walletAddress,
+        walletId: walletAddress,
         redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
       });
     }
 
-    // ========== NEW USER ==========
-
-    // 1) Mint wallet first
+    // ------------------ New User Flow ------------------
     const walletAddress = await mintOrGetWalletAddress(email);
 
-    // 2) Insert the new user including walletId
     const newUser = {
       username,
       email,
@@ -116,19 +109,17 @@ export default async function handler(
     };
     await users.insertOne(newUser);
 
-    // ✅ 3) Send welcome email (NEW LOGIC)
     try {
       await sendWelcomeEmail(username, email);
     } catch (emailErr) {
       console.error('❌ Failed to send welcome email:', emailErr);
     }
 
-    // 4) Respond
     return res.status(200).json({
       status: 'success',
       message: 'User onboarded successfully',
-      walletAddress,
-redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
+      walletId: walletAddress,
+      redirectUrl: `/mint?email=${encodeURIComponent(email)}`,
     });
 
   } catch (error: any) {
