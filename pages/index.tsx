@@ -84,7 +84,7 @@ export default function Home() {
       setMessages([
         {
           sender: "NAO",
-          text: "Welcome! I am NAO. Ready to start earning rewards for your workouts? Just enter your email to begin",
+          text: "Welcome! I am NAO. Ready to start earning rewards for your workouts?",
         },
       ]);
       setHasShownWelcome(true);
