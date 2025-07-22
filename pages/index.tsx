@@ -61,35 +61,121 @@ export default function Home() {
         }}
       >
         {/* Header */}
-        <header style={{ padding: "1rem 2rem", display: "flex", alignItems: "center" }}>
-          <h1 style={{ color: "#00fff9", fontWeight: 800, fontSize: "1.5rem" }}>
-            WORKOUT, EARN, LEVEL UP, FLEX NFTs
-          </h1>
-        </header>
+<header style={{ padding: "2rem 3rem 0", display: "flex", alignItems: "center" }}>
+  <h1 style={{ color: "#00fff9", fontWeight: 800, fontSize: "1.75rem", letterSpacing: "0.05em" }}>
+    WORKOUT
+    <span
+      style={{
+        display: "inline-block",
+        transform: "rotate(45deg)",
+        width: "12px",
+        height: "12px",
+        borderRight: "2px solid lime",
+        borderTop: "2px solid lime",
+        margin: "0 0.5rem",
+        boxShadow: "0 0 10px lime",
+      }}
+    />
+    EARN
+    <span
+      style={{
+        display: "inline-block",
+        transform: "rotate(45deg)",
+        width: "12px",
+        height: "12px",
+        borderRight: "2px solid gold",
+        borderTop: "2px solid gold",
+        margin: "0 0.5rem",
+        boxShadow: "0 0 10px gold",
+      }}
+    />
+    LEVEL UP
+    <span
+      style={{
+        display: "inline-block",
+        transform: "rotate(45deg)",
+        width: "12px",
+        height: "12px",
+        borderRight: "2px solid red",
+        borderTop: "2px solid red",
+        margin: "0 0.5rem",
+        boxShadow: "0 0 10px red",
+      }}
+    />
+    FLEX NFTs
+  </h1>
+</header>
 
-        {/* Subheading */}
-        <div style={{ padding: "0 2rem", color: "#cceeff", fontWeight: 600, fontSize: "1rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span>Track Workouts</span>
-          <span style={{ width: "30px", height: "2px", background: "lime", boxShadow: "0 0 10px lime" }}></span>
-          <span>Earn XP</span>
-          <span style={{ transform: "rotate(45deg)", width: "12px", height: "12px", borderRight: "2px solid gold", borderTop: "2px solid gold", boxShadow: "0 0 10px gold" }}></span>
-          <span>Evolve NFT</span>
-          <span style={{ width: "30px", height: "2px", background: "red", boxShadow: "0 0 10px red" }}></span>
-          <span>Claim Rewards</span>
-        </div>
+{/* Subheading */}
+<div
+  style={{
+    padding: "0 3rem 2rem",
+    color: "#cceeff",
+    fontWeight: 600,
+    fontSize: "1rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+  }}
+>
+  <span>Track Workouts</span>
+  <span
+    style={{
+      transform: "rotate(45deg)",
+      width: "12px",
+      height: "12px",
+      borderRight: "2px solid lime",
+      borderTop: "2px solid lime",
+      boxShadow: "0 0 10px lime",
+    }}
+  ></span>
+  <span>Earn XP</span>
+  <span
+    style={{
+      transform: "rotate(45deg)",
+      width: "12px",
+      height: "12px",
+      borderRight: "2px solid gold",
+      borderTop: "2px solid gold",
+      boxShadow: "0 0 10px gold",
+    }}
+  ></span>
+  <span>Evolve NFT</span>
+  <span
+    style={{
+      transform: "rotate(45deg)",
+      width: "12px",
+      height: "12px",
+      borderRight: "2px solid red",
+      borderTop: "2px solid red",
+      boxShadow: "0 0 10px red",
+    }}
+  ></span>
+  <span>Claim Rewards</span>
+</div>
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-          {/* Left Sidebar (Empty for now) */}
-          <div style={{ width: "200px" }}></div>
 
-          {/* Main Content */}
-          <div style={{ textAlign: "center", flex: 1 }}>
-            <h2 style={{ color: "#cceeff", fontSize: "2rem", marginBottom: "1rem" }}>
-              Rewards for Your Fitness. Crypto for Your Effort.
-            </h2>
-            <div style={{ color: "#cceeff", marginBottom: "1rem" }}>
-              XP: {rewardState.xp} | Streak: {rewardState.streak}
-            </div>
+        <div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: "4rem",
+  }}
+>
+  <span
+    style={{
+      display: "inline-block",
+      transform: "rotate(45deg)",
+      width: "100px",
+      height: "100px",
+      borderRight: "8px solid lime",
+      borderTop: "8px solid lime",
+      boxShadow: "0 0 30px lime",
+    }}
+  />
+</div>
+
             <button
               onClick={() => router.push("/mint")}
               style={{
@@ -106,17 +192,14 @@ export default function Home() {
             >
               Start Earning
             </button>
-          </div>
-
-          <div style={{ width: "200px" }}></div>
         </div>
+
+        <div style={{ width: "200px" }}></div>
 
         {/* Footer Placeholder */}
         <footer style={{ padding: "1rem 2rem", color: "#cceeff", textAlign: "center" }}>
           &copy; 2025 NAOVERSE. All rights reserved.
         </footer>
-      </div>
-
       <div
         style={{
           position: "relative",
