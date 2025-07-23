@@ -184,33 +184,47 @@ export default function Home() {
         </div>
 
         {/* CTA Button */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <button
-            onClick={() => setShowModal(true)}
-            style={{
-              padding: "1rem 3rem",
-              background: "linear-gradient(90deg, lime 0%, #39FF14 100%)",
-              color: "#000",
-              border: "none",
-              borderRadius: "9999px",
-              fontWeight: 700,
-              fontSize: "1.25rem",
-              cursor: "pointer",
-              marginTop: "2rem",
-              display: "inline-block",
-              width: "auto",
-              maxWidth: "300px",
-              textAlign: "center",
-              boxShadow: "0 0 15px lime",
-            }}
-          >
-            USE NAO ENGINE
-            <p className="text-sm text-neutral-400 mt-2">
-              Plug-and-play fitness rewards engine. Verified workouts. Crypto rewards. All yours.
-            </p>
+       <div style={{ textAlign: "center", marginTop: "2rem" }}>
+  <p style={{
+    fontSize: "1rem",
+    color: "#fff",
+    marginBottom: "1rem",
+    lineHeight: 1.5,
+    maxWidth: 480,
+    marginLeft: "auto",
+    marginRight: "auto"
+  }}>
+    Plug-and-play fitness rewards engine. <br />
+    Verified workouts. Crypto rewards. All yours.
+  </p>
 
-          </button>
-        </div>
+  <a
+    href="#"
+    style={{
+      display: "inline-block",
+      background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
+      color: "#000",
+      fontWeight: "700",
+      fontSize: "1rem",
+      padding: "1rem 2rem",
+      borderRadius: "999px",
+      textDecoration: "none",
+      boxShadow: "0 0 18px #39FF14",
+      transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+    }}
+    onMouseOver={(e) => {
+      e.currentTarget.style.transform = "scale(1.05)";
+      e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
+    }}
+    onMouseOut={(e) => {
+      e.currentTarget.style.transform = "scale(1)";
+      e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
+    }}
+  >
+    USE NAO ENGINE
+  </a>
+</div>
+
 
         <div style={{ flex: 1 }}></div>
 
