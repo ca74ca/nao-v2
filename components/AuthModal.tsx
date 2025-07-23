@@ -1,9 +1,85 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 
+// --- Add this above AuthModal ---
+const ResetPassword = ({ setTab }: { setTab: (tab: "signup" | "login") => void }) => {
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleReset = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/resetPassword", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, newPassword }),
+      });
+      if (res.ok) {
+        setDone(true);
+      } else {
+        setError("Failed to reset.");
+      }
+    } catch {
+      setError("Network error.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h2 style={{ color: "lime", marginBottom: "1rem" }}>Reset Password</h2>
+      <input
+        type="email"
+        placeholder="Your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={inputStyle}
+      />
+      <input
+        type="password"
+        placeholder="New password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        style={inputStyle}
+      />
+      <button
+        onClick={handleReset}
+        disabled={loading || done}
+        style={submitButtonStyle}
+      >
+        {loading ? "Resetting..." : done ? "Password Reset ✅" : "Reset Password"}
+      </button>
+      {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
+      {done && (
+        <p style={{ color: "lime", marginTop: "2rem", fontSize: "1.1rem" }}>
+          Password reset! You can now{" "}
+          <span
+            style={{ color: "#00ccff", textDecoration: "underline", cursor: "pointer" }}
+            onClick={() => setTab("login")}
+          >
+            log in
+          </span>.
+        </p>
+      )}
+      <p
+        style={{ marginTop: "1rem", cursor: "pointer", color: "#00ccff" }}
+        onClick={() => setTab("login")}
+      >
+        Back to login
+      </p>
+    </div>
+  );
+};
+// --- End ResetPassword ---
+
 const AuthModal = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
-  const [tab, setTab] = useState<"signup" | "login">("signup");
+  const [tab, setTab] = useState<"signup" | "login" | "reset">("signup");
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -124,13 +200,17 @@ const AuthModal = ({ onClose }: { onClose: () => void }) => {
             <button onClick={handleSubmit} style={submitButtonStyle} disabled={loading}>
               {loading ? "Logging In..." : "Log In and Start Earning"}
             </button>
-            <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#ccc" }}>
-              <a href="/reset-password" style={{ color: "lime", textDecoration: "underline" }}>
-                Forgot password? Reset here.
-              </a>
+            <p
+              style={{ marginTop: "1rem", cursor: "pointer", color: "#00ccff" }}
+              onClick={() => setTab("reset")}
+            >
+              Forgot password?
             </p>
           </>
         )}
+
+        {/* Reset Password Tab */}
+        {tab === "reset" && <ResetPassword setTab={setTab} />}
 
         {error && <p style={{ color: "red", marginTop: "1rem", fontSize: "0.9rem" }}>{error}</p>}
 

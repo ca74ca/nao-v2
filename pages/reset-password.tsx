@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
-export default function ResetPasswordPage() {
+type Props = {
+  setTab: (tab: "login" | "signup" | "reset") => void;
+};
+
+export default function ResetPassword({ setTab }: Props) {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -8,81 +12,81 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
 
   const handleReset = async () => {
-    setLoading(true);
     setError("");
+
+    if (!email || !newPassword) {
+      setError("Please enter both email and new password.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/resetPassword", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          newPassword,
-        }),
+        body: JSON.stringify({ email, newPassword }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        setError("Failed to reset.");
+        setError(data?.message || "Failed to reset password.");
       } else {
         setDone(true);
+        setTimeout(() => {
+          setTab("login");
+        }, 2000);
       }
     } catch (err) {
-      setError("Network error.");
+      setError("Network error. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "5rem", textAlign: "center" }}>
-      <h1 style={{ color: "lime", marginBottom: "2rem" }}>Reset Your Password</h1>
+    <div style={{ marginTop: "1rem", color: "#cceeff" }}>
+      <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Reset Password</h2>
+
       <input
         type="email"
-        placeholder="Your email"
+        placeholder="Enter your email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        style={{
-          padding: "0.75rem",
-          width: "100%",
-          maxWidth: "300px",
-          marginBottom: "1rem",
-          borderRadius: "0.5rem",
-        }}
+        style={{ padding: "0.75rem", marginBottom: "0.75rem", width: "100%" }}
       />
-      <br />
+
       <input
         type="password"
         placeholder="New password"
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
-        style={{
-          padding: "0.75rem",
-          width: "100%",
-          maxWidth: "300px",
-          marginBottom: "1rem",
-          borderRadius: "0.5rem",
-        }}
+        style={{ padding: "0.75rem", marginBottom: "1rem", width: "100%" }}
       />
-      <br />
+
       <button
         onClick={handleReset}
         disabled={loading || done}
         style={{
-          padding: "1rem 2rem",
-          background: "lime",
+          padding: "1rem",
+          width: "100%",
+          backgroundColor: "lime",
           color: "black",
-          border: "none",
           borderRadius: "9999px",
           fontWeight: "bold",
+          border: "none",
           cursor: "pointer",
         }}
       >
-        {loading ? "Resetting..." : done ? "Password Reset ✅" : "Reset Password"}
+        {loading ? "Resetting..." : done ? "✅ Reset!" : "Reset Password"}
       </button>
+
       {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
+
       {done && (
-        <p style={{ color: "lime", marginTop: "2rem", fontSize: "1.1rem" }}>
-          Password reset! You can now log in.
+        <p style={{ color: "lime", marginTop: "1rem" }}>
+          ✅ Password updated. Redirecting to login...
         </p>
       )}
     </div>
