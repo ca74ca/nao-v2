@@ -157,7 +157,7 @@ export default function Home() {
               boxShadow: "0 0 10px red",
             }}
           ></span>
-          <span>USERS</span>
+          <span>Users</span>
         </div>
 
         {/* Decorative Icon */}

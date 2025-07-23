@@ -5,6 +5,7 @@ const GlobalStats: React.FC = () => {
   const [weightLifted, setWeightLifted] = useState(10944070);
   const [hrZones, setHRZones] = useState(76468);
   const [xpEarned, setXPEarned] = useState(482611);
+  const [clock, setClock] = useState<string>("");
 
   // Static B2B metrics (non-animated)
   const verifiedWorkouts = 11882;
@@ -14,7 +15,7 @@ const GlobalStats: React.FC = () => {
   const stablecoinUSD = 12844;
   const chainInteractions = 14233;
 
-  // Animate original stats
+  // Animate legacy stats
   useEffect(() => {
     const interval = setInterval(() => {
       setWorkouts((prev) => prev + Math.floor(Math.random() * 3));
@@ -25,34 +26,68 @@ const GlobalStats: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-        gap: "1.5rem",
-        padding: "2rem",
-        marginTop: "4rem",
-        width: "100%",
-        color: "#39FF14",
-        fontFamily: "Inter, sans-serif",
-        fontWeight: 500,
-      }}
-    >
-      {/* Animated legacy stats */}
-      <StatBlock label="Workouts Completed" value={workouts} />
-      <StatBlock label="LBS Lifted Total" value={weightLifted} />
-      <StatBlock label="HR Zone Hours" value={hrZones} />
-      <StatBlock label="XP Earned" value={xpEarned} />
+  // Wall Street-style time ticker
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      };
+      setClock(now.toLocaleString("en-US", options));
+    };
+    updateClock();
+    const timer = setInterval(updateClock, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-      {/* New B2B static stats */}
-      <StatBlock label="Verified Workouts" value={verifiedWorkouts} />
-      <StatBlock label="Users Activated" value={usersActivated} />
-      <StatBlock label="dNFTs Evolved" value={evolvedRewards} />
-      <StatBlock label="ETH Paid Out" value={`Ξ${ethPaid}`} />
-      <StatBlock label="Stablecoin USD Delivered" value={`$${stablecoinUSD.toLocaleString()}`} />
-      <StatBlock label="Smart Contract Calls" value={chainInteractions} />
-    </div>
+  return (
+    <>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: "1.5rem",
+          padding: "2rem",
+          marginTop: "4rem",
+          width: "100%",
+          color: "#39FF14",
+          fontFamily: "Inter, sans-serif",
+          fontWeight: 500,
+        }}
+      >
+        {/* Animated legacy stats */}
+        <StatBlock label="Workouts Completed" value={workouts} />
+        <StatBlock label="LBS Lifted Total" value={weightLifted} />
+        <StatBlock label="HR Zone Hours" value={hrZones} />
+        <StatBlock label="XP Earned" value={xpEarned} />
+
+        {/* New B2B static stats */}
+        <StatBlock label="Verified Workouts" value={verifiedWorkouts} />
+        <StatBlock label="Users Activated" value={usersActivated} />
+        <StatBlock label="dNFTs Evolved" value={evolvedRewards} />
+        <StatBlock label="ETH Paid Out" value={`Ξ${ethPaid}`} />
+        <StatBlock label="Stablecoin USD Delivered" value={`$${stablecoinUSD.toLocaleString()}`} />
+        <StatBlock label="Smart Contract Calls" value={chainInteractions} />
+      </div>
+
+      {/* Wall Street-style timestamp */}
+      <div style={{
+        textAlign: "center",
+        marginTop: "-1rem",
+        fontSize: "0.9rem",
+        color: "#ffffffcc",
+        fontFamily: "monospace",
+        letterSpacing: "0.5px"
+      }}>
+        Last updated: {clock}
+      </div>
+    </>
   );
 };
 
