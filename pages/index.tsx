@@ -68,8 +68,8 @@ export default function Home() {
       >
         {/* Header */}
         <header style={{ padding: "2rem 3rem 0", display: "flex", alignItems: "center" }}>
-          <h1 style={{ color: "#00fff9", fontWeight: 800, fontSize: "1.75rem", letterSpacing: "0.05em" }}>
-            WORKOUT
+          <h1 style={{ color: "#f6fafaff", fontWeight: 800, fontSize: "1.75rem", letterSpacing: "0.05em" }}>
+            VERIFY FITNESS EFFORT
             <span
               style={{
                 display: "inline-block",
@@ -82,7 +82,7 @@ export default function Home() {
                 boxShadow: "0 0 10px lime",
               }}
             />
-            EARN
+            CRYPTO REWARD USER
             <span
               style={{
                 display: "inline-block",
@@ -95,7 +95,7 @@ export default function Home() {
                 boxShadow: "0 0 10px gold",
               }}
             />
-            LEVEL UP
+            ENGINE
             <span
               style={{
                 display: "inline-block",
@@ -108,7 +108,7 @@ export default function Home() {
                 boxShadow: "0 0 10px red",
               }}
             />
-            FLEX NFTs
+            powered BY NAO
           </h1>
         </header>
 
@@ -135,7 +135,7 @@ export default function Home() {
               boxShadow: "0 0 10px lime",
             }}
           ></span>
-          <span>Earn XP</span>
+          <span>Earn</span>
           <span
             style={{
               transform: "rotate(45deg)",
@@ -146,7 +146,7 @@ export default function Home() {
               boxShadow: "0 0 10px gold",
             }}
           ></span>
-          <span>Evolve NFT</span>
+          <span>Evolve</span>
           <span
             style={{
               transform: "rotate(45deg)",
@@ -157,7 +157,7 @@ export default function Home() {
               boxShadow: "0 0 10px red",
             }}
           ></span>
-          <span>Claim Rewards</span>
+          <span>USERS</span>
         </div>
 
         {/* Decorative Icon */}
@@ -204,7 +204,11 @@ export default function Home() {
               boxShadow: "0 0 15px lime",
             }}
           >
-            Start Earning
+            USE NAO ENGINE
+            <p className="text-sm text-neutral-400 mt-2">
+              Plug-and-play fitness rewards engine. Verified workouts. Crypto rewards. All yours.
+            </p>
+
           </button>
         </div>
 
