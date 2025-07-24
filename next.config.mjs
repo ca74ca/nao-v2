@@ -3,7 +3,11 @@ const nextConfig = {
   output: 'standalone',
 
   eslint: {
-    ignoreDuringBuilds: true, // 💥 this disables ESLint from breaking your build
+    ignoreDuringBuilds: true,
+  },
+
+  experimental: {
+    appDir: false, // 🚫 disable /app router to prevent build errors
   },
 };
 
