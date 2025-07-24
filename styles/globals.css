@@ -74,6 +74,14 @@ input, textarea {
   background: #e0e0e0;
 }
 
+/* Utility text colors for stat blocks */
+.text-green-500 {
+  color: #39FF14 !important;
+}
+.text-red-500 {
+  color: #ff1a1a !important;
+}
+
 /* Responsive Mobile */
 @media (max-width: 768px) {
   .nao-echo-container {
@@ -94,4 +102,14 @@ input, textarea {
     font-size: 16px;
     padding: 1rem 2rem;
   }
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-marquee {
+  animation: marquee 60s linear infinite;
 }
