@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let browser;
   try {
     browser = await puppeteer.launch({
-      headless: "new", // More robust against TikTok detection
+headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
