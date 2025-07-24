@@ -4,11 +4,7 @@ const nextConfig = {
 
   eslint: {
     ignoreDuringBuilds: true,
-  },
-
-  experimental: {
-    appDir: false, // 🚫 disable /app router to prevent build errors
-  },
+  }
 };
 
 export default nextConfig;
