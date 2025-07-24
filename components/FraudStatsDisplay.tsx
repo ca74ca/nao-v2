@@ -1,5 +1,5 @@
 import React from "react";
-import { useFraudState } from "../hooks/useFraudState"; // ✅ named import
+import { useFraudState } from "../src/hooks/useFraudState";
 
 export default function FraudStatsDisplay() {
   const stats = useFraudState();
