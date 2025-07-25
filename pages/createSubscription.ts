@@ -1,5 +1,3 @@
-// /pages/api/createSubscription.ts
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { stripe } from '@/lib/stripe'; // adjust if needed
 
@@ -19,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       customer: customerId,
       items: [
         {
-price: 'price_1PQ8exH4aGhlqXNzqGp3XGtx'
+          price: 'price_1PQ8exH4aGhlqXNzqGp3XGtx'
         },
       ],
       collection_method: 'charge_automatically',
