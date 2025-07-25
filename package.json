@@ -31,13 +31,15 @@
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-markdown": "^9.0.1"
+    "react-markdown": "^9.0.1",
+    "stripe": "^18.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
     "@next/eslint-plugin-next": "^15.3.4",
     "@types/node": "20.12.7",
     "@types/react": "18.2.79",
+    "@types/stripe": "^8.0.417",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.29.0",
     "postcss": "^8.5.4",
