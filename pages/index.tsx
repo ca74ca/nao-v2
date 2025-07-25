@@ -5,6 +5,8 @@ import { useNFTSync } from "../src/hooks/useNFTSync";
 import GlobalStats from "@/components/GlobalStats";
 import AuthModal from "../components/AuthModal";
 import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
+import FraudStatsDisplay from "@/components/FraudStatsDisplay";
+import FraudTicker from "@/components/FraudTicker";
 
 const NFT_TOKEN_ID = "demo-nft-123";
 
@@ -251,9 +253,15 @@ export default function Home() {
         }}
       >
         <GlobalStats />
-        <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
-          <LeftColumnLiveFeed />
-        </div>
+
+{/* POC 2: Fraud Verification Metrics */}
+<div style={{ width: "100%", marginTop: "2rem" }}>
+  <FraudStatsDisplay />
+</div>
+
+<div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
+  <LeftColumnLiveFeed />
+</div>
       </div>
 
       {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}

@@ -1,21 +1,19 @@
 import { connectToDatabase } from "./db";
 
-export async function logFraudEvent({
-  type,
-  amount = 0,
-  views = 0,
-}: {
-  type: "fake" | "real";
-  amount?: number;
-  views?: number;
-}) {
-  const { db } = await connectToDatabase();
-  const collection = db.collection("fraudEvents");
+interface FraudEvent {
+  platform: string;
+  verdict: "FRAUD" | "SAFE";
+  valueUSD: number;
+  viewsPrevented: number;
+  videoId: string;
+  meta?: any;
+}
 
-  await collection.insertOne({
-    type,
-    amount,
-    views,
+export async function logFraudEvent(event: FraudEvent) {
+  const { db } = await connectToDatabase();
+
+  await db.collection("fraudEvents").insertOne({
     timestamp: new Date(),
+    ...event,
   });
 }
