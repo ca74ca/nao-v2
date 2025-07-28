@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useRewardState } from "../src/hooks/useRewardState";
 import { useNFTSync } from "../src/hooks/useNFTSync";
@@ -7,6 +7,7 @@ import AuthModal from "../components/AuthModal";
 import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
 import FraudStatsDisplay from "@/components/FraudStatsDisplay";
 import FraudTicker from "@/components/FraudTicker";
+import EffortNetStatsBox from "@/components/EffortNetStatsBox"; // <-- Add EffortNetStatsBox import
 
 const NFT_TOKEN_ID = "demo-nft-123";
 
@@ -183,50 +184,48 @@ export default function Home() {
               pointerEvents: "none",
             }}
           />
-        </div>
-
-        {/* CTA Button */}
-       <div style={{ textAlign: "center", marginTop: "2rem" }}>
-  <p style={{
-    fontSize: "1rem",
-    color: "#fff",
-    marginBottom: "1rem",
-    lineHeight: 1.5,
-    maxWidth: 480,
-    marginLeft: "auto",
-    marginRight: "auto"
-  }}>
-    Plug-and-play fitness rewards engine. <br />
-    Verified workouts. Crypto rewards. All yours.
-  </p>
-
-  <a
-    href="#"
-    style={{
-      display: "inline-block",
-      background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
-      color: "#000",
-      fontWeight: "700",
-      fontSize: "1rem",
-      padding: "1rem 2rem",
-      borderRadius: "999px",
-      textDecoration: "none",
-      boxShadow: "0 0 18px #39FF14",
-      transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-    }}
-    onMouseOver={(e) => {
-      e.currentTarget.style.transform = "scale(1.05)";
-      e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
-    }}
-    onMouseOut={(e) => {
-      e.currentTarget.style.transform = "scale(1)";
-      e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
-    }}
-  >
-    USE NAO ENGINE
-  </a>
 </div>
+        {/* CTA Button */}
+        <div style={{ textAlign: "center", marginTop: "2rem" }}>
+          <p style={{
+            fontSize: "1rem",
+            color: "#fff",
+            marginBottom: "1rem",
+            lineHeight: 1.5,
+            maxWidth: 480,
+            marginLeft: "auto",
+            marginRight: "auto"
+          }}>
+            Plug-and-play fitness rewards engine. <br />
+            Verified workouts. Crypto rewards. All yours.
+          </p>
 
+          <a
+            href="#"
+            style={{
+              display: "inline-block",
+              background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
+              color: "#000",
+              fontWeight: "700",
+              fontSize: "1rem",
+              padding: "1rem 2rem",
+              borderRadius: "999px",
+              textDecoration: "none",
+              boxShadow: "0 0 18px #39FF14",
+              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "scale(1.05)";
+              e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
+            }}
+          >
+            USE NAO ENGINE
+          </a>
+        </div>
 
         <div style={{ flex: 1 }}></div>
 
@@ -254,14 +253,19 @@ export default function Home() {
       >
         <GlobalStats />
 
-{/* POC 2: Fraud Verification Metrics */}
-<div style={{ width: "100%", marginTop: "2rem" }}>
-  <FraudStatsDisplay />
-</div>
+        {/* POC 2: Fraud Verification Metrics */}
+        <div style={{ width: "100%", marginTop: "2rem" }}>
+          <FraudStatsDisplay />
+        </div>
 
-<div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
-  <LeftColumnLiveFeed />
-</div>
+        {/* EffortNetStatsBox below CTA/GlobalStats */}
+        <div style={{ marginTop: "3rem", width: "100%" }}>
+          <EffortNetStatsBox />
+        </div>
+
+        <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
+          <LeftColumnLiveFeed />
+        </div>
       </div>
 
       {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}

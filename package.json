@@ -24,6 +24,7 @@
     "express": "^4.21.2",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.1",
+    "nanoid": "^5.1.5",
     "next": "^15.3.3",
     "openai": "^4.104.0",
     "puppeteer": "^24.15.0",
