@@ -1,47 +1,14 @@
 import React, { useState } from "react";
-import { useRewardState } from "../src/hooks/useRewardState";
-import { useNFTSync } from "../src/hooks/useNFTSync";
 import GlobalStats from "@/components/GlobalStats";
 import AuthModal from "../components/AuthModal";
 import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
 import FraudStatsDisplay from "@/components/FraudStatsDisplay";
-import FraudTicker from "@/components/FraudTicker";
-import EffortNetStatsBox from "@/components/EffortNetStatsBox"; // <-- Add EffortNetStatsBox import
+import EffortNetStatsBox from "@/components/EffortNetStatsBox";
 import { useRouter } from "next/router";
-
-
-const NFT_TOKEN_ID = "demo-nft-123";
-
-
-function getUpdatedTraits(level: number) {
-  return { color: level > 2 ? "gold" : "silver", aura: level };
-}
-
-async function evolveNFT({
-  tokenId,
-  newLevel,
-  updatedTraits,
-}: {
-  tokenId: string;
-  newLevel: number;
-  updatedTraits: any;
-}) {
-  await fetch("/api/evolve", {
-    method: "POST",
-    body: JSON.stringify({ tokenId, newLevel, updatedTraits }),
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 export default function Home() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
-  const user =
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("nao_user") || "{}")
-      : {};
-  const { rewardState } = useRewardState(user.walletId || "");
-  useNFTSync(rewardState, NFT_TOKEN_ID, evolveNFT, getUpdatedTraits);
 
   return (
     <>
@@ -58,6 +25,7 @@ export default function Home() {
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
           zIndex: 0,
+          pointerEvents: "none",
         }}
       />
 
@@ -74,7 +42,7 @@ export default function Home() {
         {/* Header */}
         <header style={{ padding: "2rem 3rem 0", display: "flex", alignItems: "center" }}>
           <h1 style={{ color: "#f6fafaff", fontWeight: 800, fontSize: "1.75rem", letterSpacing: "0.05em" }}>
-            EVE 
+            EVE
             <span
               style={{
                 display: "inline-block",
@@ -101,7 +69,6 @@ export default function Home() {
               }}
             />
             The API with EffortIQ that blocks fakes, recovers wasted spending
-
             <span
               style={{
                 display: "inline-block",
@@ -114,7 +81,7 @@ export default function Home() {
                 boxShadow: "0 0 10px red",
               }}
             />
-            fraud defense 
+            fraud defense
           </h1>
         </header>
 
@@ -187,92 +154,90 @@ export default function Home() {
               pointerEvents: "none",
             }}
           />
-</div>
-       {/* CTA Button */}
-<div style={{ textAlign: "center", marginTop: "2rem" }}>
-  <p
-    style={{
-      fontSize: "1rem",
-      color: "#fff",
-      marginBottom: "1rem",
-      lineHeight: 1.5,
-      maxWidth: 480,
-      marginLeft: "auto",
-      marginRight: "auto",
-    }}
-  >
-    Fraud defense as infrastructure — for apps, feeds, and reward engines
-  </p>
+        </div>
 
-  <button
-    onClick={() => router.push("/get-started")}
-    style={{
-      display: "inline-block",
-      background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
-      color: "#000",
-      fontWeight: "700",
-      fontSize: "1rem",
-      padding: "1rem 2rem",
-      borderRadius: "999px",
-      textDecoration: "none",
-      boxShadow: "0 0 18px #39FF14",
-      transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-      cursor: "pointer",
-    }}
-    onMouseOver={(e) => {
-      e.currentTarget.style.transform = "scale(1.05)";
-      e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
-    }}
-    onMouseOut={(e) => {
-      e.currentTarget.style.transform = "scale(1)";
-      e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
-    }}
-  >
-    INSTALL EVE
-  </button>
-</div>
+        {/* CTA Button */}
+        <div style={{ textAlign: "center", marginTop: "2rem" }}>
+          <p
+            style={{
+              fontSize: "1rem",
+              color: "#fff",
+              marginBottom: "1rem",
+              lineHeight: 1.5,
+              maxWidth: 480,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            Fraud defense as infrastructure — for apps, feeds, and reward engines
+          </p>
 
-      
+          <button
+            onClick={() => router.push("/get-started")}
+            style={{
+              display: "inline-block",
+              background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
+              color: "#000",
+              fontWeight: "700",
+              fontSize: "1rem",
+              padding: "1rem 2rem",
+              borderRadius: "999px",
+              textDecoration: "none",
+              boxShadow: "0 0 18px #39FF14",
+              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+              cursor: "pointer",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "scale(1.05)";
+              e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
+            }}
+          >
+            INSTALL EVE
+          </button>
+        </div>
 
-    {/* Global Stats Section */}
-<div
-  style={{
-    position: "relative",
-    width: "100%",
-    maxWidth: 1280,
-    margin: "4rem auto 0",
-    padding: "2rem",
-    display: "flex",
-    flexDirection: "column",
-    gap: "2rem",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1,
-  }}
->
-  <GlobalStats />
+        {/* Global Stats Section */}
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            maxWidth: 1280,
+            margin: "4rem auto 0",
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2rem",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1,
+          }}
+        >
+          <GlobalStats />
 
-  {/* POC 2: Fraud Verification Metrics */}
-  <div style={{ width: "100%", marginTop: "2rem" }}>
-    <FraudStatsDisplay />
-  </div>
-
-  {/* EffortNetStatsBox below CTA/GlobalStats */}
-  <div style={{ marginTop: "3rem", width: "100%" }}>
-    <EffortNetStatsBox />
-  </div>
-
-  <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
-    <LeftColumnLiveFeed />
-  </div>
-</div>
-
-{/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
-{showModal && <AuthModal onClose={() => setShowModal(false)} />}
-      {/* End of main layout content */}
+          {/* Fraud Verification Metrics */}
+          <div style={{ width: "100%", marginTop: "2rem" }}>
+            <FraudStatsDisplay />
           </div>
 
-      {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
+          {/* EffortNetStatsBox below CTA/GlobalStats */}
+          <div style={{ marginTop: "3rem", width: "100%" }}>
+            <EffortNetStatsBox />
+          </div>
+
+          <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
+            <LeftColumnLiveFeed />
+          </div>
+        </div>
+
+        {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
+        {showModal && <AuthModal onClose={() => setShowModal(false)} />}
+      </div>
+
+      {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events (extra, if needed) */}
       {showModal && <AuthModal onClose={() => setShowModal(false)} />}
     </>
   );
