@@ -72,7 +72,7 @@ export default function Home() {
         {/* Header */}
         <header style={{ padding: "2rem 3rem 0", display: "flex", alignItems: "center" }}>
           <h1 style={{ color: "#f6fafaff", fontWeight: 800, fontSize: "1.75rem", letterSpacing: "0.05em" }}>
-            VERIFY FITNESS EFFORT
+            EVE 
             <span
               style={{
                 display: "inline-block",
@@ -85,7 +85,7 @@ export default function Home() {
                 boxShadow: "0 0 10px lime",
               }}
             />
-            CRYPTO REWARD USER
+            EFFORT VERIFYING ENGINE
             <span
               style={{
                 display: "inline-block",
@@ -98,7 +98,8 @@ export default function Home() {
                 boxShadow: "0 0 10px gold",
               }}
             />
-            ENGINE
+            The API with EffortIQ that blocks fakes, recovers wasted spending
+
             <span
               style={{
                 display: "inline-block",
@@ -111,7 +112,7 @@ export default function Home() {
                 boxShadow: "0 0 10px red",
               }}
             />
-            powered BY NAO
+            fraud defense 
           </h1>
         </header>
 
@@ -127,7 +128,7 @@ export default function Home() {
             gap: "1rem",
           }}
         >
-          <span>Track Workouts</span>
+          <span>Detect Fraud</span>
           <span
             style={{
               transform: "rotate(45deg)",
@@ -138,7 +139,7 @@ export default function Home() {
               boxShadow: "0 0 10px lime",
             }}
           ></span>
-          <span>Earn</span>
+          <span>Maximize earnings</span>
           <span
             style={{
               transform: "rotate(45deg)",
@@ -149,7 +150,7 @@ export default function Home() {
               boxShadow: "0 0 10px gold",
             }}
           ></span>
-          <span>Evolve</span>
+          <span>Block Bots</span>
           <span
             style={{
               transform: "rotate(45deg)",
@@ -160,7 +161,7 @@ export default function Home() {
               boxShadow: "0 0 10px red",
             }}
           ></span>
-          <span>Users</span>
+          <span>Slash Fraud Costs</span>
         </div>
 
         {/* Decorative Icon */}
@@ -196,8 +197,7 @@ export default function Home() {
             marginLeft: "auto",
             marginRight: "auto"
           }}>
-            Plug-and-play fitness rewards engine. <br />
-            Verified workouts. Crypto rewards. All yours.
+            Fraud defense as infrastructure — for apps, feeds, and reward engines
           </p>
 
           <a
@@ -229,44 +229,45 @@ export default function Home() {
 
         <div style={{ flex: 1 }}></div>
 
-        {/* Footer (keep ONLY this one) */}
-        <footer style={{ padding: "1rem 2rem", color: "#cceeff", textAlign: "center" }}>
-          &copy; 2025 NAOVERSE. All rights reserved.
-        </footer>
-      </div>
+      
 
-      {/* Global Stats Section */}
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: 1280,
-          margin: "4rem auto 0",
-          padding: "2rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "2rem",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1,
-        }}
-      >
-        <GlobalStats />
+    {/* Global Stats Section */}
+<div
+  style={{
+    position: "relative",
+    width: "100%",
+    maxWidth: 1280,
+    margin: "4rem auto 0",
+    padding: "2rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "2rem",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
+  }}
+>
+  <GlobalStats />
 
-        {/* POC 2: Fraud Verification Metrics */}
-        <div style={{ width: "100%", marginTop: "2rem" }}>
-          <FraudStatsDisplay />
-        </div>
+  {/* POC 2: Fraud Verification Metrics */}
+  <div style={{ width: "100%", marginTop: "2rem" }}>
+    <FraudStatsDisplay />
+  </div>
 
-        {/* EffortNetStatsBox below CTA/GlobalStats */}
-        <div style={{ marginTop: "3rem", width: "100%" }}>
-          <EffortNetStatsBox />
-        </div>
+  {/* EffortNetStatsBox below CTA/GlobalStats */}
+  <div style={{ marginTop: "3rem", width: "100%" }}>
+    <EffortNetStatsBox />
+  </div>
 
-        <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
-          <LeftColumnLiveFeed />
-        </div>
-      </div>
+  <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
+    <LeftColumnLiveFeed />
+  </div>
+</div>
+
+{/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
+{showModal && <AuthModal onClose={() => setShowModal(false)} />}
+      {/* End of main layout content */}
+          </div>
 
       {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
       {showModal && <AuthModal onClose={() => setShowModal(false)} />}
