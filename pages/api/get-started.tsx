@@ -37,10 +37,10 @@ export default function GetStartedPage() {
   );
 }
 
-// ✅ This prevents static rendering issues with useSession()
+// ✅ Force this page to render on the server to avoid useSession() SSR issues
 export async function getServerSideProps() {
   return {
-    props: {}, // No props required, just triggers SSR
+    props: {}, // triggers SSR instead of static generation
   };
 }
 
