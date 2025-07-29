@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 
 const GlobalStats: React.FC = () => {
-  const [aiReviewsFlagged, setAiReviewsFlagged] = useState(0);
-  const [fakeViewsBlocked, setFakeViewsBlocked] = useState(0);
-  const [realCreatorBlocks, setRealCreatorBlocks] = useState(0);
-  const [aiPostsFlagged, setAiPostsFlagged] = useState(0);
-  const [cheatsDetected, setCheatsDetected] = useState(0);
-  const [referralsBlocked, setReferralsBlocked] = useState(0);
-  const [fakeContribsFlagged, setFakeContribsFlagged] = useState(0);
-  const [lowEffortPostsBlocked, setLowEffortPostsBlocked] = useState(0);
-  const [verifiedEffortEvents, setVerifiedEffortEvents] = useState(0);
-  const [effortScoreRequests, setEffortScoreRequests] = useState(0);
-  const [fraudDollarsSaved, setFraudDollarsSaved] = useState(0);
-  const [viewsPrevented, setViewsPrevented] = useState(0);
+  const [stats, setStats] = useState({
+    aiReviewsFlagged: 0,
+    fakeViewsBlocked: 0,
+    realCreatorBlocks: 0,
+    aiPostsFlagged: 0,
+    cheatsDetected: 0,
+    referralsBlocked: 0,
+    fakeContribsFlagged: 0,
+    lowEffortPostsBlocked: 0,
+    verifiedEffortEvents: 0,
+    effortScoreRequests: 0,
+    fraudDollarsSaved: 0,
+    viewsPrevented: 0,
+  });
+
   const [eveIQ, setEveIQ] = useState(0);
   const [clock, setClock] = useState<string>("");
 
@@ -21,23 +24,10 @@ const GlobalStats: React.FC = () => {
       try {
         const res = await fetch("/api/getFraudStats");
         const data = await res.json();
-
-        setAiReviewsFlagged(data.aiReviewsFlagged || 0);
-        setFakeViewsBlocked(data.fakeViewsBlocked || 0);
-        setRealCreatorBlocks(data.realCreatorBlocks || 0);
-        setAiPostsFlagged(data.aiPostsFlagged || 0);
-        setCheatsDetected(data.cheatsDetected || 0);
-        setReferralsBlocked(data.referralsBlocked || 0);
-        setFakeContribsFlagged(data.fakeContribsFlagged || 0);
-        setLowEffortPostsBlocked(data.lowEffortPostsBlocked || 0);
-        setVerifiedEffortEvents(data.verifiedEffortEvents || 0);
-        setEffortScoreRequests(data.effortScoreRequests || 0);
-        setFraudDollarsSaved(data.fraudDollarsSaved || 0);
-        setViewsPrevented(data.viewsPrevented || 0);
-
+        setStats(data);
         setEveIQ(calculateEVEIQ(data));
-      } catch (error) {
-        console.error("Failed to fetch fraud stats:", error);
+      } catch (err) {
+        console.error("Failed to fetch live stats", err);
       }
     };
 
@@ -49,17 +39,15 @@ const GlobalStats: React.FC = () => {
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
-      const options: Intl.DateTimeFormatOptions = {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
+      const timeString = now.toLocaleTimeString("en-US", {
+        hour12: false,
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: false,
-      };
-      setClock(now.toLocaleString("en-US", options));
+      });
+      setClock(timeString);
     };
+
     updateClock();
     const timer = setInterval(updateClock, 1000);
     return () => clearInterval(timer);
@@ -81,31 +69,78 @@ const GlobalStats: React.FC = () => {
         }}
       >
         <StatBlock label="EVE Effort IQ Score" value={eveIQ} />
-        <StatBlock label="AI Reviews Flagged" value={aiReviewsFlagged} />
-        <StatBlock label="Fake Views Blocked" value={fakeViewsBlocked} />
-        <StatBlock label="Fake Creators Blocked" value={realCreatorBlocks} />
-        <StatBlock label="AI Posts Flagged" value={aiPostsFlagged} />
-        <StatBlock label="AI Cheating Caught" value={cheatsDetected} />
-        <StatBlock label="Fake Referrals Stopped" value={referralsBlocked} />
-        <StatBlock label="DAO Farming Flagged" value={fakeContribsFlagged} />
-        <StatBlock label="Low-Effort Content Blocked" value={lowEffortPostsBlocked} />
-        <StatBlock label="Verified Effort Events" value={verifiedEffortEvents} />
-        <StatBlock label="Effort Score Requests" value={effortScoreRequests} />
-        <StatBlock label="Fraud Dollars Saved" value={`$${fraudDollarsSaved.toLocaleString()}`} />
-        <StatBlock label="Views Prevented" value={viewsPrevented} />
+        <StatBlock label="Fraud Dollars Saved" value={`$${stats.fraudDollarsSaved.toLocaleString()}`} />
+        <StatBlock label="AI Reviews Flagged" value={stats.aiReviewsFlagged} />
+        <StatBlock label="Fake Views Blocked" value={stats.fakeViewsBlocked} />
+        <StatBlock label="Fake Creators Blocked" value={stats.realCreatorBlocks} />
+        <StatBlock label="AI Posts Flagged" value={stats.aiPostsFlagged} />
+        <StatBlock label="AI Cheating Caught" value={stats.cheatsDetected} />
+        <StatBlock label="Fake Referrals Stopped" value={stats.referralsBlocked} />
+        <StatBlock label="DAO Farming Flagged" value={stats.fakeContribsFlagged} />
+        <StatBlock label="Low-Effort Content Blocked" value={stats.lowEffortPostsBlocked} />
+        <StatBlock label="Verified Effort Events" value={stats.verifiedEffortEvents} />
+        <StatBlock label="Effort Score Requests" value={stats.effortScoreRequests} />
+        <StatBlock label="Views Prevented" value={stats.viewsPrevented.toLocaleString()} />
       </div>
 
       <div
         style={{
           textAlign: "center",
           marginTop: "-1rem",
-          fontSize: "0.9rem",
-          color: "#ffffffcc",
+          fontSize: "1rem",
+          color: "#00FF00",
           fontFamily: "monospace",
-          letterSpacing: "0.5px",
+          letterSpacing: "1.5px",
         }}
       >
-        Last updated: {clock}
+        {clock}
+      </div>
+
+      {/* Recipes Section */}
+      <div
+        style={{
+          marginTop: "3rem",
+          padding: "2rem",
+          borderTop: "1px solid #333",
+          fontFamily: "Inter, sans-serif",
+          color: "#CCCCCC",
+        }}
+      >
+        <h2 style={{ fontSize: "1.25rem", marginBottom: "1rem", color: "#39FF14" }}>
+          Effort Verification Recipes
+        </h2>
+
+        <div style={{ marginBottom: "2rem" }}>
+          <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
+            Reddit:
+            <span style={{ marginLeft: "0.5rem", color: "#FF5555" }}>
+              Block karma farming bots & AI-written advice
+            </span>
+          </h3>
+          <ul style={{ marginLeft: "1rem", fontSize: "0.9rem", lineHeight: "1.5" }}>
+            <li>❌ Flags GPT-written replies used for karma farming</li>
+            <li>❌ Detects repeat posting patterns across subreddits</li>
+            <li>❌ Blocks fake reviews or “sockpuppet” brand mentions</li>
+            <li>✅ Protects genuine community contributions</li>
+            <li>✅ Saves brands and moderators from AI-fueled manipulation</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
+            YouTube Shorts:
+            <span style={{ marginLeft: "0.5rem", color: "#FF5555" }}>
+              Spot cloned videos & stolen content
+            </span>
+          </h3>
+          <ul style={{ marginLeft: "1rem", fontSize: "0.9rem", lineHeight: "1.5" }}>
+            <li>❌ Detects re-uploaded footage across channels</li>
+            <li>❌ Flags AI voiceovers reading stolen scripts</li>
+            <li>❌ Identifies engagement boosts from click farms</li>
+            <li>✅ Prevents monetization of non-original content</li>
+            <li>✅ Supports creator IP protection</li>
+          </ul>
+        </div>
       </div>
     </>
   );
@@ -114,12 +149,12 @@ const GlobalStats: React.FC = () => {
 const StatBlock = ({ label, value }: { label: string; value: number | string }) => (
   <div
     style={{
-      background: "rgba(0, 0, 0, 0.6)",
+      background: "#0b0b0b",
       border: "1px solid #1f1f1f",
-      borderRadius: "16px",
-      padding: "1.5rem",
+      borderRadius: "12px",
+      padding: "1.25rem",
       textAlign: "center",
-      boxShadow: "0 0 12px rgba(57, 255, 20, 0.4)",
+      boxShadow: "0 0 10px rgba(57, 255, 20, 0.3)",
       transition: "all 0.3s ease-in-out",
     }}
   >
@@ -127,31 +162,32 @@ const StatBlock = ({ label, value }: { label: string; value: number | string }) 
       style={{
         fontSize: "2rem",
         fontWeight: 700,
-        marginBottom: "0.5rem",
+        marginBottom: "0.4rem",
         color: "#eaf5e8",
-        textShadow: "0 0 12px rgba(248, 251, 248, 0.7)",
+        textShadow: "0 0 10px rgba(248, 251, 248, 0.6)",
       }}
     >
       {typeof value === "number" ? value.toLocaleString() : value}
     </h2>
-    <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>{label}</p>
+    <p style={{ fontSize: "0.9rem", opacity: 0.85 }}>{label}</p>
   </div>
 );
 
-function calculateEVEIQ({
-  aiReviewsFlagged,
-  fakeViewsBlocked,
-  realCreatorBlocks,
-  aiPostsFlagged,
-  cheatsDetected,
-  referralsBlocked,
-  fakeContribsFlagged,
-  lowEffortPostsBlocked,
-  verifiedEffortEvents,
-  effortScoreRequests,
-}: any): number {
-  const effortComponent = verifiedEffortEvents * 1.0 + effortScoreRequests * 0.25;
+function calculateEVEIQ(data: any): number {
+  const {
+    aiReviewsFlagged = 0,
+    fakeViewsBlocked = 0,
+    realCreatorBlocks = 0,
+    aiPostsFlagged = 0,
+    cheatsDetected = 0,
+    referralsBlocked = 0,
+    fakeContribsFlagged = 0,
+    lowEffortPostsBlocked = 0,
+    verifiedEffortEvents = 0,
+    effortScoreRequests = 0,
+  } = data;
 
+  const effortComponent = verifiedEffortEvents * 1.0 + effortScoreRequests * 0.25;
   const fraudComponent =
     aiReviewsFlagged * 3.5 +
     fakeViewsBlocked * 0.01 +
