@@ -1,0 +1,145 @@
+import React, { useState, useEffect } from 'react';
+
+// Helper for safe number formatting with fallback
+function safeNumber(value: any): string {
+  return typeof value === "number" && !isNaN(value)
+    ? value.toLocaleString()
+    : "0";
+}
+
+// Helper function to format currency for millions/thousands
+const formatCurrency = (num: number): string => {
+  if (num >= 1_000_000_000) {
+    return `$${(num / 1_000_000_000).toFixed(2)}B`;
+  }
+  if (num >= 1_000_000) {
+    return `$${(num / 1_000_000).toFixed(2)}M`;
+  }
+  if (num >= 1_000) {
+    return `$${(num / 1_000).toFixed(1)}k`;
+  }
+  return `$${num.toLocaleString('en-US')}`;
+};
+
+// Helper function to format large numbers for thousands/millions
+const formatLargeNumber = (num: number): string => {
+  if (num >= 1_000_000_000) {
+    return `${(num / 1_000_000_000).toFixed(2)}B`;
+  }
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(2)}M`;
+  }
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(1)}k`;
+  }
+  return num.toLocaleString('en-US');
+};
+
+// StatBlock component (reused from GlobalStats for consistency)
+const StatBlock = ({ label, value }: { label: string; value: number | string }) => (
+  <div
+    style={{
+      background: "#0b0b0b",
+      border: "1px solid #1f1f1f",
+      borderRadius: "12px",
+      padding: "1.25rem",
+      textAlign: "center",
+      boxShadow: "0 0 10px rgba(57, 255, 20, 0.3)",
+      transition: "all 0.3s ease-in-out",
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "2rem",
+        fontWeight: 700,
+        marginBottom: "0.4rem",
+        color: "#eaf5e8",
+        textShadow: "0 0 10px rgba(248, 251, 248, 0.6)",
+      }}
+    >
+      {typeof value === "number" && !isNaN(value) ? value.toLocaleString() : value}
+    </h2>
+    <p style={{ fontSize: "0.9rem", opacity: 0.85 }}>{label}</p>
+  </div>
+);
+
+const RedditFraudTracker: React.FC = () => {
+  // State for simulated live Reddit-specific fraud stats
+  const [redditStats, setRedditStats] = useState({
+    karmaFarmingBotsFlagged: 7500, // Initial high value
+    aiWrittenRepliesBlocked: 12000,
+    spamPostAttempts: 34000,
+    fraudulentEngagementsPrevented: 560000, // In hundreds of thousands
+    redditDollarsSaved: 850000, // In hundreds of thousands
+  });
+
+  useEffect(() => {
+    // Simulate updates for Reddit-specific fraud metrics
+    const interval = setInterval(() => {
+      setRedditStats(prevStats => ({
+        karmaFarmingBotsFlagged: prevStats.karmaFarmingBotsFlagged + Math.floor(Math.random() * 5 + 1),
+        aiWrittenRepliesBlocked: prevStats.aiWrittenRepliesBlocked + Math.floor(Math.random() * 10 + 1),
+        spamPostAttempts: prevStats.spamPostAttempts + Math.floor(Math.random() * 50 + 10),
+        fraudulentEngagementsPrevented: prevStats.fraudulentEngagementsPrevented + Math.floor(Math.random() * 500 + 100),
+        // Simulate money saved based on fraud detected
+        redditDollarsSaved: prevStats.redditDollarsSaved + Math.floor(Math.random() * 500 + 100),
+      }));
+    }, 2000); // Update every 2 seconds for a dynamic feel
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#0a0a0a', // Dark background
+        borderRadius: '16px',
+        padding: '2rem',
+        border: '2px solid #FF4500', // Orange-red border to signify fraud focus
+        boxShadow: '0 0 30px rgba(255, 69, 0, 0.6)', // Intense orange-red glow
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        maxWidth: '700px', // Max width for the display box
+        boxSizing: 'border-box',
+        textAlign: 'center',
+        marginTop: '3rem', // Add some margin from elements above
+      }}
+    >
+      <h2
+        style={{
+          color: '#f6fafaff',
+          fontSize: 'clamp(1.3rem, 3.5vw, 2rem)',
+          fontWeight: 700,
+          marginBottom: '1.5rem',
+          textShadow: '0 0 15px #f6fafaff',
+        }}
+      >
+        EVE on Reddit: Live Fraud Interceptions
+      </h2>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", // Responsive grid
+          gap: "1.5rem",
+          width: '100%',
+        }}
+      >
+        <StatBlock label="Karma Farming Bots Flagged" value={formatLargeNumber(redditStats.karmaFarmingBotsFlagged)} />
+        <StatBlock label="AI-Written Replies Blocked" value={formatLargeNumber(redditStats.aiWrittenRepliesBlocked)} />
+        <StatBlock label="Spam Post Attempts" value={formatLargeNumber(redditStats.spamPostAttempts)} />
+        <StatBlock label="Fraudulent Engagements Prevented" value={formatLargeNumber(redditStats.fraudulentEngagementsPrevented)} />
+        <StatBlock label="Dollars Saved on Reddit" value={formatCurrency(redditStats.redditDollarsSaved)} />
+      </div>
+
+      <p style={{ color: '#888', fontSize: '0.75rem', marginTop: '1.5rem' }}>
+        *Simulated live data demonstrating EVE's specific platform capabilities.
+      </p>
+    </div>
+  );
+};
+
+export default RedditFraudTracker;
