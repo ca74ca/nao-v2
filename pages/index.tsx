@@ -7,6 +7,8 @@ import AuthModal from "../components/AuthModal";
 import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
 import FraudStatsDisplay from "../components/FraudStatsDisplay"; // Your live meter component
 import EffortNetStatsBox from "../components/EffortNetStatsBox";
+import RedditFraudTracker from "../components/RedditFraudTracker"; // NEW: Import the Reddit tracker
+
 import { useRouter } from "next/router"; // Standard Next.js import
 
 export default function Home() {
@@ -173,6 +175,8 @@ export default function Home() {
         >
           {/* GlobalStats component is now here, displaying live global fraud data */}
           <GlobalStats />
+ {/* RedditFraudTracker component (simulated live Reddit-specific fraud data) */}
+          <RedditFraudTracker />
 
           {/* EffortNetStatsBox */}
           <div style={{ marginTop: "3rem", width: "100%" }}>

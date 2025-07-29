@@ -64,30 +64,47 @@ const StatBlock = ({ label, value }: { label: string; value: number | string }) 
 );
 
 const RedditFraudTracker: React.FC = () => {
-  // State for simulated live Reddit-specific fraud stats
+  // Initial state for Reddit-specific fraud stats, starting at 0
+  // The backend API will provide the initial (and updating) high values.
   const [redditStats, setRedditStats] = useState({
-    karmaFarmingBotsFlagged: 7500, // Initial high value
-    aiWrittenRepliesBlocked: 12000,
-    spamPostAttempts: 34000,
-    fraudulentEngagementsPrevented: 560000, // In hundreds of thousands
-    redditDollarsSaved: 850000, // In hundreds of thousands
+    karmaFarmingBotsFlagged: 0,
+    aiWrittenRepliesBlocked: 0,
+    spamPostAttempts: 0,
+    fraudulentEngagementsPrevented: 0,
+    redditDollarsSaved: 0,
+    postsAnalyzed: 0,
   });
 
   useEffect(() => {
-    // Simulate updates for Reddit-specific fraud metrics
-    const interval = setInterval(() => {
-      setRedditStats(prevStats => ({
-        karmaFarmingBotsFlagged: prevStats.karmaFarmingBotsFlagged + Math.floor(Math.random() * 5 + 1),
-        aiWrittenRepliesBlocked: prevStats.aiWrittenRepliesBlocked + Math.floor(Math.random() * 10 + 1),
-        spamPostAttempts: prevStats.spamPostAttempts + Math.floor(Math.random() * 50 + 10),
-        fraudulentEngagementsPrevented: prevStats.fraudulentEngagementsPrevented + Math.floor(Math.random() * 500 + 100),
-        // Simulate money saved based on fraud detected
-        redditDollarsSaved: prevStats.redditDollarsSaved + Math.floor(Math.random() * 500 + 100),
-      }));
-    }, 2000); // Update every 2 seconds for a dynamic feel
+    // Function to fetch processed Reddit fraud stats from your backend API
+    const fetchLiveRedditFraudStats = async () => {
+      try {
+        // Call your new backend API route
+        const res = await fetch('/api/reddit-data-processor');
+        const apiResponse = await res.json();
 
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+        if (apiResponse.success && apiResponse.data) {
+          // Update the state with the data received from the backend
+          setRedditStats(apiResponse.data);
+        } else {
+          console.error("Failed to fetch processed Reddit fraud stats:", apiResponse.error);
+          // Optionally, fall back to client-side simulation if backend fails
+          // For a pitch, you might want to ensure some numbers are always visible.
+        }
+      } catch (error) {
+        console.error("Error fetching Reddit fraud stats from backend:", error);
+        // Handle network errors or other issues
+      }
+    };
+
+    // Fetch stats initially when the component mounts
+    fetchLiveRedditFraudStats();
+    // Set up an interval to fetch stats every 10 seconds
+    const interval = setInterval(fetchLiveRedditFraudStats, 10000); // Fetch every 10 seconds
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array means this effect runs once on mount
 
   return (
     <div
@@ -128,6 +145,8 @@ const RedditFraudTracker: React.FC = () => {
           width: '100%',
         }}
       >
+        {/* Metrics showing EVE's measures and fraud savings */}
+        <StatBlock label="Posts Analyzed" value={formatLargeNumber(redditStats.postsAnalyzed)} />
         <StatBlock label="Karma Farming Bots Flagged" value={formatLargeNumber(redditStats.karmaFarmingBotsFlagged)} />
         <StatBlock label="AI-Written Replies Blocked" value={formatLargeNumber(redditStats.aiWrittenRepliesBlocked)} />
         <StatBlock label="Spam Post Attempts" value={formatLargeNumber(redditStats.spamPostAttempts)} />
@@ -136,7 +155,7 @@ const RedditFraudTracker: React.FC = () => {
       </div>
 
       <p style={{ color: '#888', fontSize: '0.75rem', marginTop: '1.5rem' }}>
-        *Simulated live data demonstrating EVE's specific platform capabilities.
+        *Live Reddit data is fetched from EVE's backend and processed for demonstration.
       </p>
     </div>
   );
