@@ -1,5 +1,3 @@
-// /pages/get-started.tsx
-
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 
@@ -18,7 +16,7 @@ export default function GetStartedPage() {
           {status === "loading"
             ? "Loading..."
             : session
-            ? `Welcome, ${session.user?.email}!`
+            ? (session?.user?.email ? `Welcome, ${session.user.email}!` : "Welcome!")
             : "Sign in to get your API Key & start verifying human effort."}
         </p>
 
