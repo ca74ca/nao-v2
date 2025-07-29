@@ -1,55 +1,49 @@
 import React, { useEffect, useState } from "react";
 
 const GlobalStats: React.FC = () => {
-  const [aiReviewsFlagged, setAiReviewsFlagged] = useState(6342);
-  const [fakeViewsBlocked, setFakeViewsBlocked] = useState(98234);
-  const [realCreatorBlocks, setRealCreatorBlocks] = useState(324);
-  const [aiPostsFlagged, setAiPostsFlagged] = useState(14822);
-  const [cheatsDetected, setCheatsDetected] = useState(271);
-  const [referralsBlocked, setReferralsBlocked] = useState(591);
-  const [fakeContribsFlagged, setFakeContribsFlagged] = useState(883);
-  const [lowEffortPostsBlocked, setLowEffortPostsBlocked] = useState(1461);
-  const [verifiedEffortEvents, setVerifiedEffortEvents] = useState(18743);
-  const [effortScoreRequests, setEffortScoreRequests] = useState(29451);
+  const [aiReviewsFlagged, setAiReviewsFlagged] = useState(0);
+  const [fakeViewsBlocked, setFakeViewsBlocked] = useState(0);
+  const [realCreatorBlocks, setRealCreatorBlocks] = useState(0);
+  const [aiPostsFlagged, setAiPostsFlagged] = useState(0);
+  const [cheatsDetected, setCheatsDetected] = useState(0);
+  const [referralsBlocked, setReferralsBlocked] = useState(0);
+  const [fakeContribsFlagged, setFakeContribsFlagged] = useState(0);
+  const [lowEffortPostsBlocked, setLowEffortPostsBlocked] = useState(0);
+  const [verifiedEffortEvents, setVerifiedEffortEvents] = useState(0);
+  const [effortScoreRequests, setEffortScoreRequests] = useState(0);
   const [eveIQ, setEveIQ] = useState(0);
   const [clock, setClock] = useState<string>("");
 
-  // Animate EVE metrics
+  // ✅ Fetch live fraud stats from backend
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAiReviewsFlagged(prev => prev + Math.floor(Math.random() * 2));
-      setFakeViewsBlocked(prev => prev + Math.floor(Math.random() * 50));
-      setRealCreatorBlocks(prev => prev + Math.floor(Math.random() * 1));
-      setAiPostsFlagged(prev => prev + Math.floor(Math.random() * 3));
-      setCheatsDetected(prev => prev + Math.floor(Math.random() * 1));
-      setReferralsBlocked(prev => prev + Math.floor(Math.random() * 1));
-      setFakeContribsFlagged(prev => prev + Math.floor(Math.random() * 2));
-      setLowEffortPostsBlocked(prev => prev + Math.floor(Math.random() * 2));
-      setVerifiedEffortEvents(prev => prev + Math.floor(Math.random() * 5));
-      setEffortScoreRequests(prev => prev + Math.floor(Math.random() * 4));
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/getFraudStats");
+        const data = await res.json();
 
-      setEveIQ(calculateEVEIQ({
-        aiReviewsFlagged,
-        fakeViewsBlocked,
-        realCreatorBlocks,
-        aiPostsFlagged,
-        cheatsDetected,
-        referralsBlocked,
-        fakeContribsFlagged,
-        lowEffortPostsBlocked,
-        verifiedEffortEvents,
-        effortScoreRequests,
-      }));
-    }, 2500);
+        setAiReviewsFlagged(data.aiReviewsFlagged || 0);
+        setFakeViewsBlocked(data.fakeViewsBlocked || 0);
+        setRealCreatorBlocks(data.realCreatorBlocks || 0);
+        setAiPostsFlagged(data.aiPostsFlagged || 0);
+        setCheatsDetected(data.cheatsDetected || 0);
+        setReferralsBlocked(data.referralsBlocked || 0);
+        setFakeContribsFlagged(data.fakeContribsFlagged || 0);
+        setLowEffortPostsBlocked(data.lowEffortPostsBlocked || 0);
+        setVerifiedEffortEvents(data.verifiedEffortEvents || 0);
+        setEffortScoreRequests(data.effortScoreRequests || 0);
+
+        setEveIQ(calculateEVEIQ(data));
+      } catch (error) {
+        console.error("Failed to fetch fraud stats:", error);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 5000);
     return () => clearInterval(interval);
-  }, [
-    aiReviewsFlagged, fakeViewsBlocked, realCreatorBlocks,
-    aiPostsFlagged, cheatsDetected, referralsBlocked,
-    fakeContribsFlagged, lowEffortPostsBlocked,
-    verifiedEffortEvents, effortScoreRequests
-  ]);
+  }, []);
 
-  // Wall Street-style time ticker
+  // ⏱ Clock ticker
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
@@ -97,20 +91,23 @@ const GlobalStats: React.FC = () => {
         <StatBlock label="Effort Score Requests" value={effortScoreRequests} />
       </div>
 
-      <div style={{
-        textAlign: "center",
-        marginTop: "-1rem",
-        fontSize: "0.9rem",
-        color: "#ffffffcc",
-        fontFamily: "monospace",
-        letterSpacing: "0.5px"
-      }}>
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "-1rem",
+          fontSize: "0.9rem",
+          color: "#ffffffcc",
+          fontFamily: "monospace",
+          letterSpacing: "0.5px",
+        }}
+      >
         Last updated: {clock}
       </div>
     </>
   );
 };
 
+// 💡 Neon stat card
 const StatBlock = ({ label, value }: { label: string; value: number | string }) => (
   <div
     style={{
@@ -138,7 +135,7 @@ const StatBlock = ({ label, value }: { label: string; value: number | string }) 
   </div>
 );
 
-// EVE IQ formula
+// 🧠 Scoring logic
 function calculateEVEIQ({
   aiReviewsFlagged,
   fakeViewsBlocked,
@@ -150,20 +147,8 @@ function calculateEVEIQ({
   lowEffortPostsBlocked,
   verifiedEffortEvents,
   effortScoreRequests,
-}: {
-  aiReviewsFlagged: number;
-  fakeViewsBlocked: number;
-  realCreatorBlocks: number;
-  aiPostsFlagged: number;
-  cheatsDetected: number;
-  referralsBlocked: number;
-  fakeContribsFlagged: number;
-  lowEffortPostsBlocked: number;
-  verifiedEffortEvents: number;
-  effortScoreRequests: number;
-}): number {
-  const effortComponent =
-    verifiedEffortEvents * 1.0 + effortScoreRequests * 0.25;
+}: any): number {
+  const effortComponent = verifiedEffortEvents * 1.0 + effortScoreRequests * 0.25;
 
   const fraudComponent =
     aiReviewsFlagged * 3.5 +
