@@ -69,18 +69,18 @@ const GlobalStats: React.FC = () => {
         }}
       >
         <StatBlock label="EVE Effort IQ Score" value={eveIQ} />
-        <StatBlock label="Fraud Dollars Saved" value={`$${stats.fraudDollarsSaved.toLocaleString()}`} />
-        <StatBlock label="AI Reviews Flagged" value={stats.aiReviewsFlagged} />
-        <StatBlock label="Fake Views Blocked" value={stats.fakeViewsBlocked} />
-        <StatBlock label="Fake Creators Blocked" value={stats.realCreatorBlocks} />
-        <StatBlock label="AI Posts Flagged" value={stats.aiPostsFlagged} />
-        <StatBlock label="AI Cheating Caught" value={stats.cheatsDetected} />
-        <StatBlock label="Fake Referrals Stopped" value={stats.referralsBlocked} />
-        <StatBlock label="DAO Farming Flagged" value={stats.fakeContribsFlagged} />
-        <StatBlock label="Low-Effort Content Blocked" value={stats.lowEffortPostsBlocked} />
-        <StatBlock label="Verified Effort Events" value={stats.verifiedEffortEvents} />
-        <StatBlock label="Effort Score Requests" value={stats.effortScoreRequests} />
-        <StatBlock label="Views Prevented" value={stats.viewsPrevented.toLocaleString()} />
+        <StatBlock label="Fraud Dollars Saved" value={`$${safeNumber(stats.fraudDollarsSaved)}`} />
+        <StatBlock label="AI Reviews Flagged" value={safeNumber(stats.aiReviewsFlagged)} />
+        <StatBlock label="Fake Views Blocked" value={safeNumber(stats.fakeViewsBlocked)} />
+        <StatBlock label="Fake Creators Blocked" value={safeNumber(stats.realCreatorBlocks)} />
+        <StatBlock label="AI Posts Flagged" value={safeNumber(stats.aiPostsFlagged)} />
+        <StatBlock label="AI Cheating Caught" value={safeNumber(stats.cheatsDetected)} />
+        <StatBlock label="Fake Referrals Stopped" value={safeNumber(stats.referralsBlocked)} />
+        <StatBlock label="DAO Farming Flagged" value={safeNumber(stats.fakeContribsFlagged)} />
+        <StatBlock label="Low-Effort Content Blocked" value={safeNumber(stats.lowEffortPostsBlocked)} />
+        <StatBlock label="Verified Effort Events" value={safeNumber(stats.verifiedEffortEvents)} />
+        <StatBlock label="Effort Score Requests" value={safeNumber(stats.effortScoreRequests)} />
+        <StatBlock label="Views Prevented" value={safeNumber(stats.viewsPrevented)} />
       </div>
 
       <div
@@ -146,6 +146,13 @@ const GlobalStats: React.FC = () => {
   );
 };
 
+// Helper for safe number formatting with fallback
+function safeNumber(value: any): string {
+  return typeof value === "number" && !isNaN(value)
+    ? value.toLocaleString()
+    : "0";
+}
+
 const StatBlock = ({ label, value }: { label: string; value: number | string }) => (
   <div
     style={{
@@ -167,7 +174,7 @@ const StatBlock = ({ label, value }: { label: string; value: number | string }) 
         textShadow: "0 0 10px rgba(248, 251, 248, 0.6)",
       }}
     >
-      {typeof value === "number" ? value.toLocaleString() : value}
+      {typeof value === "number" && !isNaN(value) ? value.toLocaleString() : value}
     </h2>
     <p style={{ fontSize: "0.9rem", opacity: 0.85 }}>{label}</p>
   </div>
