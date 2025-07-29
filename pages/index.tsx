@@ -223,7 +223,7 @@ export default function Home() {
               e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
             }}
           >
-            USE NAO ENGINE
+            INSTALL EVE
           </a>
         </div>
 

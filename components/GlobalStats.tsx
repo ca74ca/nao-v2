@@ -1,30 +1,53 @@
 import React, { useEffect, useState } from "react";
 
 const GlobalStats: React.FC = () => {
-  const [workouts, setWorkouts] = useState(15522);
-  const [weightLifted, setWeightLifted] = useState(10944070);
-  const [hrZones, setHRZones] = useState(76468);
-  const [xpEarned, setXPEarned] = useState(482611);
+  const [aiReviewsFlagged, setAiReviewsFlagged] = useState(6342);
+  const [fakeViewsBlocked, setFakeViewsBlocked] = useState(98234);
+  const [realCreatorBlocks, setRealCreatorBlocks] = useState(324);
+  const [aiPostsFlagged, setAiPostsFlagged] = useState(14822);
+  const [cheatsDetected, setCheatsDetected] = useState(271);
+  const [referralsBlocked, setReferralsBlocked] = useState(591);
+  const [fakeContribsFlagged, setFakeContribsFlagged] = useState(883);
+  const [lowEffortPostsBlocked, setLowEffortPostsBlocked] = useState(1461);
+  const [verifiedEffortEvents, setVerifiedEffortEvents] = useState(18743);
+  const [effortScoreRequests, setEffortScoreRequests] = useState(29451);
+  const [eveIQ, setEveIQ] = useState(0);
   const [clock, setClock] = useState<string>("");
 
-  // Static B2B metrics (non-animated)
-  const verifiedWorkouts = 11882;
-  const usersActivated = 1874;
-  const evolvedRewards = 6421;
-  const ethPaid = 9.31;
-  const stablecoinUSD = 12844;
-  const chainInteractions = 14233;
-
-  // Animate legacy stats
+  // Animate EVE metrics
   useEffect(() => {
     const interval = setInterval(() => {
-      setWorkouts((prev) => prev + Math.floor(Math.random() * 3));
-      setWeightLifted((prev) => prev + Math.floor(Math.random() * 100));
-      setHRZones((prev) => prev + Math.floor(Math.random() * 2));
-      setXPEarned((prev) => prev + Math.floor(Math.random() * 10));
+      setAiReviewsFlagged(prev => prev + Math.floor(Math.random() * 2));
+      setFakeViewsBlocked(prev => prev + Math.floor(Math.random() * 50));
+      setRealCreatorBlocks(prev => prev + Math.floor(Math.random() * 1));
+      setAiPostsFlagged(prev => prev + Math.floor(Math.random() * 3));
+      setCheatsDetected(prev => prev + Math.floor(Math.random() * 1));
+      setReferralsBlocked(prev => prev + Math.floor(Math.random() * 1));
+      setFakeContribsFlagged(prev => prev + Math.floor(Math.random() * 2));
+      setLowEffortPostsBlocked(prev => prev + Math.floor(Math.random() * 2));
+      setVerifiedEffortEvents(prev => prev + Math.floor(Math.random() * 5));
+      setEffortScoreRequests(prev => prev + Math.floor(Math.random() * 4));
+
+      setEveIQ(calculateEVEIQ({
+        aiReviewsFlagged,
+        fakeViewsBlocked,
+        realCreatorBlocks,
+        aiPostsFlagged,
+        cheatsDetected,
+        referralsBlocked,
+        fakeContribsFlagged,
+        lowEffortPostsBlocked,
+        verifiedEffortEvents,
+        effortScoreRequests,
+      }));
     }, 2500);
     return () => clearInterval(interval);
-  }, []);
+  }, [
+    aiReviewsFlagged, fakeViewsBlocked, realCreatorBlocks,
+    aiPostsFlagged, cheatsDetected, referralsBlocked,
+    fakeContribsFlagged, lowEffortPostsBlocked,
+    verifiedEffortEvents, effortScoreRequests
+  ]);
 
   // Wall Street-style time ticker
   useEffect(() => {
@@ -61,22 +84,19 @@ const GlobalStats: React.FC = () => {
           fontWeight: 500,
         }}
       >
-        {/* Animated legacy stats */}
-        <StatBlock label="Workouts Completed" value={workouts} />
-        <StatBlock label="LBS Lifted Total" value={weightLifted} />
-        <StatBlock label="HR Zone Hours" value={hrZones} />
-        <StatBlock label="XP Earned" value={xpEarned} />
-
-        {/* New B2B static stats */}
-        <StatBlock label="Verified Workouts" value={verifiedWorkouts} />
-        <StatBlock label="Users Activated" value={usersActivated} />
-        <StatBlock label="dNFTs Evolved" value={evolvedRewards} />
-        <StatBlock label="ETH Paid Out" value={`Ξ${ethPaid}`} />
-        <StatBlock label="Stablecoin USD Delivered" value={`$${stablecoinUSD.toLocaleString()}`} />
-        <StatBlock label="Smart Contract Calls" value={chainInteractions} />
+        <StatBlock label="EVE Effort IQ Score" value={eveIQ} />
+        <StatBlock label="AI Reviews Flagged" value={aiReviewsFlagged} />
+        <StatBlock label="Fake Views Blocked" value={fakeViewsBlocked} />
+        <StatBlock label="Fake Creators Blocked" value={realCreatorBlocks} />
+        <StatBlock label="AI Posts Flagged" value={aiPostsFlagged} />
+        <StatBlock label="AI Cheating Caught" value={cheatsDetected} />
+        <StatBlock label="Fake Referrals Stopped" value={referralsBlocked} />
+        <StatBlock label="DAO Farming Flagged" value={fakeContribsFlagged} />
+        <StatBlock label="Low-Effort Content Blocked" value={lowEffortPostsBlocked} />
+        <StatBlock label="Verified Effort Events" value={verifiedEffortEvents} />
+        <StatBlock label="Effort Score Requests" value={effortScoreRequests} />
       </div>
 
-      {/* Wall Street-style timestamp */}
       <div style={{
         textAlign: "center",
         marginTop: "-1rem",
@@ -117,5 +137,46 @@ const StatBlock = ({ label, value }: { label: string; value: number | string }) 
     <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>{label}</p>
   </div>
 );
+
+// EVE IQ formula
+function calculateEVEIQ({
+  aiReviewsFlagged,
+  fakeViewsBlocked,
+  realCreatorBlocks,
+  aiPostsFlagged,
+  cheatsDetected,
+  referralsBlocked,
+  fakeContribsFlagged,
+  lowEffortPostsBlocked,
+  verifiedEffortEvents,
+  effortScoreRequests,
+}: {
+  aiReviewsFlagged: number;
+  fakeViewsBlocked: number;
+  realCreatorBlocks: number;
+  aiPostsFlagged: number;
+  cheatsDetected: number;
+  referralsBlocked: number;
+  fakeContribsFlagged: number;
+  lowEffortPostsBlocked: number;
+  verifiedEffortEvents: number;
+  effortScoreRequests: number;
+}): number {
+  const effortComponent =
+    verifiedEffortEvents * 1.0 + effortScoreRequests * 0.25;
+
+  const fraudComponent =
+    aiReviewsFlagged * 3.5 +
+    fakeViewsBlocked * 0.01 +
+    realCreatorBlocks * 7.5 +
+    aiPostsFlagged * 0.012 +
+    cheatsDetected * 15.0 +
+    referralsBlocked * 5.0 +
+    fakeContribsFlagged * 2.5 +
+    lowEffortPostsBlocked * 0.75;
+
+  const rawScore = effortComponent + fraudComponent;
+  return Math.min(100, Math.floor((rawScore / 1000) * 100));
+}
 
 export default GlobalStats;
