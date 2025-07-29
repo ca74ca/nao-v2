@@ -1,17 +1,33 @@
 import React, { useState } from "react";
-import GlobalStats from "@/components/GlobalStats";
+// Using relative paths for component imports.
+// This assumes 'index.tsx' is in 'pages/' and your components are in a 'components/' directory
+// that is a direct sibling to the 'pages/' directory (i.e., both are under the project root).
+import GlobalStats from "../components/GlobalStats";
 import AuthModal from "../components/AuthModal";
 import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
-import FraudStatsDisplay from "@/components/FraudStatsDisplay";
-import EffortNetStatsBox from "@/components/EffortNetStatsBox";
-import { useRouter } from "next/router";
+import FraudStatsDisplay from "../components/FraudStatsDisplay"; // Your live meter component
+import EffortNetStatsBox from "../components/EffortNetStatsBox";
+import { useRouter } from "next/router"; // Standard Next.js import
 
 export default function Home() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
 
+  // Define your highest impact metrics here for the headline and subheading.
+  // These are the "shocking" numbers that grab attention immediately.
+  // In a real application, these might be fetched from a high-level analytics API.
+  const projectedEcommerceFraud2029 = "$107 Billion"; // Global E-commerce Fraud Losses by 2029
+  const projectedAdFraud2028 = "$172 Billion";       // Digital Ad Fraud Losses by 2028
+  const costPer100Fraud = "$207";                   // Cost multiplier: for every $100 of fraud, it costs $207
+  const projectedAIFraud2027 = "$40 Billion";         // AI's Direct Financial Impact on US Financial Sector Fraud by 2027
+
   return (
     <>
+      {/* Viewport Meta Tag for Mobile Responsiveness */}
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+
       {/* Full Screen Background */}
       <div
         style={{
@@ -35,132 +51,68 @@ export default function Home() {
           position: "relative",
           zIndex: 10,
           display: "flex",
-          height: "100vh",
+          minHeight: "100vh", // Ensures content pushes layout if it overflows viewport
           flexDirection: "column",
+          fontFamily: "Inter, sans-serif", // Apply font globally
         }}
       >
-        {/* Header */}
-        <header style={{ padding: "2rem 3rem 0", display: "flex", alignItems: "center" }}>
-          <h1 style={{ color: "#f6fafaff", fontWeight: 800, fontSize: "1.75rem", letterSpacing: "0.05em" }}>
-            EVE
-            <span
-              style={{
-                display: "inline-block",
-                transform: "rotate(45deg)",
-                width: "12px",
-                height: "12px",
-                borderRight: "2px solid lime",
-                borderTop: "2px solid lime",
-                margin: "0 0.5rem",
-                boxShadow: "0 0 10px lime",
-              }}
-            />
-            EFFORT VERIFYING ENGINE
-            <span
-              style={{
-                display: "inline-block",
-                transform: "rotate(45deg)",
-                width: "12px",
-                height: "12px",
-                borderRight: "2px solid gold",
-                borderTop: "2px solid gold",
-                margin: "0 0.5rem",
-                boxShadow: "0 0 10px gold",
-              }}
-            />
-            The API with EffortIQ that blocks fakes, recovers wasted spending
-            <span
-              style={{
-                display: "inline-block",
-                transform: "rotate(45deg)",
-                width: "12px",
-                height: "12px",
-                borderRight: "2px solid red",
-                borderTop: "2px solid red",
-                margin: "0 0.5rem",
-                boxShadow: "0 0 10px red",
-              }}
-            />
-            fraud defense
+        {/* Header - Sharp, direct, and financially impactful */}
+        <header style={{ padding: "2rem 1.5rem 0", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <h1
+            style={{
+              color: "#f6fafaff",
+              fontWeight: 800,
+              fontSize: "clamp(1.5rem, 5vw, 2.75rem)", // Responsive font size
+              letterSpacing: "0.05em",
+              lineHeight: 1.2,
+              maxWidth: "900px", // Limit width for readability
+            }}
+          >
+            EVE: EffortIQ.
+            <br />
+            Stop the **{projectedEcommerceFraud2029}** AI Fraud Epidemic.
           </h1>
         </header>
 
-        {/* Subheading */}
+        {/* Subheading - Reinforce the problem and introduce the unique solution */}
         <div
           style={{
-            padding: "0 3rem 2rem",
+            padding: "0 1.5rem 2rem",
             color: "#cceeff",
             fontWeight: 600,
-            fontSize: "1rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "1rem",
+            fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)", // Responsive font size
+            textAlign: "center",
+            maxWidth: "700px", // Limit width for readability
+            margin: "1rem auto 0", // Center align
+            lineHeight: 1.5,
           }}
         >
-          <span>Detect Fraud</span>
-          <span
-            style={{
-              transform: "rotate(45deg)",
-              width: "12px",
-              height: "12px",
-              borderRight: "2px solid lime",
-              borderTop: "2px solid lime",
-              boxShadow: "0 0 10px lime",
-            }}
-          ></span>
-          <span>Maximize earnings</span>
-          <span
-            style={{
-              transform: "rotate(45deg)",
-              width: "12px",
-              height: "12px",
-              borderRight: "2px solid gold",
-              borderTop: "2px solid gold",
-              boxShadow: "0 0 10px gold",
-            }}
-          ></span>
-          <span>Block Bots</span>
-          <span
-            style={{
-              transform: "rotate(45deg)",
-              width: "12px",
-              height: "12px",
-              borderRight: "2px solid red",
-              borderTop: "2px solid red",
-              boxShadow: "0 0 10px red",
-            }}
-          ></span>
-          <span>Slash Fraud Costs</span>
+          AI-driven fraud is projected to cost industries **{projectedAdFraud2028}** in ad spend and **{projectedAIFraud2027}** in financial losses. For every $100 of fraud, it costs businesses **{costPer100Fraud}**.
+          <br />
+          EVE's unique **Human Effort Score** identifies genuine interactions, blocks sophisticated fakes, and recovers your wasted spending.
         </div>
 
-        {/* Decorative Icon */}
+        {/* Live Fraud Impact Meter (FraudStatsDisplay) - Placed prominently */}
         <div
           style={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: "4rem",
+            marginTop: "2rem", // Adjust margin to position it well
+            width: "100%",
+            padding: "0 1.5rem", // Add padding for mobile
+            boxSizing: "border-box", // Include padding in width calculation
           }}
         >
-          <span
-            style={{
-              display: "inline-block",
-              transform: "rotate(45deg)",
-              width: "100px",
-              height: "100px",
-              borderRight: "8px solid lime",
-              borderTop: "8px solid lime",
-              boxShadow: "0 0 30px lime",
-              pointerEvents: "none",
-            }}
-          />
+          {/* This is your component that fetches and displays live fraud stats */}
+          <FraudStatsDisplay />
         </div>
 
-        {/* CTA Button */}
+        {/* CTA Button and supporting text */}
         <div style={{ textAlign: "center", marginTop: "2rem" }}>
           <p
             style={{
-              fontSize: "1rem",
+              fontSize: "clamp(0.9rem, 2.5vw, 1rem)", // Responsive font size
               color: "#fff",
               marginBottom: "1rem",
               lineHeight: 1.5,
@@ -169,7 +121,9 @@ export default function Home() {
               marginRight: "auto",
             }}
           >
-            Fraud defense as infrastructure — for apps, feeds, and reward engines
+            Fraud defense as infrastructure — for apps, feeds, and reward engines.
+            <br />
+            **Start protecting your revenue today.**
           </p>
 
           <button
@@ -179,13 +133,14 @@ export default function Home() {
               background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
               color: "#000",
               fontWeight: "700",
-              fontSize: "1rem",
+              fontSize: "clamp(0.9rem, 3vw, 1.1rem)", // Responsive font size
               padding: "1rem 2rem",
               borderRadius: "999px",
               textDecoration: "none",
               boxShadow: "0 0 18px #39FF14",
               transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
               cursor: "pointer",
+              border: "none", // Ensure no default button border
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = "scale(1.05)";
@@ -196,18 +151,18 @@ export default function Home() {
               e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
             }}
           >
-            INSTALL EVE
+            SECURE YOUR PLATFORM NOW
           </button>
         </div>
 
-        {/* Global Stats Section */}
+        {/* Other Stats Sections - Can follow the main live meter and CTA */}
         <div
           style={{
             position: "relative",
             width: "100%",
             maxWidth: 1280,
-            margin: "4rem auto 0",
-            padding: "2rem",
+            margin: "4rem auto 0", // Increased margin to separate from CTA/Live Meter
+            padding: "2rem 1.5rem",
             display: "flex",
             flexDirection: "column",
             gap: "2rem",
@@ -216,18 +171,15 @@ export default function Home() {
             zIndex: 1,
           }}
         >
+          {/* GlobalStats component is now here, displaying live global fraud data */}
           <GlobalStats />
 
-          {/* Fraud Verification Metrics */}
-          <div style={{ width: "100%", marginTop: "2rem" }}>
-            <FraudStatsDisplay />
-          </div>
-
-          {/* EffortNetStatsBox below CTA/GlobalStats */}
+          {/* EffortNetStatsBox */}
           <div style={{ marginTop: "3rem", width: "100%" }}>
             <EffortNetStatsBox />
           </div>
 
+          {/* LeftColumnLiveFeed */}
           <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
             <LeftColumnLiveFeed />
           </div>
@@ -236,9 +188,6 @@ export default function Home() {
         {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
         {showModal && <AuthModal onClose={() => setShowModal(false)} />}
       </div>
-
-      {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events (extra, if needed) */}
-      {showModal && <AuthModal onClose={() => setShowModal(false)} />}
     </>
   );
 }
