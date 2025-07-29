@@ -24,7 +24,20 @@ const GlobalStats: React.FC = () => {
       try {
         const res = await fetch("/api/getFraudStats");
         const data = await res.json();
-        setStats(data);
+        setStats({
+          aiReviewsFlagged: data.aiReviewsFlagged ?? 0,
+          fakeViewsBlocked: data.fakeViewsBlocked ?? 0,
+          realCreatorBlocks: data.realCreatorBlocks ?? 0,
+          aiPostsFlagged: data.aiPostsFlagged ?? 0,
+          cheatsDetected: data.cheatsDetected ?? 0,
+          referralsBlocked: data.referralsBlocked ?? 0,
+          fakeContribsFlagged: data.fakeContribsFlagged ?? 0,
+          lowEffortPostsBlocked: data.lowEffortPostsBlocked ?? 0,
+          verifiedEffortEvents: data.verifiedEffortEvents ?? 0,
+          effortScoreRequests: data.effortScoreRequests ?? 0,
+          fraudDollarsSaved: data.fraudDollarsSaved ?? 0,
+          viewsPrevented: data.viewsPrevented ?? 0,
+        });
         setEveIQ(calculateEVEIQ(data));
       } catch (err) {
         console.error("Failed to fetch live stats", err);
