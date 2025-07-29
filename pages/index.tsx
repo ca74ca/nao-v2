@@ -6,10 +6,12 @@ import AuthModal from "../components/AuthModal";
 import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
 import FraudStatsDisplay from "@/components/FraudStatsDisplay";
 import FraudTicker from "@/components/FraudTicker";
-import EffortNetStatsBox from "@/components/EffortNetStatsBox";
+import EffortNetStatsBox from "@/components/EffortNetStatsBox"; // <-- Add EffortNetStatsBox import
 import { useRouter } from "next/router";
 
+
 const NFT_TOKEN_ID = "demo-nft-123";
+
 
 function getUpdatedTraits(level: number) {
   return { color: level > 2 ? "gold" : "silver", aura: level };
@@ -185,57 +187,93 @@ export default function Home() {
               pointerEvents: "none",
             }}
           />
-        </div>
+</div>
+       {/* CTA Button */}
+<div style={{ textAlign: "center", marginTop: "2rem" }}>
+  <p
+    style={{
+      fontSize: "1rem",
+      color: "#fff",
+      marginBottom: "1rem",
+      lineHeight: 1.5,
+      maxWidth: 480,
+      marginLeft: "auto",
+      marginRight: "auto",
+    }}
+  >
+    Fraud defense as infrastructure — for apps, feeds, and reward engines
+  </p>
 
-        {/* CTA Button */}
-        <div style={{ textAlign: "center", marginTop: "2rem" }}>
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "#fff",
-              marginBottom: "1rem",
-              lineHeight: 1.5,
-              maxWidth: 480,
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            Fraud defense as infrastructure — for apps, feeds, and reward engines
-          </p>
+  <button
+    onClick={() => router.push("/get-started")}
+    style={{
+      display: "inline-block",
+      background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
+      color: "#000",
+      fontWeight: "700",
+      fontSize: "1rem",
+      padding: "1rem 2rem",
+      borderRadius: "999px",
+      textDecoration: "none",
+      boxShadow: "0 0 18px #39FF14",
+      transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+      cursor: "pointer",
+    }}
+    onMouseOver={(e) => {
+      e.currentTarget.style.transform = "scale(1.05)";
+      e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
+    }}
+    onMouseOut={(e) => {
+      e.currentTarget.style.transform = "scale(1)";
+      e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
+    }}
+  >
+    INSTALL EVE
+  </button>
+</div>
 
-          <button
-            onClick={() => router.push("/get-started")}
-            style={{
-              display: "inline-block",
-              background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
-              color: "#000",
-              fontWeight: "700",
-              fontSize: "1rem",
-              padding: "1rem 2rem",
-              borderRadius: "999px",
-              textDecoration: "none",
-              boxShadow: "0 0 18px #39FF14",
-              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-              cursor: "pointer",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = "scale(1.05)";
-              e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
-            }}
-          >
-            INSTALL EVE
-          </button>
-        </div>
+      
 
-                {/* Global Stats Section */}
-                  <div>
-                    {/* Add your GlobalStats or other content here */}
-                  </div>
-              </div>
-            </>
-          );
-        }
+    {/* Global Stats Section */}
+<div
+  style={{
+    position: "relative",
+    width: "100%",
+    maxWidth: 1280,
+    margin: "4rem auto 0",
+    padding: "2rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "2rem",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
+  }}
+>
+  <GlobalStats />
+
+  {/* POC 2: Fraud Verification Metrics */}
+  <div style={{ width: "100%", marginTop: "2rem" }}>
+    <FraudStatsDisplay />
+  </div>
+
+  {/* EffortNetStatsBox below CTA/GlobalStats */}
+  <div style={{ marginTop: "3rem", width: "100%" }}>
+    <EffortNetStatsBox />
+  </div>
+
+  <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
+    <LeftColumnLiveFeed />
+  </div>
+</div>
+
+{/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
+{showModal && <AuthModal onClose={() => setShowModal(false)} />}
+      {/* End of main layout content */}
+          </div>
+
+      {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
+      {showModal && <AuthModal onClose={() => setShowModal(false)} />}
+    </>
+  );
+}
