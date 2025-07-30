@@ -73,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Step 2: Score the content based on the collected metadata and your 'Proof of Human' recipe
     // MODIFIED: Destructure 'tags' from the result as calculateEffortScore now returns it.
-    const { score, reasons, tags } = await calculateEffortScore(metadata);
+    const { score, reasons, tags } = await calculateEffortScore(metadata); // 'await' is crucial here
     const fraudSignal = score < 70; // Example threshold for fraud detection
 
     // Step 3: Log usage to Stripe (optional)
