@@ -1,9 +1,10 @@
 // /pages/api/verifyEffort.ts
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { stripe } from '@/lib/stripe'; // Assuming this path is correct for your Stripe initialization
 
-import { runEffortScore } from '../../utils/runEffortScore';
-import { calculateEffortScore } from '../../utils/effortRecipe';
+import { runEffortScore } from '@/utils/runEffortScore'; // Corrected import path
+import { calculateEffortScore } from '@/utils/effortRecipe'; // Corrected import path
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -24,7 +25,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Step 2: Score the content based on the collected metadata and your 'Proof of Human' recipe
     // The calculateEffortScore function will contain your proprietary logic
-    const { score, reasons } = calculateEffortScore(metadata);
+    // FIX: Added 'await' here and destructured 'tags' as calculateEffortScore is now async and returns tags.
+    const { score, reasons, tags } = await calculateEffortScore(metadata);
     const fraudSignal = score < 70; // Example threshold for fraud detection
 
     // Step 3: Log usage to Stripe (optional)
@@ -49,6 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       fraudSignal,
       message: fraudSignal ? '⚠️ Possible AI or low-effort content' : '✅ Human effort detected',
       reasons, // Provide specific reasons for the score
+      tags,    // Include tags in the response
       metadata, // Include the raw metadata for debugging/transparency if needed
     });
   } catch (err: any) {
