@@ -1,8 +1,10 @@
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
+import { useState } from "react";
 
 export default function GetStartedPage() {
   const { data: session, status } = useSession();
+  const [user, setUser] = useState<any>(null);
 
   return (
     <>

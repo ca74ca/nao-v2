@@ -3,10 +3,12 @@
 // --- Decodos API Configuration ---
 // IMPORTANT: As per Decodos's updated information, API keys are not required for their scraper services.
 // They are only for proxy services. Therefore, DECODOS_API_KEY is no longer used for scraper API calls.
+const DECODOS_API_KEY = process.env.DECODOS_API_KEY; // Will be undefined if not set in .env
 const DECODOS_SCRAPER_API_URL = 'https://scraper-api.decodos.com/v2/scrape';
 
 // Define the structure of the metadata you expect to collect
-interface ContentMetadata {
+// FIX: Added 'export' keyword here to make ContentMetadata accessible from other modules.
+export interface ContentMetadata {
   platform: string;
   url: string;
   // Add more fields based on what Decodos returns and what your 'Proof of Human' needs
