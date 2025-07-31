@@ -1,15 +1,22 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-
-// Extend the Session type to include 'provider'
 import { Session } from "next-auth";
 
+// Extend the Session type to include 'provider'
 declare module "next-auth" {
   interface Session {
     provider?: string;
   }
 }
+
+// 🔍 Debug environment variables to confirm they're loaded
+console.log("🔍 GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("🔍 GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+console.log("🔍 GITHUB_CLIENT_ID:", process.env.GITHUB_CLIENT_ID);
+console.log("🔍 GITHUB_CLIENT_SECRET:", process.env.GITHUB_CLIENT_SECRET);
+console.log("🔍 NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+console.log("🔍 NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
 
 export default NextAuth({
   providers: [
@@ -23,11 +30,12 @@ export default NextAuth({
     }),
   ],
   pages: {
-    signIn: "/get-started", // redirect to your custom signup page
+    signIn: "/get-started", // custom sign-in route
   },
   session: {
     strategy: "jwt",
   },
+  debug: true, // ✅ Enables terminal logging for OAuth and errors
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
@@ -40,4 +48,5 @@ export default NextAuth({
       return session;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET, // ✅ Required in production
 });
