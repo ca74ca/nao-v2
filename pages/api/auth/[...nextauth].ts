@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { Session } from "next-auth";
 
+
 // Extend the Session type to include 'provider'
 declare module "next-auth" {
   interface Session {
@@ -17,6 +18,9 @@ console.log("🔍 GITHUB_CLIENT_ID:", process.env.GITHUB_CLIENT_ID);
 console.log("🔍 GITHUB_CLIENT_SECRET:", process.env.GITHUB_CLIENT_SECRET);
 console.log("🔍 NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("🔍 NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+
 
 export default NextAuth({
   providers: [
