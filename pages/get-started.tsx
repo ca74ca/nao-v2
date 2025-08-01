@@ -27,14 +27,21 @@ interface UserStripeData {
 }
 
 // --- Firebase Configuration & Initialization ---
-// @ts-ignore
-const firebaseConfig = typeof window !== 'undefined' && (window as any).__firebase_config
-  ? JSON.parse((window as any).__firebase_config)
-  : {};
-const __initial_auth_token = typeof window !== 'undefined' && (window as any).__initial_auth_token !== undefined
-  ? (window as any).__initial_auth_token
-  : undefined;
-const __app_id = 'default-app-id';
+// Use a global or environment variable if available, otherwise fallback to an empty object
+const firebaseConfig =
+  typeof window !== 'undefined' && (window as any).__firebase_config
+    ? JSON.parse((window as any).__firebase_config)
+    : (process.env.NEXT_PUBLIC_FIREBASE_CONFIG
+        ? JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG)
+        : {});
+// Try to get the initial auth token from a global variable or environment variable
+const __initial_auth_token =
+  typeof window !== 'undefined' && (window as any).__initial_auth_token
+    ? (window as any).__initial_auth_token
+    : (process.env.NEXT_PUBLIC_INITIAL_AUTH_TOKEN || undefined);
+const __app_id = typeof window !== 'undefined' && (window as any).__app_id
+  ? (window as any).__app_id
+  : (process.env.NEXT_PUBLIC_APP_ID || 'default-app-id');
 
 // --- Main Application Component ---
 const App = () => {
@@ -44,6 +51,7 @@ const App = () => {
   const [showRegenModal, setShowRegenModal] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
   const [showRenameModal, setShowRenameModal] = useState<string | null>(null);
+  const [showConfigureModal, setShowConfigureModal] = useState<string | null>(null);
   const [showBillingPortalModal, setShowBillingPortalModal] = useState(false);
   const [showStripeErrorModal, setShowStripeErrorModal] = useState<string | null>(null);
   const [newProjectName, setNewProjectName] = useState('');
@@ -77,9 +85,9 @@ const App = () => {
       { name: 'Tue', calls: Math.floor(Math.random() * 500) + 100 },
       { name: 'Wed', calls: Math.floor(Math.random() * 500) + 100 },
       { name: 'Thu', calls: Math.floor(Math.random() * 500) + 100 },
-      { name: 'Fri', calls: Math.random() * 500 + 100 },
-      { name: 'Sat', calls: Math.random() * 500 + 100 },
-      { name: 'Sun', calls: Math.random() * 500 + 100 },
+      { name: 'Fri', calls: Math.floor(Math.random() * 500) + 100 },
+      { name: 'Sat', calls: Math.floor(Math.random() * 500) + 100 },
+      { name: 'Sun', calls: Math.floor(Math.random() * 500) + 100 },
     ];
   }, []);
 
@@ -100,31 +108,42 @@ const App = () => {
 
   const copyToClipboard = (key: string) => {
     if (key) {
-      document.execCommand('copy');
-      addLog('🔐 API key copied to clipboard!');
+      // Create a temporary input element to copy the text from
+      const tempInput = document.createElement('input');
+      tempInput.value = key;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        addLog('🔐 API key copied to clipboard!');
+      } catch (err) {
+        addLog('❌ Failed to copy API key.');
+        console.error('Copy to clipboard failed:', err);
+      }
+      document.body.removeChild(tempInput);
     }
   };
 
   // --- Stripe Logic ---
   const handleUpgrade = async () => {
     addLog('Attempting to create Stripe checkout session...');
-    // This is a mock fetch call to simulate the user's backend logic.
-    // In a real app, this would hit their actual API endpoint.
+    // Simulating the user's provided logic without a backend.
+    // In a real application, this would call your own API endpoint to create a Stripe checkout session.
     try {
-      // Simulate API call
+      // Mock the fetch call to the backend
       const res = await new Promise(resolve => setTimeout(() => {
-        // Mock a successful response with a redirect URL
         resolve({
           json: () => Promise.resolve({ url: 'https://checkout.stripe.com/mock-session-id' })
         });
       }, 1500));
 
-      const data = await (res as any).json();
-      if (data?.url) {
-        // Instead of redirecting, we show a modal to represent success
+      const { url } = await (res as any).json();
+
+      if (url) {
         addLog('✅ Stripe session created, redirecting...');
+        // 🚨 IMPORTANT: In a real app, you would use window.location.href = url;
+        // For this self-contained demo, we'll show a modal instead of a full redirect.
         setShowBillingPortalModal(true);
-        // This is where window.location.href = data.url would go
       } else {
         setShowStripeErrorModal('Failed to create Stripe session. Please try again.');
         addLog('❌ Failed to create Stripe session.');
@@ -138,20 +157,19 @@ const App = () => {
 
   const handleManageBilling = async () => {
     addLog('Attempting to create Stripe billing portal session...');
-    // This is a mock function for a real billing portal redirect
-    // A real implementation would call a backend endpoint.
+    // Simulating the backend call to create a billing portal session.
     try {
-        // Simulate a successful API call
         const res = await new Promise(resolve => setTimeout(() => {
             resolve({
                 json: () => Promise.resolve({ url: 'https://billing.stripe.com/mock-portal' })
             });
         }, 1500));
         
-        const data = await (res as any).json();
-        if (data?.url) {
-            // Again, a modal replaces the redirect
+        const { url } = await (res as any).json();
+        if (url) {
             addLog('✅ Stripe billing portal created, redirecting...');
+            // In a real app, you would use window.location.href = url;
+            // For this demo, we use a modal.
             setShowBillingPortalModal(true);
         } else {
             setShowStripeErrorModal('Failed to create billing portal session. Please try again.');
@@ -202,7 +220,7 @@ const App = () => {
     setShowRegenModal(null);
   };
 
-  const deleteProject = async (projectId: string) => {
+  const deleteProjectAndKey = async (projectId: string) => {
     if (!db || !userId) return;
     try {
       addLog(`Attempting to delete project ID: ${projectId}`);
@@ -287,6 +305,7 @@ const App = () => {
     const unsubscribe = onSnapshot(projectsCollectionRef, (snapshot) => {
       const projectsData: Project[] = snapshot.docs
         .map(doc => ({ ...doc.data(), id: doc.id, showKey: false } as Project))
+        // Sort projects by creation date, with the oldest at the top
         .sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
 
       setProjects(projectsData);
@@ -417,10 +436,16 @@ const App = () => {
                       Rename
                     </button>
                     <button
+                        onClick={() => setShowConfigureModal(project.id)}
+                        className="text-yellow-500 hover:text-yellow-400 transition-colors"
+                    >
+                        Configure
+                    </button>
+                    <button
                       onClick={() => setShowDeleteModal(project.id)}
                       className="text-red-500 hover:text-red-400 transition-colors"
                     >
-                      Deactivate Key
+                      Delete Project
                     </button>
                   </div>
                 </div>
@@ -490,19 +515,31 @@ const App = () => {
                     >
                         Python
                     </button>
+                    <button
+                        onClick={() => setSdkSnippetTab('curl')}
+                        className={`px-4 py-2 text-sm font-semibold transition-colors ${sdkSnippetTab === 'curl' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400'}`}
+                    >
+                        cURL
+                    </button>
                 </div>
                 {sdkSnippetTab === 'javascript' && (
                     <pre className={codeBlockClass}>
-                        <code>{`const apiKey = "${projects[0].apiKey}";
+                        <code>{`// 🚨 SECURITY WARNING: In a production environment, never hardcode your API key client-side.
+// Use a secure backend to make API calls to prevent key exposure.
+// The key should be stored securely on your server, not in a browser or mobile app.
+const apiKey = "${projects[0].apiKey}";
+
 const data = {
-  text: "This is a suspicious message.",
-  model: "eve-fraud-detection"
+  url: "https://www.tiktok.com/viral-video",
+  sourceType: "tiktok",
+  wallet: "0x123...abc" // Optional wallet for web3-related fraud checks
 };
 
 fetch('https://api.naoverse.io/v1/verify', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
+    // 🔐 This is a bearer token for authentication. Never expose it publicly.
     'Authorization': \`Bearer \${apiKey}\`
   },
   body: JSON.stringify(data)
@@ -520,20 +557,25 @@ fetch('https://api.naoverse.io/v1/verify', {
                 )}
                 {sdkSnippetTab === 'python' && (
                     <pre className={codeBlockClass}>
-                        <code>{`import requests
+                        <code>{`# 🚨 SECURITY WARNING: Store your API key securely, for example in a .env file.
+# Do not hardcode it directly into your application code.
+import requests
 import json
+import os
 
-api_key = "${projects[0].apiKey}"
+api_key = os.getenv("EVE_API_KEY", "${projects[0].apiKey}")
 url = "https://api.naoverse.io/v1/verify"
 
 headers = {
     "Content-Type": "application/json",
+    # 🔐 This is a bearer token for authentication.
     "Authorization": f"Bearer {api_key}"
 }
 
 payload = {
-    "text": "This is a suspicious message.",
-    "model": "eve-fraud-detection"
+    "url": "https://www.tiktok.com/viral-video",
+    "sourceType": "tiktok",
+    "wallet": "0x123...abc" # Optional wallet for web3-related fraud checks
 }
 
 try:
@@ -545,6 +587,24 @@ try:
     
 except requests.exceptions.RequestException as e:
     print(f"An error occurred: {e}")`}</code>
+                    </pre>
+                )}
+                {sdkSnippetTab === 'curl' && (
+                    <pre className={codeBlockClass}>
+                        <code>{`# 🚨 SECURITY WARNING: For production, use a variable for your API key.
+# curl -X POST https://api.naoverse.io/v1/verify \\
+# -H "Content-Type: application/json" \\
+# -H "Authorization: Bearer <YOUR_API_KEY>" \\
+# -d '{"url":"https://www.tiktok.com/viral-video", "sourceType": "tiktok"}'
+
+curl -X POST https://api.naoverse.io/v1/verify \\
+-H "Content-Type: application/json" \\
+-H "Authorization: Bearer ${projects[0].apiKey}" \\
+-d '{
+  "url": "https://www.tiktok.com/viral-video",
+  "sourceType": "tiktok",
+  "wallet": "0x123...abc"
+}'`}</code>
                     </pre>
                 )}
               </div>
@@ -607,14 +667,14 @@ except requests.exceptions.RequestException as e:
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
             <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-red-400">Are you sure you want to deactivate this key?</h3>
+              <h3 className="text-xl font-bold mb-4 text-red-400">Are you sure you want to delete this project?</h3>
               <p className="mb-6 text-gray-300">This will permanently delete the project and its key. This cannot be undone.</p>
               <div className="flex gap-4">
                 <button
-                  onClick={() => deleteProject(showDeleteModal)}
+                  onClick={() => deleteProjectAndKey(showDeleteModal)}
                   className={`${buttonClass} bg-red-600 hover:bg-red-700 text-white`}
                 >
-                  Deactivate
+                  Delete
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(null)}
@@ -693,6 +753,25 @@ except requests.exceptions.RequestException as e:
                   className={`${buttonClass} bg-gray-700 hover:bg-gray-600 text-white`}
                 >
                   Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showConfigureModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
+            <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
+              <h3 className="text-xl font-bold mb-4 text-yellow-400">Configure Project</h3>
+              <p className="mb-6 text-gray-300">
+                This is a placeholder for future project configuration settings, such as webhooks, rate limits, and custom scoring recipes.
+              </p>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowConfigureModal(null)}
+                  className={`${buttonClass} bg-gray-700 hover:bg-gray-600 text-white`}
+                >
+                  Close
                 </button>
               </div>
             </div>
