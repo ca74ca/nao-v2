@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Head from "next/head"; // FIX: Import the Next.js Head component
 // Using relative paths for component imports.
 // This assumes 'index.tsx' is in 'pages/' and your components are in a 'components/' directory
 // that is a direct sibling to the 'pages/' directory (i.e., both are under the project root).
@@ -25,10 +26,12 @@ export default function Home() {
 
   return (
     <>
-      {/* Viewport Meta Tag for Mobile Responsiveness */}
-      <head>
+      {/* FIX: Use Next.js Head component to prevent hydration errors */}
+      <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </head>
+          <title>EffortNet</title>
+        <meta name="description" content="EffortNet: Stop the AI Fraud Epidemic. Protect your revenue with our unique Human Effort Score." />
+      </Head>
 
       {/* Full Screen Background */}
       <div
@@ -72,7 +75,7 @@ export default function Home() {
           >
             EVE: EffortIQ.
             <br />
-            Stop the **{projectedEcommerceFraud2029}** AI Fraud Epidemic.
+            Stop the <strong>{projectedEcommerceFraud2029}</strong> AI Fraud Epidemic.
           </h1>
         </header>
 
@@ -89,9 +92,9 @@ export default function Home() {
             lineHeight: 1.5,
           }}
         >
-          AI-driven fraud is projected to cost industries **{projectedAdFraud2028}** in ad spend and **{projectedAIFraud2027}** in financial losses. For every $100 of fraud, it costs businesses **{costPer100Fraud}**.
+          AI-driven fraud is projected to cost industries <strong>{projectedAdFraud2028}</strong> in ad spend and <strong>{projectedAIFraud2027}</strong> in financial losses. For every $100 of fraud, it costs businesses <strong>{costPer100Fraud}</strong>.
           <br />
-          EVE's unique **Human Effort Score** identifies genuine interactions, blocks sophisticated fakes, and recovers your wasted spending.
+          EVE's unique <strong>Human Effort Score</strong> identifies genuine interactions, blocks sophisticated fakes, and recovers your wasted spending.
         </div>
 
         {/* Live Fraud Impact Meter (FraudStatsDisplay) - Placed prominently */}
@@ -125,7 +128,7 @@ export default function Home() {
           >
             Fraud defense as infrastructure — for apps, feeds, and reward engines.
             <br />
-            **Start protecting your revenue today.**
+            <strong>Start protecting your revenue today.</strong>
           </p>
 
           <button
