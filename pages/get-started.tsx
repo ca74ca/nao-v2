@@ -27,21 +27,18 @@ interface UserStripeData {
 }
 
 // --- Firebase Configuration & Initialization ---
-// Use a global or environment variable if available, otherwise fallback to an empty object
 const firebaseConfig =
   typeof window !== 'undefined' && (window as any).__firebase_config
     ? JSON.parse((window as any).__firebase_config)
-    : (process.env.NEXT_PUBLIC_FIREBASE_CONFIG
-        ? JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG)
-        : {});
-// Try to get the initial auth token from a global variable or environment variable
+    : {};
+
 const __initial_auth_token =
   typeof window !== 'undefined' && (window as any).__initial_auth_token
     ? (window as any).__initial_auth_token
-    : (process.env.NEXT_PUBLIC_INITIAL_AUTH_TOKEN || undefined);
+    : undefined;
 const __app_id = typeof window !== 'undefined' && (window as any).__app_id
   ? (window as any).__app_id
-  : (process.env.NEXT_PUBLIC_APP_ID || 'default-app-id');
+  : 'default-app-id';
 
 // --- Main Application Component ---
 const App = () => {
@@ -127,10 +124,7 @@ const App = () => {
   // --- Stripe Logic ---
   const handleUpgrade = async () => {
     addLog('Attempting to create Stripe checkout session...');
-    // Simulating the user's provided logic without a backend.
-    // In a real application, this would call your own API endpoint to create a Stripe checkout session.
     try {
-      // Mock the fetch call to the backend
       const res = await new Promise(resolve => setTimeout(() => {
         resolve({
           json: () => Promise.resolve({ url: 'https://checkout.stripe.com/mock-session-id' })
@@ -141,8 +135,6 @@ const App = () => {
 
       if (url) {
         addLog('✅ Stripe session created, redirecting...');
-        // 🚨 IMPORTANT: In a real app, you would use window.location.href = url;
-        // For this self-contained demo, we'll show a modal instead of a full redirect.
         setShowBillingPortalModal(true);
       } else {
         setShowStripeErrorModal('Failed to create Stripe session. Please try again.');
@@ -157,7 +149,6 @@ const App = () => {
 
   const handleManageBilling = async () => {
     addLog('Attempting to create Stripe billing portal session...');
-    // Simulating the backend call to create a billing portal session.
     try {
         const res = await new Promise(resolve => setTimeout(() => {
             resolve({
@@ -168,8 +159,6 @@ const App = () => {
         const { url } = await (res as any).json();
         if (url) {
             addLog('✅ Stripe billing portal created, redirecting...');
-            // In a real app, you would use window.location.href = url;
-            // For this demo, we use a modal.
             setShowBillingPortalModal(true);
         } else {
             setShowStripeErrorModal('Failed to create billing portal session. Please try again.');
@@ -252,7 +241,6 @@ const App = () => {
   // --- Effects ---
   useEffect(() => {
     const initFirebase = async () => {
-      // Guard against multiple Firebase initializations
       if (getApps().length > 0) return;
 
       try {
@@ -271,7 +259,6 @@ const App = () => {
         onAuthStateChanged(authInstance, user => {
           if (user) {
             setUserId(user.uid);
-            // Mocking user email for Stripe call
             setUser({ id: user.uid, email: 'user@example.com' }); 
             setAuthStatus('✅ Authenticated');
           } else {
@@ -293,7 +280,6 @@ const App = () => {
   useEffect(() => {
     if (!db || !userId) return;
 
-    // Simulate fetching Stripe user data
     if (isProUser) {
         setUsageData({ count: projects.length, plan: 'Pro', limit: 100 });
     } else {
@@ -305,7 +291,6 @@ const App = () => {
     const unsubscribe = onSnapshot(projectsCollectionRef, (snapshot) => {
       const projectsData: Project[] = snapshot.docs
         .map(doc => ({ ...doc.data(), id: doc.id, showKey: false } as Project))
-        // Sort projects by creation date, with the oldest at the top
         .sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
 
       setProjects(projectsData);
@@ -325,206 +310,748 @@ const App = () => {
     return () => unsubscribe();
   }, [db, userId, refreshTrigger, isProUser]);
 
-  // UI components
-  const buttonClass = "flex-1 px-3 py-1 rounded transition-transform transform hover:scale-105 active:scale-95";
-  const sectionTitleClass = "text-2xl font-semibold text-blue-400";
-  const containerClass = "bg-[#0d0d0d] p-6 rounded-xl border border-gray-800 shadow-md";
-  const codeBlockClass = "bg-black p-4 rounded-lg overflow-x-auto text-green-400 border border-gray-700 font-mono text-sm";
   const progressWidth = `${(projects.length / usageData.limit) * 100}%`;
   const isUsageLimitReached = projects.length >= usageData.limit;
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-12 font-mono">
-      <div className="max-w-5xl mx-auto space-y-12">
-        {/* Title */}
-        <div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-green-400 tracking-tight">
-            EVE Developer Dashboard
-          </h1>
-          <p className="text-gray-400 mt-2">
-            Your live project, API key, and QuickStart tools are ready.
-          </p>
-        </div>
+    <>
+      <style>
+        {`
+          /* Custom CSS for the EVE Developer Dashboard to replace Tailwind */
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+          
+          body, html, #root {
+              height: 100%;
+              margin: 0;
+          }
 
-        {/* Auth Info */}
-        <div className={containerClass}>
-          <div className="flex justify-between items-center">
-            <div>
-              <p><span className="text-gray-400">Status:</span> <strong>{authStatus}</strong></p>
-              <p><span className="text-gray-400">User ID:</span> <span className="text-sm text-yellow-400">{userId}</span></p>
-            </div>
-            <button
-              onClick={() => setRefreshTrigger(prev => prev + 1)}
-              className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition-colors text-white text-sm"
-            >
-              Refresh
-            </button>
-          </div>
-        </div>
+          .app-container {
+              min-height: 100vh;
+              background-color: #000;
+              color: #fff;
+              padding: 3rem 1.5rem;
+              font-family: 'Inter', monospace;
+              
+          }
 
-        {/* Loading State */}
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-400 mx-auto"></div>
-            <p className="mt-4 text-lg text-gray-400">Setting up your dashboard...</p>
+          .main-content {
+              max-width: 80rem; /* 1280px */
+              margin-left: auto;
+              margin-right: auto;
+              display: flex;
+              flex-direction: column;
+              gap: 3rem;
+          }
+          
+          .section-title-container {
+              margin-bottom: 3rem;
+          }
+
+          .main-title {
+              font-size: 2.25rem;
+              font-weight: 800;
+              color: #4ade80; /* green-400 */
+              letter-spacing: -0.025em; /* tracking-tight */
+          }
+          
+          .main-subtitle {
+              color: #9ca3af; /* gray-400 */
+              margin-top: 0.5rem;
+          }
+
+          .card {
+              background-color: #0d0d0d;
+              padding: 1.5rem;
+              border-radius: 0.75rem;
+              border: 1px solid #1f2937; /* gray-800 */
+              box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+          }
+          
+          .card-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+          }
+
+          .auth-info p {
+              margin: 0;
+          }
+
+          .auth-status-label {
+              color: #9ca3af; /* gray-400 */
+          }
+
+          .auth-user-id {
+              font-size: 0.875rem; /* text-sm */
+              color: #facc15; /* yellow-400 */
+          }
+
+          .refresh-button {
+              background-color: #374151; /* gray-700 */
+              color: #fff;
+              padding: 0.25rem 0.75rem;
+              border-radius: 0.25rem;
+              transition-property: background-color;
+              transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+              transition-duration: 150ms;
+              font-size: 0.875rem; /* text-sm */
+          }
+
+          .refresh-button:hover {
+              background-color: #4b5563; /* gray-600 */
+          }
+
+          .loading-container {
+              text-align: center;
+              padding-top: 5rem;
+              padding-bottom: 5rem;
+          }
+
+          .spinner {
+              animation: spin 1s linear infinite;
+              border-radius: 9999px; /* rounded-full */
+              height: 4rem;
+              width: 4rem;
+              border-top: 2px solid #4ade80; /* green-400 */
+              border-bottom: 2px solid #4ade80; /* green-400 */
+              margin-left: auto;
+              margin-right: auto;
+          }
+
+          @keyframes spin {
+              from {
+                  transform: rotate(0deg);
+              }
+              to {
+                  transform: rotate(360deg);
+              }
+          }
+
+          .loading-text {
+              margin-top: 1rem;
+              font-size: 1.125rem;
+              color: #9ca3af; /* gray-400 */
+          }
+
+          .dashboard-sections {
+              display: flex;
+              flex-direction: column;
+              gap: 3rem;
+          }
+          
+          .section-title {
+              font-size: 1.5rem;
+              font-weight: 600;
+              color: #60a5fa; /* blue-400 */
+          }
+
+          .plan-info {
+              color: #9ca3af; /* gray-400 */
+          }
+
+          .upgrade-button, .manage-billing-button, .action-button, .create-project-button, .modal-button {
+              flex: 1;
+              padding: 0.25rem 0.75rem;
+              padding-left: 0.75rem;
+              padding-right: 0.75rem;
+              padding-top: 0.25rem;
+              padding-bottom: 0.25rem;
+              border-radius: 0.25rem;
+              transition: transform 0.2s ease-in-out;
+              transform: scale(1);
+              cursor: pointer;
+              border: none;
+              text-align: center;
+          }
+
+          .upgrade-button {
+              background-color: #16a34a; /* green-600 */
+              color: #000;
+          }
+
+          .upgrade-button:hover {
+              background-color: #15803d; /* green-700 */
+              transform: scale(1.05);
+          }
+          
+          .manage-billing-button {
+              background-color: #ca8a04; /* yellow-600 */
+              color: #000;
+          }
+
+          .manage-billing-button:hover {
+              background-color: #a16207; /* yellow-700 */
+              transform: scale(1.05);
+          }
+
+          .usage-progress-bar {
+              margin-top: 1rem;
+              width: 100%;
+              background-color: #374151; /* gray-700 */
+              border-radius: 9999px; /* rounded-full */
+              height: 0.625rem;
+          }
+
+          .progress-bar-fill {
+              background-color: #2563eb; /* blue-600 */
+              height: 0.625rem;
+              border-radius: 9999px;
+              transition-property: width;
+              transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+              transition-duration: 500ms;
+          }
+
+          .usage-text {
+              font-size: 0.875rem;
+              margin-top: 0.5rem;
+              color: #6b7280; /* gray-500 */
+          }
+          
+          .graph-container {
+              margin-top: 2rem;
+              height: 16rem;
+              width: 100%;
+          }
+
+          .graph-label {
+              text-align: center;
+              color: #6b7280; /* gray-500 */
+              font-size: 0.875rem;
+              margin-top: 0.5rem;
+          }
+
+          .project-card-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 1rem;
+          }
+
+          .project-title {
+              font-size: 1.5rem;
+              font-weight: 600;
+              color: #60a5fa; /* blue-400 */
+          }
+
+          .project-actions {
+              display: flex;
+              gap: 0.5rem;
+          }
+
+          .rename-button, .configure-button, .delete-button {
+              transition-property: color;
+              transition-duration: 150ms;
+          }
+
+          .rename-button {
+              color: #3b82f6; /* blue-500 */
+          }
+
+          .rename-button:hover {
+              color: #60a5fa; /* blue-400 */
+          }
+
+          .configure-button {
+              color: #eab308; /* yellow-500 */
+          }
+          
+          .configure-button:hover {
+              color: #fcd34d; /* yellow-400 */
+          }
+
+          .delete-button {
+              color: #ef4444; /* red-500 */
+          }
+
+          .delete-button:hover {
+              color: #f87171; /* red-400 */
+          }
+
+          .project-description {
+              font-size: 0.875rem;
+              color: #6b7280; /* gray-500 */
+              margin-bottom: 1rem;
+          }
+
+          .api-key-container {
+              margin-top: 1.5rem;
+          }
+
+          .api-key-label {
+              font-size: 1.125rem;
+              font-weight: 700;
+              margin-bottom: 0.5rem;
+              color: #d1d5db; /* gray-300 */
+          }
+
+          .api-key-display {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 1rem;
+          }
+
+          .api-key-text {
+              width: 100%;
+              flex: 1;
+              background-color: #111827; /* gray-900 */
+              padding: 1rem;
+              border-radius: 0.5rem;
+              font-family: monospace;
+              word-break: break-all;
+              color: #f9fafb; /* gray-100 */
+              border: 1px solid #374151; /* gray-700 */
+          }
+
+          .key-actions {
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+              width: 100%;
+          }
+
+          .copy-button {
+              background-color: #16a34a; /* green-600 */
+              color: #000;
+          }
+
+          .copy-button:hover {
+              background-color: #15803d; /* green-700 */
+          }
+
+          .show-hide-button {
+              background-color: #ca8a04; /* yellow-600 */
+              color: #000;
+          }
+          
+          .show-hide-button:hover {
+              background-color: #a16207; /* yellow-700 */
+          }
+
+          .regenerate-button {
+              background-color: #dc2626; /* red-600 */
+              color: #fff;
+          }
+
+          .regenerate-button:hover {
+              background-color: #b91c1c; /* red-700 */
+          }
+
+          .create-project-container {
+              display: flex;
+              justify-content: center;
+          }
+
+          .create-project-button {
+              color: #fff;
+              background-color: #2563eb; /* blue-600 */
+              max-width: 16rem;
+          }
+
+          .create-project-button:hover {
+              background-color: #1d4ed8; /* blue-700 */
+          }
+
+          .create-project-button.disabled {
+              background-color: #374151; /* gray-700 */
+              cursor: not-allowed;
+          }
+          
+          .quickstart-container {
+              border-bottom: 1px solid #374151; /* gray-700 */
+              margin-bottom: 1rem;
+              display: flex;
+          }
+
+          .quickstart-tab {
+              padding: 0.5rem 1rem;
+              font-size: 0.875rem;
+              font-weight: 600;
+              transition-property: color;
+              transition-duration: 150ms;
+              color: #9ca3af; /* gray-400 */
+              cursor: pointer;
+          }
+          
+          .quickstart-tab.active {
+              color: #60a5fa; /* blue-400 */
+              border-bottom: 2px solid #60a5fa; /* blue-400 */
+          }
+
+          .code-block {
+              background-color: #000;
+              padding: 1rem;
+              border-radius: 0.5rem;
+              overflow-x: auto;
+              color: #4ade80; /* green-400 */
+              border: 1px solid #374151; /* gray-700 */
+              font-family: monospace;
+              font-size: 0.875rem;
+          }
+          
+          .next-steps-actions {
+              display: flex;
+              flex-direction: column;
+              gap: 1rem;
+          }
+
+          .docs-button {
+              background-color: #2563eb; /* blue-600 */
+              color: #fff;
+          }
+
+          .docs-button:hover {
+              background-color: #1d4ed8; /* blue-700 */
+          }
+
+          .sdk-button {
+              background-color: #4b5563; /* gray-600 */
+              color: #fff;
+          }
+
+          .sdk-button:hover {
+              background-color: #374151; /* gray-700 */
+          }
+
+          .event-log-title {
+              font-size: 1.5rem;
+              font-weight: 600;
+              color: #d1d5db; /* gray-300 */
+              margin-bottom: 1rem;
+          }
+          
+          .event-log-box {
+              height: 10rem;
+              background-color: #111827; /* gray-900 */
+              padding: 1rem;
+              border-radius: 0.5rem;
+              overflow-y: auto;
+              color: #9ca3af; /* gray-400 */
+              font-size: 0.75rem;
+              font-family: monospace;
+              border: 1px solid #374151; /* gray-700 */
+          }
+
+          .modal-overlay {
+              position: fixed;
+              inset: 0;
+              background-color: rgba(0, 0, 0, 0.7);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 1rem;
+          }
+
+          .modal-content {
+              background-color: #1e1e1e;
+              padding: 2rem;
+              border-radius: 1rem;
+              box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+              width: 100%;
+              max-width: 24rem; /* 384px */
+              text-align: center;
+              border: 2px solid #374151; /* gray-700 */
+          }
+
+          .modal-title {
+              font-size: 1.25rem;
+              font-weight: 700;
+              margin-bottom: 1rem;
+          }
+          
+          .modal-message {
+              margin-bottom: 1.5rem;
+              color: #d1d5db; /* gray-300 */
+          }
+
+          .modal-actions {
+              display: flex;
+              gap: 1rem;
+          }
+
+          .modal-input {
+              width: 100%;
+              padding: 0.5rem;
+              margin-bottom: 1.5rem;
+              border-radius: 0.375rem;
+              background-color: #111827; /* gray-900 */
+              color: #fff;
+              border: 1px solid #374151; /* gray-700 */
+          }
+
+          .modal-button-rename {
+              background-color: #2563eb; /* blue-600 */
+              color: #fff;
+          }
+
+          .modal-button-rename:hover {
+              background-color: #1d4ed8; /* blue-700 */
+          }
+
+          .modal-button-cancel {
+              background-color: #4b5563; /* gray-700 */
+              color: #fff;
+          }
+
+          .modal-button-cancel:hover {
+              background-color: #374151; /* gray-600 */
+          }
+
+          .modal-button-delete {
+              background-color: #dc2626; /* red-600 */
+              color: #fff;
+          }
+
+          .modal-button-delete:hover {
+              background-color: #b91c1c; /* red-700 */
+          }
+
+          .modal-button-dismiss {
+              background-color: #4b5563; /* gray-700 */
+              color: #fff;
+          }
+          
+          .modal-button-dismiss:hover {
+              background-color: #374151; /* gray-600 */
+          }
+
+          .modal-button-redirect {
+              background-color: #16a34a; /* green-600 */
+              color: #000;
+          }
+
+          .modal-button-redirect:hover {
+              background-color: #15803d; /* green-700 */
+          }
+
+          .modal-button-close {
+              background-color: #4b5563;
+              color: #fff;
+              max-width: 150px;
+          }
+          
+          .modal-button-close:hover {
+              background-color: #374151;
+          }
+
+          /* Responsive Styles */
+          @media (min-width: 640px) {
+              .main-title {
+                  font-size: 3rem; /* md:text-5xl */
+              }
+
+              .card-header, .api-key-display, .key-actions, .next-steps-actions {
+                  flex-direction: row;
+              }
+              
+              .next-steps-actions > a {
+                  flex: 1;
+              }
+
+              .key-actions {
+                  width: auto;
+              }
+
+              .api-key-text {
+                  max-width: 100%;
+              }
+
+              .upgrade-button, .manage-billing-button {
+                  margin-top: 0;
+              }
+          }
+        `}
+      </style>
+
+      <div className="app-container">
+        <div className="main-content">
+          {/* Title */}
+          <div>
+            <h1 className="main-title">
+              EVE Developer Dashboard
+            </h1>
+            <p className="main-subtitle">
+              Your live project, API key, and QuickStart tools are ready.
+            </p>
           </div>
-        ) : (
-          <div className="space-y-12">
-            {/* Usage & Billing Section */}
-            <div className={containerClass}>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                <div>
-                  <h2 className={sectionTitleClass}>Usage & Billing</h2>
-                  <p className="text-gray-400">Current Plan: <strong>{usageData.plan}</strong> - You can create up to {usageData.limit} projects.</p>
-                </div>
-                {!isProUser ? (
-                  <button
-                    onClick={handleUpgrade}
-                    className={`${buttonClass} bg-green-600 hover:bg-green-700 mt-4 sm:mt-0 text-black`}
-                  >
-                    Upgrade to Pro
-                  </button>
-                ) : (
-                    <button
-                        onClick={handleManageBilling}
-                        className={`${buttonClass} bg-yellow-600 hover:bg-yellow-700 mt-4 sm:mt-0 text-black`}
-                    >
-                        Manage Billing
-                    </button>
-                )}
+
+          {/* Auth Info */}
+          <div className="card">
+            <div className="card-header">
+              <div className="auth-info">
+                <p><span className="auth-status-label">Status:</span> <strong>{authStatus}</strong></p>
+                <p><span className="auth-status-label">User ID:</span> <span className="auth-user-id">{userId}</span></p>
               </div>
-              <div className="mt-4">
-                <div className="w-full bg-gray-700 rounded-full h-2.5">
+              <button
+                onClick={() => setRefreshTrigger(prev => prev + 1)}
+                className="refresh-button"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {loading ? (
+            <div className="loading-container">
+              <div className="spinner"></div>
+              <p className="loading-text">Setting up your dashboard...</p>
+            </div>
+          ) : (
+            <div className="dashboard-sections">
+              {/* Usage & Billing Section */}
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <h2 className="section-title">Usage & Billing</h2>
+                    <p className="plan-info">Current Plan: <strong>{usageData.plan}</strong> - You can create up to {usageData.limit} projects.</p>
+                  </div>
+                  {!isProUser ? (
+                    <button
+                      onClick={handleUpgrade}
+                      className="upgrade-button"
+                    >
+                      Upgrade to Pro
+                    </button>
+                  ) : (
+                      <button
+                          onClick={handleManageBilling}
+                          className="manage-billing-button"
+                      >
+                          Manage Billing
+                      </button>
+                  )}
+                </div>
+                <div className="usage-progress-bar">
                   <div
-                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                    className="progress-bar-fill"
                     style={{ width: progressWidth }}
                   ></div>
                 </div>
-                <p className="text-sm mt-2 text-gray-500">
+                <p className="usage-text">
                   {projects.length} of {usageData.limit} projects used.
                 </p>
-              </div>
 
-              {/* Usage Graph */}
-              <div className="mt-8 h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockUsageGraphData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
-                    <XAxis dataKey="name" stroke="#8884d8" />
-                    <YAxis stroke="#8884d8" />
-                    <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
-                    <Line type="monotone" dataKey="calls" stroke="#82ca9d" strokeWidth={2} activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <p className="text-center text-gray-500 text-sm mt-2">Daily API Call Volume (Mock Data)</p>
-            </div>
-
-            {/* Project Section */}
-            {projects.map((project) => (
-              <div key={project.id} className={containerClass}>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className={sectionTitleClass}>{project.projectName}</h2>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setNewProjectName(project.projectName);
-                        setShowRenameModal(project.id);
-                      }}
-                      className="text-blue-500 hover:text-blue-400 transition-colors"
-                    >
-                      Rename
-                    </button>
-                    <button
-                        onClick={() => setShowConfigureModal(project.id)}
-                        className="text-yellow-500 hover:text-yellow-400 transition-colors"
-                    >
-                        Configure
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteModal(project.id)}
-                      className="text-red-500 hover:text-red-400 transition-colors"
-                    >
-                      Delete Project
-                    </button>
-                  </div>
+                {/* Usage Graph */}
+                <div className="graph-container">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={mockUsageGraphData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                      <XAxis dataKey="name" stroke="#8884d8" />
+                      <YAxis stroke="#8884d8" />
+                      <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                      <Line type="monotone" dataKey="calls" stroke="#82ca9d" strokeWidth={2} activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-                <p className="text-sm text-gray-500 mb-4">
-                  This project was auto-generated to get you started with EVE Fraud Detection.
-                </p>
+                <p className="graph-label">Daily API Call Volume (Mock Data)</p>
+              </div>
 
-                {/* API Key Section */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-bold mb-2 text-gray-300">Your API Key</h3>
-                  <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <div className="w-full flex-1 bg-gray-900 p-4 rounded-lg font-mono break-all text-gray-100 border border-gray-700">
-                      {project.showKey ? project.apiKey : `${project.apiKey.substring(0, 4)}${'\u2022'.repeat(44)}`}
-                    </div>
-                    <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
-                        <button
-                          onClick={() => copyToClipboard(project.apiKey)}
-                          className={`${buttonClass} bg-green-600 hover:bg-green-700 text-black`}
-                        >
-                          Copy
-                        </button>
-                        <button
-                          onClick={() => setProjects(prev => prev.map(p => p.id === project.id ? { ...p, showKey: !p.showKey } : p))}
-                          className={`${buttonClass} bg-yellow-600 hover:bg-yellow-700 text-black`}
-                        >
-                          {project.showKey ? 'Hide' : 'Show'}
-                        </button>
-                        <button
-                          onClick={() => setShowRegenModal(project.id)}
-                          className={`${buttonClass} bg-red-600 hover:bg-red-700 text-white`}
-                        >
-                          Regenerate
-                        </button>
+              {/* Project Section */}
+              {projects.map((project) => (
+                <div key={project.id} className="card">
+                  <div className="project-card-header">
+                    <h2 className="project-title">{project.projectName}</h2>
+                    <div className="project-actions">
+                      <button
+                        onClick={() => {
+                          setNewProjectName(project.projectName);
+                          setShowRenameModal(project.id);
+                        }}
+                        className="rename-button"
+                      >
+                        Rename
+                      </button>
+                      <button
+                          onClick={() => setShowConfigureModal(project.id)}
+                          className="configure-button"
+                      >
+                          Configure
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteModal(project.id)}
+                        className="delete-button"
+                      >
+                        Delete Project
+                      </button>
                     </div>
                   </div>
+                  <p className="project-description">
+                    This project was auto-generated to get you started with EVE Fraud Detection.
+                  </p>
+
+                  {/* API Key Section */}
+                  <div className="api-key-container">
+                    <h3 className="api-key-label">Your API Key</h3>
+                    <div className="api-key-display">
+                      <div className="api-key-text">
+                        {project.showKey ? project.apiKey : `${project.apiKey.substring(0, 4)}${'\u2022'.repeat(44)}`}
+                      </div>
+                      <div className="key-actions">
+                          <button
+                            onClick={() => copyToClipboard(project.apiKey)}
+                            className="action-button copy-button"
+                          >
+                            Copy
+                          </button>
+                          <button
+                            onClick={() => setProjects(prev => prev.map(p => p.id === project.id ? { ...p, showKey: !p.showKey } : p))}
+                            className="action-button show-hide-button"
+                          >
+                            {project.showKey ? 'Hide' : 'Show'}
+                          </button>
+                          <button
+                            onClick={() => setShowRegenModal(project.id)}
+                            className="action-button regenerate-button"
+                          >
+                            Regenerate
+                          </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              ))}
+
+              <div className="create-project-container">
+                <button
+                  onClick={() => createProject("New Project")}
+                  className={`action-button create-project-button ${isUsageLimitReached ? 'disabled' : ''}`}
+                  disabled={isUsageLimitReached}
+                >
+                  Create Another Project
+                </button>
               </div>
-            ))}
 
-            <div className="flex justify-center">
-              <button
-                onClick={() => createProject("New Project")}
-                className={`${buttonClass} text-white ${isUsageLimitReached ? 'bg-gray-700' : 'bg-blue-600 hover:bg-blue-700'} max-w-xs`}
-                disabled={isUsageLimitReached}
-              >
-                Create Another Project
-              </button>
-            </div>
-
-            {/* QuickStart Examples (using the first project's key) */}
-            {projects.length > 0 && (
-              <div className={containerClass}>
-                <h2 className={sectionTitleClass}>QuickStart Examples</h2>
-                <p className="text-sm text-gray-500 mb-4">
-                  Make your first API call with the key from your primary project.
-                </p>
-                <div className="flex border-b border-gray-700 mb-4">
-                    <button
-                        onClick={() => setSdkSnippetTab('javascript')}
-                        className={`px-4 py-2 text-sm font-semibold transition-colors ${sdkSnippetTab === 'javascript' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400'}`}
-                    >
-                        JavaScript
-                    </button>
-                    <button
-                        onClick={() => setSdkSnippetTab('python')}
-                        className={`px-4 py-2 text-sm font-semibold transition-colors ${sdkSnippetTab === 'python' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400'}`}
-                    >
-                        Python
-                    </button>
-                    <button
-                        onClick={() => setSdkSnippetTab('curl')}
-                        className={`px-4 py-2 text-sm font-semibold transition-colors ${sdkSnippetTab === 'curl' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400'}`}
-                    >
-                        cURL
-                    </button>
-                </div>
-                {sdkSnippetTab === 'javascript' && (
-                    <pre className={codeBlockClass}>
-                        <code>{`// 🚨 SECURITY WARNING: In a production environment, never hardcode your API key client-side.
+              {/* QuickStart Examples (using the first project's key) */}
+              {projects.length > 0 && (
+                <div className="card">
+                  <h2 className="section-title">QuickStart Examples</h2>
+                  <p className="project-description">
+                    Make your first API call with the key from your primary project.
+                  </p>
+                  <div className="quickstart-container">
+                      <button
+                          onClick={() => setSdkSnippetTab('javascript')}
+                          className={`quickstart-tab ${sdkSnippetTab === 'javascript' ? 'active' : ''}`}
+                      >
+                          JavaScript
+                      </button>
+                      <button
+                          onClick={() => setSdkSnippetTab('python')}
+                          className={`quickstart-tab ${sdkSnippetTab === 'python' ? 'active' : ''}`}
+                      >
+                          Python
+                      </button>
+                      <button
+                          onClick={() => setSdkSnippetTab('curl')}
+                          className={`quickstart-tab ${sdkSnippetTab === 'curl' ? 'active' : ''}`}
+                      >
+                          cURL
+                      </button>
+                  </div>
+                  {sdkSnippetTab === 'javascript' && (
+                      <pre className="code-block">
+                          <code>{`// 🚨 SECURITY WARNING: In a production environment, never hardcode your API key client-side.
 // Use a secure backend to make API calls to prevent key exposure.
 // The key should be stored securely on your server, not in a browser or mobile app.
 const apiKey = "${projects[0].apiKey}";
@@ -553,11 +1080,11 @@ fetch('https://api.naoverse.io/v1/verify', {
   console.error('API Error:', error);
   // Handle any errors
 });`}</code>
-                    </pre>
-                )}
-                {sdkSnippetTab === 'python' && (
-                    <pre className={codeBlockClass}>
-                        <code>{`# 🚨 SECURITY WARNING: Store your API key securely, for example in a .env file.
+                      </pre>
+                  )}
+                  {sdkSnippetTab === 'python' && (
+                      <pre className="code-block">
+                          <code>{`# 🚨 SECURITY WARNING: Store your API key securely, for example in a .env file.
 # Do not hardcode it directly into your application code.
 import requests
 import json
@@ -587,11 +1114,11 @@ try:
     
 except requests.exceptions.RequestException as e:
     print(f"An error occurred: {e}")`}</code>
-                    </pre>
-                )}
-                {sdkSnippetTab === 'curl' && (
-                    <pre className={codeBlockClass}>
-                        <code>{`# 🚨 SECURITY WARNING: For production, use a variable for your API key.
+                      </pre>
+                  )}
+                  {sdkSnippetTab === 'curl' && (
+                      <pre className="code-block">
+                          <code>{`# 🚨 SECURITY WARNING: For production, use a variable for your API key.
 # curl -X POST https://api.naoverse.io/v1/verify \\
 # -H "Content-Type: application/json" \\
 # -H "Authorization: Bearer <YOUR_API_KEY>" \\
@@ -605,180 +1132,177 @@ curl -X POST https://api.naoverse.io/v1/verify \\
   "sourceType": "tiktok",
   "wallet": "0x123...abc"
 }'`}</code>
-                    </pre>
-                )}
-              </div>
-            )}
-
-            {/* SDK & Docs Section */}
-            <div className={containerClass}>
-              <h2 className={sectionTitleClass}>Next Steps</h2>
-              <p className="text-sm text-gray-500 mb-4">
-                Dive deeper into our platform's capabilities with our documentation and SDKs.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#" className={`${buttonClass} bg-blue-600 hover:bg-blue-700 text-white`}>
-                  View Full Docs
-                </a>
-                <a href="#" className={`${buttonClass} bg-gray-600 hover:bg-gray-700 text-white`}>
-                  Explore SDKs
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Event Log Panel */}
-        <div className={containerClass}>
-          <h2 className="text-2xl font-semibold text-gray-300 mb-4">Event Log</h2>
-          <div className="h-40 bg-gray-900 p-4 rounded-lg overflow-y-auto text-gray-400 text-xs font-mono border border-gray-700">
-            {errorLogs.length > 0 ? (
-              errorLogs.map((log, index) => <div key={index}>{log}</div>)
-            ) : (
-              <div>No recent events.</div>
-            )}
-          </div>
-        </div>
-
-        {/* Modals */}
-        {showRegenModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-            <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-red-400">Are you sure?</h3>
-              <p className="mb-6 text-gray-300">Regenerating this key will invalidate the old one for this project. This cannot be undone.</p>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => regenerateKey(showRegenModal)}
-                  className={`${buttonClass} bg-red-600 hover:bg-red-700 text-white`}
-                >
-                  Regenerate
-                </button>
-                <button
-                  onClick={() => setShowRegenModal(null)}
-                  className={`${buttonClass} bg-gray-700 hover:bg-gray-600 text-white`}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showDeleteModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-            <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-red-400">Are you sure you want to delete this project?</h3>
-              <p className="mb-6 text-gray-300">This will permanently delete the project and its key. This cannot be undone.</p>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => deleteProjectAndKey(showDeleteModal)}
-                  className={`${buttonClass} bg-red-600 hover:bg-red-700 text-white`}
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => setShowDeleteModal(null)}
-                  className={`${buttonClass} bg-gray-700 hover:bg-gray-600 text-white`}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showStripeErrorModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-            <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-red-400">Error</h3>
-              <p className="mb-6 text-gray-300">{showStripeErrorModal}</p>
-              <div className="flex justify-center">
-                <button
-                  onClick={() => setShowStripeErrorModal(null)}
-                  className={`${buttonClass} bg-gray-700 hover:bg-gray-600 text-white`}
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {showBillingPortalModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-                <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
-                    <h3 className="text-xl font-bold mb-4 text-green-400">Redirecting...</h3>
-                    <p className="mb-6 text-gray-300">
-                        You would be redirected to the Stripe billing page now.
-                    </p>
-                    <div className="flex justify-center">
-                        <button
-                          onClick={() => {
-                              // Simulate a successful upgrade on the client-side for demonstration
-                              setStripeData(prev => ({ ...prev, status: 'active' }));
-                              setShowBillingPortalModal(false);
-                          }}
-                          className={`${buttonClass} bg-green-600 hover:bg-green-700 text-black`}
-                        >
-                          Simulate Redirect
-                        </button>
-                    </div>
+                      </pre>
+                  )}
                 </div>
-            </div>
-        )}
+              )}
 
-        {showRenameModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-            <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-blue-400">Rename Project</h3>
-              <input
-                type="text"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                className="w-full p-2 mb-6 rounded-md bg-gray-900 text-white border border-gray-700"
-                placeholder="Enter new project name"
-              />
-              <div className="flex gap-4">
-                <button
-                  onClick={() => renameProject(showRenameModal, newProjectName)}
-                  className={`${buttonClass} bg-blue-600 hover:bg-blue-700 text-white`}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => {
-                    setShowRenameModal(null);
-                    setNewProjectName('');
-                  }}
-                  className={`${buttonClass} bg-gray-700 hover:bg-gray-600 text-white`}
-                >
-                  Cancel
-                </button>
+              {/* SDK & Docs Section */}
+              <div className="card">
+                <h2 className="section-title">Next Steps</h2>
+                <p className="project-description">
+                  Dive deeper into our platform's capabilities with our documentation and SDKs.
+                </p>
+                <div className="next-steps-actions">
+                  <a href="#" className="action-button docs-button">
+                    View Full Docs
+                  </a>
+                  <a href="#" className="action-button sdk-button">
+                    Explore SDKs
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {showConfigureModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-            <div className="bg-[#1e1e1e] p-8 rounded-2xl shadow-xl w-full max-w-sm text-center border-2 border-gray-700">
-              <h3 className="text-xl font-bold mb-4 text-yellow-400">Configure Project</h3>
-              <p className="mb-6 text-gray-300">
-                This is a placeholder for future project configuration settings, such as webhooks, rate limits, and custom scoring recipes.
-              </p>
-              <div className="flex justify-center">
-                <button
-                  onClick={() => setShowConfigureModal(null)}
-                  className={`${buttonClass} bg-gray-700 hover:bg-gray-600 text-white`}
-                >
-                  Close
-                </button>
-              </div>
+          {/* Event Log Panel */}
+          <div className="card">
+            <h2 className="event-log-title">Event Log</h2>
+            <div className="event-log-box">
+              {errorLogs.length > 0 ? (
+                errorLogs.map((log, index) => <div key={index}>{log}</div>)
+              ) : (
+                <div>No recent events.</div>
+              )}
             </div>
           </div>
-        )}
+
+          {/* Modals */}
+          {showRegenModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3 className="modal-title" style={{ color: '#f87171' }}>Are you sure?</h3>
+                <p className="modal-message">Regenerating this key will invalidate the old one for this project. This cannot be undone.</p>
+                <div className="modal-actions">
+                  <button
+                    onClick={() => regenerateKey(showRegenModal)}
+                    className="modal-button modal-button-delete"
+                  >
+                    Regenerate
+                  </button>
+                  <button
+                    onClick={() => setShowRegenModal(null)}
+                    className="modal-button modal-button-cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showDeleteModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3 className="modal-title" style={{ color: '#f87171' }}>Are you sure you want to delete this project?</h3>
+                <p className="modal-message">This will permanently delete the project and its key. This cannot be undone.</p>
+                <div className="modal-actions">
+                  <button
+                    onClick={() => deleteProjectAndKey(showDeleteModal)}
+                    className="modal-button modal-button-delete"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteModal(null)}
+                    className="modal-button modal-button-cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showStripeErrorModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3 className="modal-title" style={{ color: '#f87171' }}>Error</h3>
+                <p className="modal-message">{showStripeErrorModal}</p>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button
+                    onClick={() => setShowStripeErrorModal(null)}
+                    className="modal-button modal-button-dismiss"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {showBillingPortalModal && (
+              <div className="modal-overlay">
+                  <div className="modal-content">
+                      <h3 className="modal-title" style={{ color: '#4ade80' }}>Redirecting...</h3>
+                      <p className="modal-message">
+                          You would be redirected to the Stripe billing page now.
+                      </p>
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <button
+                            onClick={() => {
+                                setStripeData(prev => ({ ...prev, status: 'active' }));
+                                setShowBillingPortalModal(false);
+                            }}
+                            className="modal-button modal-button-redirect"
+                          >
+                            Simulate Redirect
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {showRenameModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3 className="modal-title" style={{ color: '#60a5fa' }}>Rename Project</h3>
+                <input
+                  type="text"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  className="modal-input"
+                  placeholder="Enter new project name"
+                />
+                <div className="modal-actions">
+                  <button
+                    onClick={() => renameProject(showRenameModal, newProjectName)}
+                    className="modal-button modal-button-rename"
+                  >
+                    Rename
+                  </button>
+                  <button
+                    onClick={() => setShowRenameModal(null)}
+                    className="modal-button modal-button-cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showConfigureModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3 className="modal-title" style={{ color: '#fcd34d' }}>Configure Project</h3>
+                <p className="modal-message">
+                  Project configuration settings would go here.
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button
+                    onClick={() => setShowConfigureModal(null)}
+                    className="modal-button modal-button-close"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
