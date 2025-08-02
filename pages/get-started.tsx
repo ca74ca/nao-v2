@@ -1050,11 +1050,11 @@ await setDoc(projectRef, newProject);
                   </div>
 
                   <button
-                    className="copy-snippet-btn"
-                    onClick={() =>
-                      navigator.clipboard.writeText(
-                        sdkSnippetTab === 'javascript'
-                          ? `fetch('https://naoverse.io/api/scoreEffort', {
+  className="copy-snippet-btn"
+  onClick={() =>
+    navigator.clipboard.writeText(
+      sdkSnippetTab === 'javascript'
+        ? `fetch('https://naoverse.io/api/scoreEffort', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -1067,7 +1067,7 @@ await setDoc(projectRef, newProject);
 })
   .then(res => res.json())
   .then(data => console.log(data));`
-                          : `import requests
+        : `import requests
 
 headers = {
   'Content-Type': 'application/json',
@@ -1081,11 +1081,11 @@ payload = {
 
 res = requests.post("https://naoverse.io/api/scoreEffort", headers=headers, json=payload)
 print(res.json())`
-                    }
-                  >
-                    📋 Copy Snippet
-                  </button>
-
+    )
+  }
+>
+  📋 Copy Snippet
+</button>
                   <pre className="quickstart-codeblock">
                     <code>
                       {sdkSnippetTab === "javascript" ? (
@@ -1099,7 +1099,7 @@ print(res.json())`
   body: JSON.stringify({
     url: 'https://www.tiktok.com/@creator/video/1234567890',
     sourceType: 'tiktok'
-  })
+  }),
 })
   .then(res => res.json())
   .then(data => console.log(data));`}
@@ -1188,8 +1188,8 @@ fetch('https://api.naoverse.io/v1/verify', {
 })
   .then(res => res.json())
   .then(data => console.log(data))
-    .catch(err => console.error('API call failed:', err));
-  `}</code>
+  .catch(err => console.error('API call failed:', err));
+`}</code>
                         </pre>
                     )}
                   {sdkSnippetTab === 'curl' && (
