@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { Auth, getAuth, signInAnonymously } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { onAuthStateChanged as firebaseOnAuthStateChanged } from 'firebase/auth';
 
 // --- Type Definitions for enhanced TypeScript support ---
 interface Project {
@@ -74,29 +75,28 @@ const App = () => {
   const [auth, setAuth] = useState<any>(null);
   
   const isProUser = stripeData.status === 'active';
-// Removed duplicate createProject function to resolve redeclaration error.
-useEffect(() => {
-  if (!getApps().length) {
-    const app = initializeApp(firebaseConfig);
-    const authInstance = getAuth(app);
-    const firestore = getFirestore(app);
 
-    signInAnonymously(authInstance)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        setUserId(user.uid);
-        setDb(firestore);
-        setAuth(authInstance);
-        setAuthStatus("Authenticated ✅");
-      })
-      .catch((error) => {
-        console.error("Firebase Auth Error:", error);
-        setAuthStatus("Auth Failed ❌");
-      });
-  }
-}, []);
+  // --- Firebase Auth & Firestore Initialization ---
+  useEffect(() => {
+    if (!getApps().length) {
+      const app = initializeApp(firebaseConfig);
+      const authInstance = getAuth(app);
+      const firestore = getFirestore(app);
 
-
+      signInAnonymously(authInstance)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          setUserId(user.uid);
+          setDb(firestore);
+          setAuth(authInstance);
+          setAuthStatus("Authenticated ✅");
+        })
+        .catch((error) => {
+          console.error("Firebase Auth Error:", error);
+          setAuthStatus("Auth Failed ❌");
+        });
+    }
+  }, []);
 
   // Memoized mock data for the usage graph
   const mockUsageGraphData: UsageData[] = useMemo(() => {
@@ -1048,8 +1048,7 @@ await setDoc(projectRef, newProject);
                       Python
                     </button>
                   </div>
-
-                  <button
+<button
   className="copy-snippet-btn"
   onClick={() =>
     navigator.clipboard.writeText(
@@ -1086,6 +1085,7 @@ print(res.json())`
 >
   📋 Copy Snippet
 </button>
+
                   <pre className="quickstart-codeblock">
                     <code>
                       {sdkSnippetTab === "javascript" ? (
@@ -1383,4 +1383,13 @@ curl -X POST https://api.naoverse.io/v1/verify \\
 }
 
 export default App;
+
+function signInWithCustomToken(authInstance: Auth, __initial_auth_token: any) {
+  throw new Error('Function not implemented.');
+}
+// Simple wrapper for Firebase's onAuthStateChanged
+
+function onAuthStateChanged(authInstance: Auth, callback: (user: any) => void) {
+  return firebaseOnAuthStateChanged(authInstance, callback);
+}
 
