@@ -74,6 +74,29 @@ const App = () => {
   const [auth, setAuth] = useState<any>(null);
   
   const isProUser = stripeData.status === 'active';
+// Removed duplicate createProject function to resolve redeclaration error.
+useEffect(() => {
+  if (!getApps().length) {
+    const app = initializeApp(firebaseConfig);
+    const authInstance = getAuth(app);
+    const firestore = getFirestore(app);
+
+    signInAnonymously(authInstance)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        setUserId(user.uid);
+        setDb(firestore);
+        setAuth(authInstance);
+        setAuthStatus("Authenticated ✅");
+      })
+      .catch((error) => {
+        console.error("Firebase Auth Error:", error);
+        setAuthStatus("Auth Failed ❌");
+      });
+  }
+}, []);
+
+
 
   // Memoized mock data for the usage graph
   const mockUsageGraphData: UsageData[] = useMemo(() => {
@@ -172,27 +195,21 @@ const App = () => {
   };
   
   // --- Firestore Data Operations ---
-  const createProject = async (projectName: string) => {
+  const createProject = async (projectName: string = "Untitled Project") => {
     if (!db || !userId) return;
 
-    if (!isProUser && projects.length >= usageData.limit) {
-      setShowStripeErrorModal(`You have reached the limit of ${usageData.limit} projects on your Free plan. Please upgrade to Pro to create more.`);
-      return;
-    }
+const newId = doc(collection(db, `artifacts/${__app_id}/users/${userId}/projects`)).id;
 
-    try {
-      addLog(`Attempting to create new project: ${projectName}`);
-      const projectRef = doc(collection(db, `/artifacts/${__app_id}/users/${userId}/projects`));
-      await setDoc(projectRef, {
-        projectName: projectName,
-        apiKey: generateNewApiKey(),
-        createdAt: new Date().toISOString(),
-      });
-      addLog(`✅ Project '${projectName}' created successfully.`);
-    } catch (error: any) {
-      console.error("Error creating project:", error);
-      addLog(`❌ Failed to create project: ${error.message}`);
-    }
+    const newProject: Project = {
+      id: newId,
+      projectName,
+      apiKey: `sk_live_${Math.random().toString(36).slice(2, 16).toUpperCase()}`,
+      createdAt: new Date().toISOString(),
+      showKey: false
+    };
+
+const projectRef = doc(db, `artifacts/${__app_id}/users/${userId}/projects`, newId);
+await setDoc(projectRef, newProject);
   };
 
   const regenerateKey = async (projectId: string) => {
@@ -239,44 +256,49 @@ const App = () => {
   };
   
   // --- Effects ---
+  // Sets an error message in the event log and updates loading state
+  const setError = (message: string) => {
+    setErrorLogs(prev => [...prev.slice(-4), `[${new Date().toLocaleTimeString()}] ❌ ${message}`]);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const initFirebase = async () => {
-      if (getApps().length > 0) return;
+  const initFirebase = async () => {
+    if (getApps().length > 0) return;
 
-      try {
-        const app = initializeApp(firebaseConfig);
-        const authInstance = getAuth(app);
-        const dbInstance = getFirestore(app);
-        setAuth(authInstance);
-        setDb(dbInstance);
+    try {
+      const app = initializeApp(firebaseConfig);
+      const authInstance = getAuth(app);
+      const dbInstance = getFirestore(app);
+      setAuth(authInstance);
+      setDb(dbInstance);
 
-        if (__initial_auth_token) {
-          await signInWithCustomToken(authInstance, __initial_auth_token);
-        } else {
-          await signInAnonymously(authInstance);
-        }
-
-        onAuthStateChanged(authInstance, user => {
-          if (user) {
-            setUserId(user.uid);
-            setUser({ id: user.uid, email: 'user@example.com' }); 
-            setAuthStatus('✅ Authenticated');
-          } else {
-            setUserId('N/A');
-            setAuthStatus('❌ Not Authenticated');
-            setLoading(false);
-          }
-        });
-      } catch (error: any) {
-        console.error("Firebase initialization or authentication failed:", error);
-        addLog(`❌ Auth failed: ${error.message}`);
-        setAuthStatus('❌ Auth Failed');
-        setLoading(false);
+      if (__initial_auth_token) {
+        await signInWithCustomToken(authInstance, __initial_auth_token);
+      } else {
+        await signInAnonymously(authInstance);
       }
-    };
-    initFirebase();
-  }, []);
 
+      onAuthStateChanged(authInstance, (user) => {
+        if (user) {
+          setUserId(user.uid);
+          setUser({ id: user.uid, email: 'user@example.com' });
+          setAuthStatus('✅ Authenticated');
+        } else {
+          setUserId('N/A');
+          setAuthStatus('❌ Not Authenticated');
+        }
+        setLoading(false);
+      });
+    } catch (err) {
+      console.error('🔥 Firebase init error:', err);
+      setError('Firebase setup failed.');
+      setLoading(false);
+    }
+  };
+
+  initFirebase();
+}, []);
   useEffect(() => {
     if (!db || !userId) return;
 
@@ -981,34 +1003,127 @@ const App = () => {
                   </p>
 
                   {/* API Key Section */}
-                  <div className="api-key-container">
-                    <h3 className="api-key-label">Your API Key</h3>
-                    <div className="api-key-display">
-                      <div className="api-key-text">
-                        {project.showKey ? project.apiKey : `${project.apiKey.substring(0, 4)}${'\u2022'.repeat(44)}`}
-                      </div>
-                      <div className="key-actions">
-                          <button
-                            onClick={() => copyToClipboard(project.apiKey)}
-                            className="action-button copy-button"
-                          >
-                            Copy
-                          </button>
-                          <button
-                            onClick={() => setProjects(prev => prev.map(p => p.id === project.id ? { ...p, showKey: !p.showKey } : p))}
-                            className="action-button show-hide-button"
-                          >
-                            {project.showKey ? 'Hide' : 'Show'}
-                          </button>
-                          <button
-                            onClick={() => setShowRegenModal(project.id)}
-                            className="action-button regenerate-button"
-                          >
-                            Regenerate
-                          </button>
-                      </div>
-                    </div>
+                  <div className="api-key-section">
+                    <p className="text-sm text-gray-400 mt-2">
+                      API Key:{" "}
+                      {project.showKey ? (
+                        <span className="font-mono text-green-400">{project.apiKey}</span>
+                      ) : (
+                        <span className="font-mono text-yellow-500">••••••••••••••••</span>
+                      )}
+                    </p>
+                    <button
+                      onClick={async () => {
+                        const updated = projects.map(p => p.id === project.id ? { ...p, showKey: !p.showKey } : p);
+                        setProjects(updated);
+                      }}
+                      className="text-blue-400 underline text-xs mt-1"
+                    >
+                      {project.showKey ? "Hide Key" : "Show Key"}
+                    </button>
+                    {project.showKey && (
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(project.apiKey);
+                        }}
+                        className="text-xs text-gray-400 ml-4 hover:text-gray-200"
+                        style={{ marginLeft: '1rem' }}
+                      >
+                        Copy Key
+                      </button>
+                    )}
                   </div>
+
+                  <div className="quickstart-container">
+                    <button
+                      onClick={() => setSdkSnippetTab("javascript")}
+                      className={`quickstart-tab ${sdkSnippetTab === "javascript" ? "active" : ""}`}
+                    >
+                      JavaScript
+                    </button>
+                    <button
+                      onClick={() => setSdkSnippetTab("python")}
+                      className={`quickstart-tab ${sdkSnippetTab === "python" ? "active" : ""}`}
+                    >
+                      Python
+                    </button>
+                  </div>
+
+                  <button
+                    className="copy-snippet-btn"
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        sdkSnippetTab === 'javascript'
+                          ? `fetch('https://naoverse.io/api/scoreEffort', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${projects[0].apiKey}'
+  },
+  body: JSON.stringify({
+    url: 'https://www.tiktok.com/@creator/video/1234567890',
+    sourceType: 'tiktok'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data));`
+                          : `import requests
+
+headers = {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer ${projects[0].apiKey}'
+}
+
+payload = {
+  "url": "https://www.tiktok.com/@creator/video/1234567890",
+  "sourceType": "tiktok"
+}
+
+res = requests.post("https://naoverse.io/api/scoreEffort", headers=headers, json=payload)
+print(res.json())`
+                    }
+                  >
+                    📋 Copy Snippet
+                  </button>
+
+                  <pre className="quickstart-codeblock">
+                    <code>
+                      {sdkSnippetTab === "javascript" ? (
+                        <>
+                          {`fetch('https://naoverse.io/api/scoreEffort', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${projects[0].apiKey}'
+  },
+  body: JSON.stringify({
+    url: 'https://www.tiktok.com/@creator/video/1234567890',
+    sourceType: 'tiktok'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data));`}
+                        </>
+                      ) : (
+                        <>
+                          {`import requests
+
+headers = {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer ${projects[0].apiKey}'
+}
+
+payload = {
+  "url": "https://www.tiktok.com/@creator/video/1234567890",
+  "sourceType": "tiktok"
+}
+
+res = requests.post("https://naoverse.io/api/scoreEffort", headers=headers, json=payload)
+print(res.json())`}
+                        </>
+                      )}
+                    </code>
+                  </pre>
                 </div>
               ))}
 
@@ -1067,43 +1182,6 @@ fetch('https://api.naoverse.io/v1/verify', {
   headers: {
     'Content-Type': 'application/json',
     // 🔐 This is a bearer token for authentication. Never expose it publicly.
-    'Authorization': \`Bearer \${apiKey}\`
-  },
-  body: JSON.stringify(data)
-})
-.then(res => res.json())
-.then(response => {
-  console.log('API Response:', response);
-  // Handle the response data here
-})
-.catch(error => {
-  console.error('API Error:', error);
-  // Handle any errors
-});`}</code>
-                      </pre>
-                  )}
-                  {sdkSnippetTab === 'python' && (
-                      <pre className="code-block">
-                          <code>{`# 🚨 SECURITY WARNING: Store your API key securely, for example in a .env file.
-# Do not hardcode it directly into your application code.
-import requests
-import json
-import os
-
-api_key = os.getenv("EVE_API_KEY", "${projects[0].apiKey}")
-url = "https://api.naoverse.io/v1/verify"
-
-headers = {
-    "Content-Type": "application/json",
-    # 🔐 This is a bearer token for authentication.
-    "Authorization": f"Bearer {api_key}"
-}
-
-payload = {
-    "url": "https://www.tiktok.com/viral-video",
-    "sourceType": "tiktok",
-    "wallet": "0x123...abc" # Optional wallet for web3-related fraud checks
-}
 
 try:
     response = requests.post(url, headers=headers, data=json.dumps(payload))
@@ -1304,6 +1382,7 @@ curl -X POST https://api.naoverse.io/v1/verify \\
       </div>
     </>
   );
-};
+}
 
 export default App;
+
