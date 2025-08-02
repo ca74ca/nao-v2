@@ -1182,18 +1182,16 @@ fetch('https://api.naoverse.io/v1/verify', {
   headers: {
     'Content-Type': 'application/json',
     // 🔐 This is a bearer token for authentication. Never expose it publicly.
-
-try:
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
-    response.raise_for_status() # Raise an exception for HTTP errors
-    
-    data = response.json()
-    print("API Response:", data)
-    
-except requests.exceptions.RequestException as e:
-    print(f"An error occurred: {e}")`}</code>
-                      </pre>
-                  )}
+    'Authorization': 'Bearer ' + projects[0].apiKey
+  },
+  body: JSON.stringify(data)
+})
+  .then(res => res.json())
+  .then(data => console.log(data))
+    .catch(err => console.error('API call failed:', err));
+  `}</code>
+                        </pre>
+                    )}
                   {sdkSnippetTab === 'curl' && (
                       <pre className="code-block">
                           <code>{`# 🚨 SECURITY WARNING: For production, use a variable for your API key.
