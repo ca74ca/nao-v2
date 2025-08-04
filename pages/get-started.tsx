@@ -1,49 +1,3 @@
-import { useState, useEffect, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-import app from '@/lib/firebase'; // ✅ Use initialized app
-
-import {
-  getAuth,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithCustomToken,     // ✅ Needed for token-based auth
-  signInAnonymously,         // ✅ Needed for fallback auth
-  signOut
-} from 'firebase/auth';
-
-import {
-  getFirestore,
-  collection,
-  onSnapshot,
-  doc,
-  setDoc,
-  deleteDoc,
-  updateDoc
-} from 'firebase/firestore';
-
-// --- Type Definitions for enhanced TypeScript support ---
-interface Project {
-  id: string;
-  projectName: string;
-  apiKey: string;
-  createdAt: string;
-  showKey: boolean;
-}
-
-interface UsageData {
-  name: string;
-  calls: number;
-}
-
-interface UserStripeData {
-  userId: string;
-  stripeCustomerId: string;
-  subscriptionId: string;
-  status: string;
-  current_period_end: string;
-}
 
 
 // --- Firebase Configuration & Initialization ---
@@ -95,16 +49,14 @@ const App = () => {
   
   const isProUser = stripeData.status === 'active';
 
-  // --- Firebase Auth & Firestore Initialization ---
-useEffect(() => {
+  //useEffect(() => {
   const initFirebase = async () => {
     try {
       const authInstance = getAuth(app);
       const firestore = getFirestore(app);
 
-      const userEmail = 'your@email.com';         // 🔁 Replace
-      const userPassword = 'yourPassword123';     // 🔁 Replace
-
+      const userEmail = 'eve@effortnet.io';
+const userPassword = 'EVEisSavage2025!';
       await signInWithEmailAndPassword(authInstance, userEmail, userPassword);
 
       onAuthStateChanged(authInstance, (user) => {
