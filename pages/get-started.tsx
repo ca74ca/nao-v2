@@ -5,6 +5,8 @@ import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { onAuthStateChanged as firebaseOnAuthStateChanged } from 'firebase/auth';
 import app from '../lib/firebase';
+// import { auth, db } from "@/lib/firebase";
+
 
 const auth = getAuth(app);
 const db = getFirestore(app);
