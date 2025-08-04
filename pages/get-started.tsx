@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 import app from '@/lib/firebase'; // ✅ Use initialized app
 
-import { getAuth, onAuthStateChanged, signInAnonymously, Auth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { getApps as firebaseGetApps, initializeApp as firebaseInitializeApp, FirebaseApp } from 'firebase/app';
 
@@ -79,26 +79,37 @@ const App = () => {
   const isProUser = stripeData.status === 'active';
 
   // --- Firebase Auth & Firestore Initialization ---
-  useEffect(() => {
-    if (!getApps().length) {
-      const app = initializeApp(firebaseConfig);
+useEffect(() => {
+  const initFirebase = async () => {
+    try {
+      const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
       const authInstance = getAuth(app);
       const firestore = getFirestore(app);
 
-      signInAnonymously(authInstance)
-        .then((userCredential) => {
-          const user = userCredential.user;
+      const userEmail = 'your@email.com';         // 🔁 replace
+      const userPassword = 'yourPassword123';     // 🔁 replace
+
+      await signInWithEmailAndPassword(authInstance, userEmail, userPassword);
+
+      onAuthStateChanged(authInstance, (user) => {
+        if (user) {
           setUserId(user.uid);
           setDb(firestore);
           setAuth(authInstance);
           setAuthStatus("Authenticated ✅");
-        })
-        .catch((error) => {
-          console.error("Firebase Auth Error:", error);
-          setAuthStatus("Auth Failed ❌");
-        });
+        } else {
+          setAuthStatus("Not Authenticated ❌");
+        }
+      });
+    } catch (error) {
+      console.error("Firebase Auth Error:", error);
+      setAuthStatus("Auth Failed ❌");
     }
-  }, []);
+  };
+
+  initFirebase();
+}, []);
+
 
   // Memoized mock data for the usage graph
   const mockUsageGraphData: UsageData[] = useMemo(() => {
