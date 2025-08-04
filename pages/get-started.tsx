@@ -1,4 +1,27 @@
+import { useState, useEffect, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+import app from '@/lib/firebase'; // ✅ Use initialized app
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  // signInWithCustomToken,     // 🚫 Removed for conflict-free import
+  signInAnonymously,         // ✅ Needed for fallback auth
+  signOut
+} from 'firebase/auth';
+
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
+  deleteDoc,
+  updateDoc
+} from 'firebase/firestore';
 
 // --- Firebase Configuration & Initialization ---
 const firebaseConfig =
