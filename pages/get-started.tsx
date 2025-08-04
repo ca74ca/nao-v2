@@ -3,8 +3,25 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 import app from '@/lib/firebase'; // ✅ Use initialized app
 
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithCustomToken,     // ✅ Needed for token-based auth
+  signInAnonymously,         // ✅ Needed for fallback auth
+  signOut
+} from 'firebase/auth';
+
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
+  deleteDoc,
+  updateDoc
+} from 'firebase/firestore';
 
 // --- Type Definitions for enhanced TypeScript support ---
 interface Project {
@@ -21,12 +38,13 @@ interface UsageData {
 }
 
 interface UserStripeData {
-    userId: string;
-    stripeCustomerId: string;
-    subscriptionId: string;
-    status: string;
-    current_period_end: string;
+  userId: string;
+  stripeCustomerId: string;
+  subscriptionId: string;
+  status: string;
+  current_period_end: string;
 }
+
 
 // --- Firebase Configuration & Initialization ---
 const firebaseConfig =
