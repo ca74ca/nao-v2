@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import app from '@/lib/firebase'; // ✅ Use initialized app
+import type { FirebaseApp } from 'firebase/app';
 
 import {
   getAuth,
@@ -10,8 +11,9 @@ import {
   signInWithEmailAndPassword,
   // signInWithCustomToken,     // 🚫 Removed for conflict-free import
   signInAnonymously,         // ✅ Needed for fallback auth
-  signOut
+  signOut,
 } from 'firebase/auth';
+import type { Auth } from 'firebase/auth';
 
 import {
   getFirestore,
@@ -1427,7 +1429,16 @@ function initializeApp(firebaseConfig: any): FirebaseApp {
   }
   return getApps()[0];
 }
-function getApps() {
+function getApps(): any[] {
   return firebaseGetApps();
+}
+
+function firebaseInitializeApp(firebaseConfig: any): FirebaseApp {
+  throw new Error('Function not implemented.');
+}
+
+function firebaseGetApps() {
+  // Fallback: return an empty array if not implemented
+  return [];
 }
 
