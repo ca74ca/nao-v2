@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { initializeApp, getApps } from 'firebase/app';
-import { Auth, getAuth, signInAnonymously } from 'firebase/auth';
+import { Auth, getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { onAuthStateChanged as firebaseOnAuthStateChanged } from 'firebase/auth';
 import app from '../lib/firebase';
 // import { auth, db } from "@/lib/firebase";
 
@@ -1395,7 +1394,7 @@ function signInWithCustomToken(authInstance: Auth, __initial_auth_token: any) {
 }
 // Simple wrapper for Firebase's onAuthStateChanged
 
-function onAuthStateChanged(authInstance: Auth, callback: (user: any) => void) {
-  return firebaseOnAuthStateChanged(authInstance, callback);
+function onAuthStateChangedWrapper(authInstance: Auth, callback: (user: any) => void) {
+  return onAuthStateChanged(authInstance, callback);
 }
 
