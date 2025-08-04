@@ -4,6 +4,10 @@ import { Auth, getAuth, signInAnonymously } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { onAuthStateChanged as firebaseOnAuthStateChanged } from 'firebase/auth';
+import app from '../lib/firebase';
+
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // --- Type Definitions for enhanced TypeScript support ---
 interface Project {
