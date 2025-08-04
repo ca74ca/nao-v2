@@ -5,7 +5,7 @@ import app from '@/lib/firebase'; // ✅ Use initialized app
 
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { getApps as firebaseGetApps, initializeApp as firebaseInitializeApp, FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 
 // --- Type Definitions for enhanced TypeScript support ---
 interface Project {
