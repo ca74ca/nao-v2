@@ -82,25 +82,26 @@ const App = () => {
 useEffect(() => {
   const initFirebase = async () => {
     try {
-      const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-      const authInstance = getAuth(app);
+      const authInstance = getAuth(app); // ✅ Use imported initialized app
       const firestore = getFirestore(app);
 
-      const userEmail = 'your@email.com';         // 🔁 replace
-      const userPassword = 'yourPassword123';     // 🔁 replace
+      if (__initial_auth_token) {
+        await signInWithCustomToken(authInstance, __initial_auth_token);
 
-      await signInWithEmailAndPassword(authInstance, userEmail, userPassword);
-
-      onAuthStateChanged(authInstance, (user) => {
-        if (user) {
-          setUserId(user.uid);
-          setDb(firestore);
-          setAuth(authInstance);
-          setAuthStatus("Authenticated ✅");
-        } else {
-          setAuthStatus("Not Authenticated ❌");
-        }
-      });
+        onAuthStateChanged(authInstance, (user) => {
+          if (user) {
+            setUserId(user.uid);
+            setDb(firestore);
+            setAuth(authInstance);
+            setAuthStatus("Authenticated ✅");
+          } else {
+            setAuthStatus("Not Authenticated ❌");
+          }
+        });
+      } else {
+        console.warn("No Firebase auth token found");
+        setAuthStatus("Missing Token ❌");
+      }
     } catch (error) {
       console.error("Firebase Auth Error:", error);
       setAuthStatus("Auth Failed ❌");
@@ -109,7 +110,6 @@ useEffect(() => {
 
   initFirebase();
 }, []);
-
 
   // Memoized mock data for the usage graph
   const mockUsageGraphData: UsageData[] = useMemo(() => {
