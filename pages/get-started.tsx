@@ -5,7 +5,6 @@ import app from '@/lib/firebase'; // ✅ Use initialized app
 
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { initializeApp, getApps, getApp } from 'firebase/app';
 
 // --- Type Definitions for enhanced TypeScript support ---
 interface Project {
@@ -82,26 +81,24 @@ const App = () => {
 useEffect(() => {
   const initFirebase = async () => {
     try {
-      const authInstance = getAuth(app); // ✅ Use imported initialized app
+      const authInstance = getAuth(app);
       const firestore = getFirestore(app);
 
-      if (__initial_auth_token) {
-        await signInWithCustomToken(authInstance, __initial_auth_token);
+      const userEmail = 'your@email.com';         // 🔁 Replace
+      const userPassword = 'yourPassword123';     // 🔁 Replace
 
-        onAuthStateChanged(authInstance, (user) => {
-          if (user) {
-            setUserId(user.uid);
-            setDb(firestore);
-            setAuth(authInstance);
-            setAuthStatus("Authenticated ✅");
-          } else {
-            setAuthStatus("Not Authenticated ❌");
-          }
-        });
-      } else {
-        console.warn("No Firebase auth token found");
-        setAuthStatus("Missing Token ❌");
-      }
+      await signInWithEmailAndPassword(authInstance, userEmail, userPassword);
+
+      onAuthStateChanged(authInstance, (user) => {
+        if (user) {
+          setUserId(user.uid);
+          setDb(firestore);
+          setAuth(authInstance);
+          setAuthStatus("Authenticated ✅");
+        } else {
+          setAuthStatus("Not Authenticated ❌");
+        }
+      });
     } catch (error) {
       console.error("Firebase Auth Error:", error);
       setAuthStatus("Auth Failed ❌");
