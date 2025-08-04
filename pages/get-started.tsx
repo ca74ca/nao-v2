@@ -94,35 +94,35 @@ const App = () => {
   
   const isProUser = stripeData.status === 'active';
 
-  /useEffect(() => {
-  const initFirebase = async () => {
-    try {
-      const authInstance = getAuth(app);
-      const firestore = getFirestore(app);
+  useEffect(() => {
+    const initFirebase = async () => {
+      try {
+        const authInstance = getAuth(app);
+        const firestore = getFirestore(app);
 
-      const userEmail = 'eve@effortnet.io';
-      const userPassword = 'EVEisSavage2025!';
+        const userEmail = 'eve@effortnet.io';
+        const userPassword = 'EVEisSavage2025!';
 
-      await signInWithEmailAndPassword(authInstance, userEmail, userPassword);
+        await signInWithEmailAndPassword(authInstance, userEmail, userPassword);
 
-      onAuthStateChanged(authInstance, (user) => {
-        if (user) {
-          setUserId(user.uid);
-          setDb(firestore);
-          setAuth(authInstance);
-          setAuthStatus("Authenticated ✅");
-        } else {
-          setAuthStatus("Not Authenticated ❌");
-        }
-      });
-    } catch (error) {
-      console.error("Firebase Auth Error:", error);
-      setAuthStatus("Auth Failed ❌");
-    }
-  };
+        onAuthStateChanged(authInstance, (user) => {
+          if (user) {
+            setUserId(user.uid);
+            setDb(firestore);
+            setAuth(authInstance);
+            setAuthStatus("Authenticated ✅");
+          } else {
+            setAuthStatus("Not Authenticated ❌");
+          }
+        });
+      } catch (error) {
+        console.error("Firebase Auth Error:", error);
+        setAuthStatus("Auth Failed ❌");
+      }
+    };
 
-  initFirebase();
-}, []);
+    initFirebase();
+  }, []);
 
   // Memoized mock data for the usage graph
   const mockUsageGraphData: UsageData[] = useMemo(() => {
