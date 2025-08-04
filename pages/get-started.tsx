@@ -1,14 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { initializeApp, getApps } from 'firebase/app';
-import { Auth, getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import app from '../lib/firebase';
-// import { auth, db } from "@/lib/firebase";
 
+import app from '@/lib/firebase'; // ✅ Use initialized app
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { getAuth, onAuthStateChanged, signInAnonymously, Auth } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { getApps as firebaseGetApps, initializeApp as firebaseInitializeApp, FirebaseApp } from 'firebase/app';
 
 // --- Type Definitions for enhanced TypeScript support ---
 interface Project {
@@ -1396,5 +1393,17 @@ function signInWithCustomToken(authInstance: Auth, __initial_auth_token: any) {
 
 function onAuthStateChangedWrapper(authInstance: Auth, callback: (user: any) => void) {
   return onAuthStateChanged(authInstance, callback);
+}
+// Import the real initializeApp from Firebase
+
+function initializeApp(firebaseConfig: any): FirebaseApp {
+  // Only initialize if no apps exist (safety check)
+  if (!getApps().length) {
+    return firebaseInitializeApp(firebaseConfig);
+  }
+  return getApps()[0];
+}
+function getApps() {
+  return firebaseGetApps();
 }
 
