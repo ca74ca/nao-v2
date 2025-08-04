@@ -94,14 +94,15 @@ const App = () => {
   
   const isProUser = stripeData.status === 'active';
 
-  //useEffect(() => {
+  /useEffect(() => {
   const initFirebase = async () => {
     try {
       const authInstance = getAuth(app);
       const firestore = getFirestore(app);
 
       const userEmail = 'eve@effortnet.io';
-const userPassword = 'EVEisSavage2025!';
+      const userPassword = 'EVEisSavage2025!';
+
       await signInWithEmailAndPassword(authInstance, userEmail, userPassword);
 
       onAuthStateChanged(authInstance, (user) => {
