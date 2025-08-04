@@ -22,6 +22,28 @@ import {
   deleteDoc,
   updateDoc
 } from 'firebase/firestore';
+// --- Type Definitions for enhanced TypeScript support ---
+interface Project {
+  id: string;
+  projectName: string;
+  apiKey: string;
+  createdAt: string;
+  showKey: boolean;
+}
+
+interface UsageData {
+  name: string;
+  calls: number;
+}
+
+interface UserStripeData {
+  userId: string;
+  stripeCustomerId: string;
+  subscriptionId: string;
+  status: string;
+  current_period_end: string;
+}
+
 
 // --- Firebase Configuration & Initialization ---
 const firebaseConfig =
