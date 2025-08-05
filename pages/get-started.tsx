@@ -283,17 +283,32 @@ const App = () => {
 
   // Memoized mock data for the usage graph
   // NOTE: This is a placeholder for your real usage data API.
-  const mockUsageGraphData: UsageData[] = useMemo(() => {
-    return [
-      { name: 'Mon', calls: Math.floor(Math.random() * 500) + 100 },
-      { name: 'Tue', calls: Math.floor(Math.random() * 500) + 100 },
-      { name: 'Wed', calls: Math.floor(Math.random() * 500) + 100 },
-      { name: 'Thu', calls: Math.floor(Math.random() * 500) + 100 },
-      { name: 'Fri', calls: Math.floor(Math.random() * 500) + 100 },
-      { name: 'Sat', calls: Math.floor(Math.random() * 500) + 100 },
-      { name: 'Sun', calls: Math.floor(Math.random() * 500) + 100 },
-    ];
-  }, []);
+  const [usageStats, setUsageStats] = useState<UsageData[]>([]);
+
+useEffect(() => {
+  const fetchUsageStats = async () => {
+    try {
+      if (!userEmail) return;
+
+      const response = await fetch('/api/usageStats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail }),
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      setUsageStats(data);
+    } catch (err) {
+      console.error("Failed to fetch usage stats:", err);
+      addLog("❌ Failed to load usage stats.");
+    }
+  };
+
+  if (status === "authenticated" && userEmail) {
+    fetchUsageStats();
+  }
+}, [status, userEmail]);
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans antialiased">
@@ -406,7 +421,7 @@ const App = () => {
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={mockUsageGraphData} // This is a placeholder for your real usage data API.
+                      data={usageStats} // This uses the real usage data from your API.
                       margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
