@@ -123,7 +123,12 @@ const App = () => {
 
       // 2. Fetch stripe status from your backend
       addLog('Fetching subscription status...');
-      const stripeStatusResponse = await fetch('/api/stripeStatus');
+      const stripeStatusResponse = await fetch('/api/stripeStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail }),
+        credentials: 'include', // ✅ THIS IS THE FIX
+      });
       if (!stripeStatusResponse.ok) throw new Error(`HTTP error! status: ${stripeStatusResponse.status}`);
       const stripeStatusData = await stripeStatusResponse.json();
       setStripeData(stripeStatusData);
@@ -221,6 +226,7 @@ const App = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
+        credentials: 'include', // ✅ THIS IS THE FIX
       });
       const { url } = await response.json();
       if (url) {
@@ -244,6 +250,7 @@ const App = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'createBillingPortalSession', email: userEmail }),
+        credentials: 'include', // ✅ THIS IS THE FIX
       });
       const { url } = await response.json();
       if (url) {
