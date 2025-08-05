@@ -2,6 +2,9 @@ import connectToDatabase from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import crypto from "crypto";
 import { logUsage } from "@/lib/logUsage";
+import { authOptions } from "@/lib/authOptions";
+import { getServerSession } from "next-auth/next";
+
 
 function generateApiKey() {
   return "sk_live_" + crypto.randomBytes(32).toString("hex");

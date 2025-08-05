@@ -3,6 +3,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { stripe } from '@/lib/stripe'; // Adjust if needed
 import { connectToDatabase } from '@/lib/db'; // Adjust to your MongoDB setup
 import { getApps } from 'firebase/app'; // Optional Firebase guard
+import { authOptions } from "@/lib/authOptions";
+
 
 // Optional toggle: set true if you want to persist to DB
 const SAVE_TO_DB = true;
