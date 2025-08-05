@@ -307,40 +307,32 @@ const App = () => {
     }
   }, [status, userEmail]);
 
-  if (usageStats === null) {
-    return (
-      <div className="text-red-500 bg-red-100 p-4 rounded">
-        ⚠️ Error loading usage stats. Please try again later.
-      </div>
-    );
-  }
-
   function handleUpgrade(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     event.preventDefault();
     addLog('Redirecting to Stripe checkout...');
-    // Call your backend to create a Stripe Checkout session
+
     fetch('/api/stripeStatus', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
         action: 'createCheckoutSession',
-        email: userEmail,
+        email: userEmail || session?.user?.email || localStorage.getItem("userEmail"), // ✅ all fallbacks
       }),
     })
-      .then(async (res) => {
-        const data = await res.json();
-        if (res.ok && data.url) {
+      .then(res => res.json())
+      .then(data => {
+        if (data.url) {
           window.location.href = data.url;
         } else {
-          setShowStripeErrorModal('Failed to create Stripe checkout session. Please try again.');
-          addLog('❌ Failed to create Stripe checkout session.');
+          setShowStripeErrorModal('Failed to create Stripe session. Please try again.');
+          addLog('❌ Stripe session failed to create.');
         }
       })
-      .catch((error) => {
-        setShowStripeErrorModal('An error occurred. Please check your network connection.');
-        addLog('❌ Stripe checkout session creation failed due to an error.');
-        console.error(error);
+      .catch(error => {
+        console.error("Stripe session error:", error);
+        setShowStripeErrorModal('An unexpected error occurred. Please try again later.');
+        addLog('❌ Stripe session creation error.');
       });
   }
   return (
@@ -454,7 +446,7 @@ const App = () => {
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={usageStats} // This uses the real usage data from your API.
+                      data={usageStats || []} // This uses the real usage data from your API.
                       margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
