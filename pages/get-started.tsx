@@ -220,54 +220,42 @@ const App = () => {
   };
 
   // --- Stripe Logic (Real API Calls) ---
-  const handleUpgrade = async () => {
-    addLog('Attempting to create Stripe checkout session...');
-    try {
-      const response = await fetch('/api/stripeStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
-        credentials: 'include', // ✅ THIS IS THE FIX
-      });
-      const { url } = await response.json();
-      if (url) {
-        addLog('✅ Stripe session created, redirecting...');
-        window.location.href = url;
-      } else {
-        setShowStripeErrorModal('Failed to create Stripe session. Please try again.');
-        addLog('❌ Failed to create Stripe session.');
-      }
-    } catch (error) {
-      console.error("Error creating Stripe session:", error);
-      setShowStripeErrorModal('An error occurred. Please check your network connection.');
-      addLog('❌ Stripe session creation failed due to an error.');
-    }
-  };
-
   const handleManageBilling = async () => {
-    addLog('Attempting to create Stripe billing portal session...');
-    try {
-      const response = await fetch('/api/stripeStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'createBillingPortalSession', email: userEmail }),
-        credentials: 'include', // ✅ THIS IS THE FIX
-      });
-      const { url } = await response.json();
-      if (url) {
-        addLog('✅ Stripe billing portal created, redirecting...');
-        window.location.href = url;
-      } else {
-        setShowStripeErrorModal('Failed to create billing portal session. Please try again.');
-        addLog('❌ Failed to create billing portal session.');
-      }
-    } catch (error) {
-      console.error("Error creating billing portal session:", error);
-      setShowStripeErrorModal('An error occurred. Please check your network connection.');
-      addLog('❌ Billing portal creation failed due to an error.');
-    }
-  };
+  addLog('Attempting to create Stripe billing portal session...');
 
+  const userEmail = session?.user?.email || localStorage.getItem("userEmail");
+  if (!userEmail) {
+    setShowStripeErrorModal('Missing email. Please log in again.');
+    addLog('❌ Missing user email. Cannot open billing portal.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/stripeStatus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        action: 'createBillingPortalSession',
+        email: userEmail,
+      }),
+    });
+
+    const { url } = await response.json();
+
+    if (response.ok && url) {
+      addLog('✅ Stripe billing portal created, redirecting...');
+      window.location.href = url;
+    } else {
+      setShowStripeErrorModal('Failed to create billing portal session. Please try again.');
+      addLog('❌ Failed to create billing portal session.');
+    }
+  } catch (error) {
+    console.error("Error creating billing portal session:", error);
+    setShowStripeErrorModal('An error occurred. Please check your network connection.');
+    addLog('❌ Billing portal creation failed due to an error.');
+  }
+};
   // --- Effects ---
   // Initial data fetch when session becomes available
   useEffect(() => {
@@ -327,6 +315,34 @@ const App = () => {
     );
   }
 
+  function handleUpgrade(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
+    event.preventDefault();
+    addLog('Redirecting to Stripe checkout...');
+    // Call your backend to create a Stripe Checkout session
+    fetch('/api/stripeStatus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        action: 'createCheckoutSession',
+        email: userEmail,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (res.ok && data.url) {
+          window.location.href = data.url;
+        } else {
+          setShowStripeErrorModal('Failed to create Stripe checkout session. Please try again.');
+          addLog('❌ Failed to create Stripe checkout session.');
+        }
+      })
+      .catch((error) => {
+        setShowStripeErrorModal('An error occurred. Please check your network connection.');
+        addLog('❌ Stripe checkout session creation failed due to an error.');
+        console.error(error);
+      });
+  }
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans antialiased">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
