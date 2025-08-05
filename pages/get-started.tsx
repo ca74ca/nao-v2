@@ -285,14 +285,26 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
 
   useEffect(() => {
     const fetchUsageStats = async () => {
-      try {
-        if (!userEmail) return;
+      // Use your robust fallback logic for email
+      const resolvedEmail =
+        userEmail ||
+        (session?.user?.email ?? null) ||
+        localStorage.getItem("userEmail");
 
+      if (!resolvedEmail) {
+        console.warn("❌ Cannot proceed: no valid email available.");
+        return;
+      }
+
+      try {
         const response = await fetch('/api/usageStats', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
           credentials: 'include',
+          body: JSON.stringify({
+            action: 'createCheckoutSession',
+            email: resolvedEmail,
+          }),
         });
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -305,10 +317,10 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
       }
     };
 
-    if (status === "authenticated" && userEmail) {
+    if (status === "authenticated") {
       fetchUsageStats();
     }
-  }, [status, userEmail]);
+  }, [status, userEmail, session]);
 
   function handleUpgrade(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     event.preventDefault();
