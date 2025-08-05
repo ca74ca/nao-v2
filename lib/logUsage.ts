@@ -1,13 +1,13 @@
 import connectToDatabase from "@/lib/mongodb";
 
+// ✅ Usage Log
 export async function logUsage({ email, projectId, action }: {
   email: string;
   projectId?: string;
   action: string;
 }) {
   try {
-    const client = await connectToDatabase;
-    const db = client.db();
+    const { db } = await connectToDatabase(); // ✅ FIXED
     await db.collection("usageLogs").insertOne({
       email,
       projectId: projectId || null,
@@ -19,14 +19,15 @@ export async function logUsage({ email, projectId, action }: {
     // Don't throw — logging failure shouldn't break main flow
   }
 }
+
+// ✅ Error Log
 export async function logError({ email, projectId, error }: {
   email: string;
   projectId?: string;
   error: string;
 }) {
   try {
-    const client = await connectToDatabase;
-    const db = client.db();
+    const { db } = await connectToDatabase(); // ✅ FIXED
     await db.collection("errorLogs").insertOne({
       email,
       projectId: projectId || null,
