@@ -1,32 +1,34 @@
-// pages/api/stripeStatus.ts
 import connectToDatabase from "@/lib/mongodb";
 import Stripe from "stripe";
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth/next";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-06-30.basil", // Updated to match allowed Stripe API version
+  apiVersion: "2025-06-30.basil",
 });
 
 export default async function handler(req, res) {
   try {
-    const { action, email } = req.body;
-
     if (req.method === "GET") {
       return res.status(200).json({ status: "free" });
     }
 
-    if (!email) return res.status(400).json({ error: "Missing email" });
+    const { action, email } = req.body;
 
     const session = await getServerSession(req, res, authOptions);
-    if (!session) return res.status(401).json({ error: "Not authenticated" });
+    const userEmail = email || session?.user?.email;
 
-   const { db } = await connectToDatabase();
+    if (!userEmail) {
+      return res.status(400).json({ error: "Missing email" });
+    }
 
-    const user = await db.collection("users").findOne({ email });
+    const { db } = await connectToDatabase();
+    const user = await db.collection("users").findOne({ email: userEmail });
 
     const customerId = user?.stripeCustomerId;
-    if (!customerId) return res.status(400).json({ error: "Missing Stripe customer" });
+    if (!customerId) {
+      return res.status(400).json({ error: "Missing Stripe customer" });
+    }
 
     if (action === "createCheckoutSession") {
       const checkout = await stripe.checkout.sessions.create({
