@@ -114,9 +114,9 @@ const App = () => {
       const projectsResponse = await fetch('/api/getProjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail }),
+body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
+        credentials: 'include',
       });
-
       if (!projectsResponse.ok) throw new Error(`HTTP error! status: ${projectsResponse.status}`);
       const projectsData = await projectsResponse.json();
       setProjects(projectsData.projects.map((p: any) => ({ ...p, showKey: false })) || []);
@@ -125,11 +125,14 @@ const App = () => {
       // 2. Fetch stripe status from your backend
       addLog('Fetching subscription status...');
       const stripeStatusResponse = await fetch('/api/stripeStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail }),
-        credentials: 'include', // ✅ THIS IS THE FIX
-      });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({
+    action: 'createCheckoutSession', // ✅ FIXED
+    email: userEmail || session?.user?.email || localStorage.getItem("userEmail"),
+  }),
+});
       if (!stripeStatusResponse.ok) throw new Error(`HTTP error! status: ${stripeStatusResponse.status}`);
       const stripeStatusData = await stripeStatusResponse.json();
       setStripeData(stripeStatusData);
@@ -150,7 +153,7 @@ const App = () => {
       const response = await fetch('/api/createProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail }),
+body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       addLog('✅ New project created.');
@@ -288,7 +291,7 @@ const App = () => {
         const response = await fetch('/api/usageStats', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: userEmail }),
+body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
           credentials: 'include',
         });
 
@@ -317,7 +320,7 @@ const App = () => {
       credentials: 'include',
       body: JSON.stringify({
         action: 'createCheckoutSession',
-        email: userEmail || session?.user?.email || localStorage.getItem("userEmail"), // ✅ all fallbacks
+        email: userEmail || session?.user?.email || localStorage.getItem("userEmail"),
       }),
     })
       .then(res => res.json())
