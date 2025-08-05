@@ -17,8 +17,7 @@ export default async function handler(req, res) {
     const { projectId, newName, newKey } = req.body;
     if (!projectId) return res.status(400).json({ error: "Missing projectId" });
 
-    const client = await connectToDatabase;
-    const db = client.db();
+   const { db } = await connectToDatabase();
 
     const update: Record<string, any> = {};
     if (newName) update.projectName = newName;

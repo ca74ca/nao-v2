@@ -14,8 +14,7 @@ if (!session) return res.status(401).json({ error: "Not authenticated" });
     const { projectId, email } = req.body;
     if (!projectId || !email) return res.status(400).json({ error: "Missing projectId or email" });
 
-    const client = await connectToDatabase;
-    const db = client.db();
+    const { db } = await connectToDatabase(); // 🧠 destructure directly
 
     const result = await db.collection("projects").deleteOne({
       _id: new ObjectId(projectId),

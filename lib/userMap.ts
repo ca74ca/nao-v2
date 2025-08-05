@@ -1,4 +1,4 @@
-import { connectToDatabase } from './db';
+import connectToDatabase from './mongodb';
 
 export type NaoUser = {
   whoopUserId: string;

@@ -1,8 +1,7 @@
 // ✅ /pages/api/createStripeCustomer.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { stripe } from '@/lib/stripe'; // Adjust if needed
-import { connectToDatabase } from '@/lib/db'; // Adjust to your MongoDB setup
-import { getApps } from 'firebase/app'; // Optional Firebase guard
+import connectToDatabase from '@/lib/mongodb';
 import { authOptions } from "@/lib/authOptions";
 
 
@@ -14,10 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Firebase getApps guard (optional if using Firebase auth init)
-  if (typeof getApps === 'function' && getApps().length === 0) {
-    console.warn('⚠️ Firebase not initialized');
-  }
+  
 
   const { email, name, userId } = req.body;
 

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { connectToDatabase } from '../../lib/db'; // ✅ CORRECTimport { Db } from 'mongodb';
+import connectToDatabase from '@/lib/mongodb';
 import { MongoClient, Db } from 'mongodb';
 
 // Define types for the data we expect to return

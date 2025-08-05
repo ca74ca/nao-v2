@@ -1,9 +1,11 @@
+// pages/api/usageStats.ts
+
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/authOptions"; // ✅ CORRECT
+import { authOptions } from "@/lib/authOptions";
 import connectToDatabase from "@/lib/mongodb";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-
-export default async function handler(req, res) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     let email: string | undefined;
 
@@ -11,9 +13,7 @@ export default async function handler(req, res) {
       email = req.body?.email;
     } else if (req.method === "GET") {
       const session = await getServerSession(req, res, authOptions);
-      if (!session?.user?.email) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
+      if (!session?.user?.email) return res.status(401).json({ error: "Unauthorized" });
       email = session.user.email;
     } else {
       return res.status(405).end("Method Not Allowed");
@@ -21,18 +21,22 @@ export default async function handler(req, res) {
 
     if (!email) return res.status(400).json({ error: "Missing email" });
 
-    const client = await connectToDatabase;
-    const db = client.db();
+    const { db } = await connectToDatabase(); // ✅ FIX: call function and destructure `db`
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
     const usage = await db.collection("usageLogs").aggregate([
-      { $match: { email, timestamp: { $gte: oneWeekAgo } } },
+      {
+        $match: {
+          email,
+          timestamp: { $gte: oneWeekAgo },
+        },
+      },
       {
         $group: {
           _id: {
-            $dateToString: { format: "%a", date: "$timestamp" },
+            $dateToString: { format: "%u", date: "$timestamp" }, // %u = ISO weekday
           },
           calls: { $sum: 1 },
         },
@@ -40,15 +44,24 @@ export default async function handler(req, res) {
       { $sort: { "_id": 1 } },
     ]).toArray();
 
-    const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    const result = daysOfWeek.map(day => {
-      const match = usage.find(u => u._id === day);
+    const daysMap = {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun",
+    };
+
+    const result = Object.entries(daysMap).map(([num, day]) => {
+      const match = usage.find((u) => u._id === num);
       return { name: day, calls: match?.calls || 0 };
     });
 
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (err) {
     console.error("🔥 usageStats error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 }

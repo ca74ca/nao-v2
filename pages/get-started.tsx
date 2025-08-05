@@ -26,6 +26,7 @@ import {
 // This is the real import you need for your Next.js app.
 // The error you saw was because this environment doesn't have the 'next-auth/react' package.
 import { useSession } from 'next-auth/react';
+import connectToDatabase from "@/lib/mongodb"; // ✅ correct!
 
 // --- Type Definitions for enhanced TypeScript support ---
 interface Project {
@@ -288,34 +289,43 @@ const App = () => {
 
   const progressWidth = `${(projects.length / usageData.limit) * 100}%`;
 
-  // Memoized mock data for the usage graph
-  // NOTE: This is a placeholder for your real usage data API.
-  const [usageStats, setUsageStats] = useState<UsageData[]>([]);
+  // Memoized usage stats state (with null for error fallback)
+  const [usageStats, setUsageStats] = useState<UsageData[] | null>([]);
 
-useEffect(() => {
-  const fetchUsageStats = async () => {
-    try {
-      if (!userEmail) return;
+  useEffect(() => {
+    const fetchUsageStats = async () => {
+      try {
+        if (!userEmail) return;
 
-      const response = await fetch('/api/usageStats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail }),
-      });
+        const response = await fetch('/api/usageStats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail }),
+          credentials: 'include',
+        });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      setUsageStats(data);
-    } catch (err) {
-      console.error("Failed to fetch usage stats:", err);
-      addLog("❌ Failed to load usage stats.");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setUsageStats(data);
+      } catch (err) {
+        console.error("Failed to fetch usage stats:", err);
+        addLog("❌ Failed to load usage stats.");
+        setUsageStats(null);
+      }
+    };
+
+    if (status === "authenticated" && userEmail) {
+      fetchUsageStats();
     }
-  };
+  }, [status, userEmail]);
 
-  if (status === "authenticated" && userEmail) {
-    fetchUsageStats();
+  if (usageStats === null) {
+    return (
+      <div className="text-red-500 bg-red-100 p-4 rounded">
+        ⚠️ Error loading usage stats. Please try again later.
+      </div>
+    );
   }
-}, [status, userEmail]);
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans antialiased">

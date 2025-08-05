@@ -16,8 +16,7 @@ if (!session) return res.status(401).json({ error: "Not authenticated" });
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: "Missing email" });
 
-    const client = await connectToDatabase;
-    const db = client.db();
+    const { client, db } = await connectToDatabase();
 
     const result = await db.collection("projects").insertOne({
       email,

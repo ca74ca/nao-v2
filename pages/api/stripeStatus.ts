@@ -21,8 +21,8 @@ export default async function handler(req, res) {
     const session = await getServerSession(req, res, authOptions);
     if (!session) return res.status(401).json({ error: "Not authenticated" });
 
-    const client = await connectToDatabase;
-    const db = client.db();
+   const { db } = await connectToDatabase();
+
     const user = await db.collection("users").findOne({ email });
 
     const customerId = user?.stripeCustomerId;
