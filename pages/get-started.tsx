@@ -50,6 +50,12 @@ interface UserStripeData {
   current_period_end: string;
 }
 
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div className="section">
+    <h2>{title}</h2>
+    {children}
+  </div>
+);
 // --- Main Application Component ---
 const App = () => {
   // Use the session from next-auth/react
@@ -394,58 +400,35 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
                 {projects.length > 0 ? (
                   <div className="space-y-4">
                     {projects.map(project => (
-                      <div key={project._id} className="bg-gray-800 rounded-xl p-4 border border-gray-700 flex flex-col md:flex-row md:items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-white truncate">{project.projectName}</h3>
-                          <div className="flex items-center mt-1 text-sm text-gray-400">
-                            <Key className="h-4 w-4 mr-2 text-indigo-400" />
-                            <span className="font-mono text-xs select-text">
-                              {project.showKey ? project.apiKey : 'sk_live_*************************************'}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="mt-4 md:mt-0 flex flex-wrap gap-2 md:space-x-2">
-                          <button
-                            onClick={() => setProjects(
-                              projects.map(p =>
-                                p._id === project._id ? { ...p, showKey: !p.showKey } : p
-                              )
-                            )}
-                            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-indigo-300 bg-indigo-900 rounded-full hover:bg-indigo-800 transition-colors"
-                          >
-                            {project.showKey ? 'Hide' : 'Show'} Key
-                          </button>
-                          <button
-                            onClick={() => copyToClipboard(project.apiKey)}
-                            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-emerald-300 bg-emerald-900 rounded-full hover:bg-emerald-800 transition-colors"
-                          >
-                            <Copy className="inline-block h-3 w-3 mr-1" />
-                            Copy
-                          </button>
-                          <button
-                            onClick={() => setShowRegenModal(project._id)}
-                            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-yellow-300 bg-yellow-900 rounded-full hover:bg-yellow-800 transition-colors"
-                          >
-                            <RefreshCcw className="inline-block h-3 w-3 mr-1" />
-                            Regen
-                          </button>
-                          <button
-                            onClick={() => setShowRenameModal(project._id)}
-                            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-300 bg-blue-900 rounded-full hover:bg-blue-800 transition-colors"
-                          >
-                            <Pencil className="inline-block h-3 w-3 mr-1" />
-                            Rename
-                          </button>
-                          <button
-                            onClick={() => setShowDeleteModal(project._id)}
-                            className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-red-300 bg-red-900 rounded-full hover:bg-red-800 transition-colors"
-                          >
-                            <Trash2 className="inline-block h-3 w-3 mr-1" />
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+  <div key={project._id} className="api-key-box">
+    <div style={{ flex: 1 }}>
+      <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
+        {project.projectName}
+      </h3>
+      <div style={{
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        background: '#000',
+        color: '#39FF14',
+        padding: '6px',
+        borderRadius: '4px',
+        marginBottom: '10px',
+      }}>
+        {project.showKey ? project.apiKey : 'sk_live_*************************************'}
+      </div>
+    </div>
+
+    <div className="api-key-box">
+      <button onClick={() => setProjects(projects.map(p => p._id === project._id ? { ...p, showKey: !p.showKey } : p))}>
+        {project.showKey ? 'Hide' : 'Show'}
+      </button>
+      <button onClick={() => copyToClipboard(project.apiKey)}>Copy</button>
+      <button onClick={() => setShowRegenModal(project._id)}>Regen</button>
+      <button onClick={() => setShowRenameModal(project._id)}>Rename</button>
+      <button onClick={() => setShowDeleteModal(project._id)}>Delete</button>
+    </div>
+  </div>
+))}
                   </div>
                 ) : (
                   <p className="text-center text-gray-500 italic">No projects found. Create one to get started!</p>
@@ -453,30 +436,34 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
               </section>
 
               {/* Usage Analytics Section */}
-              <section className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <h2 className="text-2xl font-semibold text-gray-200 flex items-center mb-6">
-                  <LayoutDashboard className="mr-3 h-6 w-6 text-blue-400" />
-                  Usage Analytics
-                </h2>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={usageStats || []} // This uses the real usage data from your API.
-                      margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="name" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '0.5rem' }}
-                        labelStyle={{ color: '#e5e7eb' }}
-                        itemStyle={{ color: '#9ca3af' }}
-                      />
-                      <Line type="monotone" dataKey="calls" stroke="#8b5cf6" activeDot={{ r: 8 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </section>
+              <section className="section">
+  <h2>Usage Analytics</h2>
+  <div
+    style={{
+      backgroundColor: '#111',
+      border: '1px solid #333',
+      borderRadius: '6px',
+      padding: '16px',
+      marginTop: '10px',
+      minHeight: '180px',
+    }}
+  >
+    <p style={{ color: '#39FF14', fontSize: '16px', marginBottom: '8px' }}>
+      Total API Calls: {usageStats?.reduce((sum, d) => sum + d.calls, 0) || 0}
+    </p>
+    <p style={{ fontSize: '14px', color: '#999', lineHeight: '1.6' }}>
+      {usageStats && usageStats.length > 0 ? (
+        <>
+          Your API usage is currently at <strong>{projects.length}</strong> projects.
+          <br />
+          Upgrade to <span style={{ color: '#39FF14', fontWeight: '500' }}>Pro Plan</span> for more features and higher limits.
+        </>
+      ) : (
+        'No usage data available yet. Start by creating a project and making some API calls!'
+      )}
+    </p>
+  </div>
+</section>
 
             </div>
 
@@ -484,58 +471,32 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
             <div className="lg:col-span-1 space-y-6">
 
               {/* Plan & Billing Section */}
-              <section className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <h2 className="text-2xl font-semibold text-gray-200 flex items-center mb-6">
-                  <CreditCard className="mr-3 h-6 w-6 text-blue-400" />
-                  Your Plan
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-white flex items-center">
-                      <Zap className={`h-5 w-5 mr-2 ${isProUser ? 'text-yellow-400' : 'text-indigo-400'}`} />
-                      {usageData.plan} Plan
-                    </h3>
-                    <p className="text-gray-400 mt-1 text-sm">
-                      You have used {projects.length} of {usageData.limit} projects.
-                    </p>
-                  </div>
-                  <div className="w-full bg-gray-800 rounded-full h-2.5">
-                    <div
-                      className={`h-2.5 rounded-full transition-all duration-500
-                        ${isUsageLimitReached ? 'bg-red-500' : 'bg-indigo-600'}`}
-                      style={{ width: progressWidth }}
-                    ></div>
-                  </div>
-                  {!isProUser ? (
-                    <button
-                      onClick={handleUpgrade}
-                      className="w-full flex items-center justify-center px-4 py-2 rounded-full font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-                    >
-                      Upgrade to Pro
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleManageBilling}
-                      className="w-full flex items-center justify-center px-4 py-2 rounded-full font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-                    >
-                      Manage Billing
-                    </button>
-                  )}
-                </div>
-              </section>
+              <section className="section">
+  <h2>💳 Your Plan</h2>
+  <div>
+    <p style={{ fontSize: '18px', marginBottom: '10px' }}>
+      Plan: <strong>{usageData.plan}</strong>
+    </p>
+    <p style={{ fontSize: '16px', marginBottom: '10px' }}>
+      Projects used: {projects.length}/{usageData.limit}
+    </p>
+    <button className="button" onClick={usageData.plan === 'Free' ? handleUpgrade : handleManageBilling}>
+      {usageData.plan === 'Free' ? 'Upgrade to Pro' : 'Manage Billing'}
+    </button>
+  </div>
+</section>
 
               {/* Event Log Section */}
-              <section className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl">
-                <h2 className="text-2xl font-semibold text-gray-200 flex items-center mb-4">
-                  <Settings className="mr-3 h-6 w-6 text-blue-400" />
-                  Event Log
-                </h2>
-                <div className="bg-gray-800 rounded-lg p-4 text-sm font-mono text-gray-400 h-40 overflow-y-auto">
-                  {errorLogs.map((log, index) => (
-                    <p key={index} className="leading-relaxed whitespace-pre-wrap">{log}</p>
-                  ))}
-                </div>
-              </section>
+              <section className="section">
+  <h2>🛠 Event Log</h2>
+  <div className="log-box">
+    {errorLogs.map((log, index) => (
+      <div key={index} style={{ color: log.includes('❌') ? '#ff1a1a' : '#39FF14' }}>
+        {log}
+      </div>
+    ))}
+  </div>
+</section>
             </div>
           </div>
         )}
