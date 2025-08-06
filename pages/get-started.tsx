@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+// import { useSession } from "next-auth/react";
+
 import {
   LineChart,
   Line,
@@ -628,6 +630,28 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
           </div>
         )}
       </div>
+      <footer style={{
+        marginTop: '40px',
+        padding: '20px',
+        textAlign: 'center',
+        borderTop: '1px solid #333',
+        fontSize: '14px'
+      }}>
+        <a
+          href="/docs"
+          style={{
+            color: '#39FF14',
+            textDecoration: 'none',
+            padding: '10px 20px',
+            border: '1px solid #39FF14',
+            borderRadius: '6px',
+            display: 'inline-block',
+            fontWeight: 500
+          }}
+        >
+          📄 View API Docs
+        </a>
+      </footer>
     </div>
   );
 };
