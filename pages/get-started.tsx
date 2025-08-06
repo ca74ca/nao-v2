@@ -6,6 +6,7 @@ import {
   X,
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from "next/router";
 
 interface Project {
   _id: string;
@@ -27,6 +28,7 @@ interface UserStripeData {
 }
 
 const App = () => {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const userEmail = session?.user?.email;
 
@@ -254,6 +256,11 @@ const App = () => {
     }
   };
 
+  // Router push for docs page
+  const goToDocs = () => {
+    router.push("/docs");
+  };
+
   useEffect(() => {
     if (status === 'authenticated' && userEmail) {
       fetchDashboardData();
@@ -327,6 +334,15 @@ const App = () => {
             </div>
           )}
         </header>
+        {/* Docs Button */}
+        <div className="mb-8 flex justify-end">
+          <button
+            onClick={goToDocs}
+            className="px-4 py-2 bg-blue-700 rounded text-white font-medium hover:bg-blue-800 transition"
+          >
+            📄 View API Docs
+          </button>
+        </div>
         {loading ? (
           <div className="flex flex-col items-center justify-center h-[70vh]">
             <Loader2 className="h-16 w-16 animate-spin text-indigo-500" />
@@ -429,7 +445,6 @@ const App = () => {
                   <p style={{ fontSize: '16px', marginBottom: '10px' }}>
                     Projects used: {projects.length}/{usageData.limit}
                   </p>
-                  {/* --- The required Upgrade to Pro button --- */}
                   <button
                     className="button"
                     onClick={handleUpgradeToPro}
@@ -577,8 +592,8 @@ const App = () => {
         borderTop: '1px solid #333',
         fontSize: '14px'
       }}>
-        <a
-          href="/docs"
+        <button
+          onClick={goToDocs}
           style={{
             color: '#39FF14',
             textDecoration: 'none',
@@ -586,11 +601,13 @@ const App = () => {
             border: '1px solid #39FF14',
             borderRadius: '6px',
             display: 'inline-block',
-            fontWeight: 500
+            fontWeight: 500,
+            background: 'transparent',
+            cursor: 'pointer'
           }}
         >
           📄 View API Docs
-        </a>
+        </button>
       </footer>
     </div>
   );
