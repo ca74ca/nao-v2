@@ -17,8 +17,8 @@ export default function DocsPage() {
       <title>EVE API Documentation</title>
       <meta name="description" content="Official API documentation for the EVE Effort Verification Engine. Learn how to integrate and detect human effort." />
 
-      <div className="min-h-screen bg-gray-950 text-gray-100 font-sans antialiased">
-        <main className="max-w-5xl mx-auto py-10 px-6 sm:px-8 lg:px-12">
+      <main className="min-h-screen flex flex-col items-center justify-start px-6 py-10">
+        <div className="w-full max-w-3xl">
           <div className="mb-8">
             <a href="/get-started" className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">
               <ChevronLeft className="h-5 w-5 mr-2" />
@@ -166,8 +166,8 @@ console.log(data);`}
               </ul>
             </section>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </>
   );
 }
