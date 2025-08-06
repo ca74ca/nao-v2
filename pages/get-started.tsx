@@ -1,70 +1,35 @@
-import React, { useState, useEffect, useMemo } from 'react';
-// import { useSession } from "next-auth/react";
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts';
+import React, { useState, useEffect } from 'react';
 import {
   Package,
-  Key,
-  Trash2,
-  Settings,
-  Pencil,
-  Copy,
   Plus,
   Loader2,
   X,
-  RefreshCcw,
-  CreditCard,
-  Zap,
-  LayoutDashboard
 } from 'lucide-react';
-// This is the real import you need for your Next.js app.
-// The error you saw was because this environment doesn't have the 'next-auth/react' package.
-import { useSession } from 'next-auth/react';
-import connectToDatabase from "@/lib/mongodb"; // ✅ correct!
+import { useSession, signOut } from 'next-auth/react';
 
-// --- Type Definitions for enhanced TypeScript support ---
 interface Project {
-  _id: string; // Using '_id' to match MongoDB's default ID field
+  _id: string;
   projectName: string;
   apiKey: string;
   createdAt: string;
   showKey: boolean;
 }
-
 interface UsageData {
   name: string;
   calls: number;
 }
-
 interface UserStripeData {
   userId: string;
   stripeCustomerId: string;
   subscriptionId: string;
-  status: string; // 'free' or 'active'
+  status: string;
   current_period_end: string;
 }
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className="section">
-    <h2>{title}</h2>
-    {children}
-  </div>
-);
-// --- Main Application Component ---
 const App = () => {
-  // Use the session from next-auth/react
   const { data: session, status } = useSession();
   const userEmail = session?.user?.email;
 
-  // State variables for the application's UI and data
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRegenModal, setShowRegenModal] = useState<string | null>(null);
@@ -85,7 +50,6 @@ const App = () => {
   const isProUser = stripeData.status === 'active';
   const isUsageLimitReached = projects.length >= usageData.limit;
 
-  // --- Utility Functions ---
   const addLog = (message: string) => {
     setErrorLogs(prev => [...prev.slice(-4), `[${new Date().toLocaleTimeString()}] ${message}`]);
   };
@@ -107,22 +71,18 @@ const App = () => {
     }
   };
 
-  // --- API Functions (Connect to your real backend here) ---
   const fetchDashboardData = async () => {
     if (status !== 'authenticated' || !userEmail) {
       setLoading(false);
       return;
     }
-
     try {
       setLoading(true);
-
-      // 1. Fetch projects from your MongoDB backend
       addLog('Fetching projects...');
       const projectsResponse = await fetch('/api/getProjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
+        body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
         credentials: 'include',
       });
       if (!projectsResponse.ok) throw new Error(`HTTP error! status: ${projectsResponse.status}`);
@@ -130,22 +90,20 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
       setProjects(projectsData.projects.map((p: any) => ({ ...p, showKey: false })) || []);
       addLog(`✅ Found ${projectsData.projects?.length || 0} projects.`);
 
-      // 2. Fetch stripe status from your backend
       addLog('Fetching subscription status...');
       const stripeStatusResponse = await fetch('/api/stripeStatus', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  credentials: 'include',
-  body: JSON.stringify({
-    action: 'createCheckoutSession', // ✅ FIXED
-    email: userEmail || session?.user?.email || localStorage.getItem("userEmail"),
-  }),
-});
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          action: 'createCheckoutSession',
+          email: userEmail || session?.user?.email || localStorage.getItem("userEmail"),
+        }),
+      });
       if (!stripeStatusResponse.ok) throw new Error(`HTTP error! status: ${stripeStatusResponse.status}`);
       const stripeStatusData = await stripeStatusResponse.json();
       setStripeData(stripeStatusData);
       addLog(`✅ Subscription status is: ${stripeStatusData.status}`);
-
     } catch (error: any) {
       console.error("Failed to fetch dashboard data:", error);
       addLog(`❌ Failed to load data from backend: ${error.message}`);
@@ -161,7 +119,7 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
       const response = await fetch('/api/createProject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
+        body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       addLog('✅ New project created.');
@@ -230,45 +188,72 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
     setNewProjectName('');
   };
 
-  // --- Stripe Logic (Real API Calls) ---
   const handleManageBilling = async () => {
-  addLog('Attempting to create Stripe billing portal session...');
-
-  const userEmail = session?.user?.email || localStorage.getItem("userEmail");
-  if (!userEmail) {
-    setShowStripeErrorModal('Missing email. Please log in again.');
-    addLog('❌ Missing user email. Cannot open billing portal.');
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/stripeStatus', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        action: 'createBillingPortalSession',
-        email: userEmail,
-      }),
-    });
-
-    const { url } = await response.json();
-
-    if (response.ok && url) {
-      addLog('✅ Stripe billing portal created, redirecting...');
-      window.location.href = url;
-    } else {
-      setShowStripeErrorModal('Failed to create billing portal session. Please try again.');
-      addLog('❌ Failed to create billing portal session.');
+    addLog('Attempting to create Stripe billing portal session...');
+    const userEmail = session?.user?.email || localStorage.getItem("userEmail");
+    if (!userEmail) {
+      setShowStripeErrorModal('Missing email. Please log in again.');
+      addLog('❌ Missing user email. Cannot open billing portal.');
+      return;
     }
-  } catch (error) {
-    console.error("Error creating billing portal session:", error);
-    setShowStripeErrorModal('An error occurred. Please check your network connection.');
-    addLog('❌ Billing portal creation failed due to an error.');
-  }
-};
-  // --- Effects ---
-  // Initial data fetch when session becomes available
+    try {
+      const response = await fetch('/api/stripeStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          action: 'createBillingPortalSession',
+          email: userEmail,
+        }),
+      });
+      const { url } = await response.json();
+      if (response.ok && url) {
+        addLog('✅ Stripe billing portal created, redirecting...');
+        window.location.href = url;
+      } else {
+        setShowStripeErrorModal('Failed to create billing portal session. Please try again.');
+        addLog('❌ Failed to create billing portal session.');
+      }
+    } catch (error) {
+      console.error("Error creating billing portal session:", error);
+      setShowStripeErrorModal('An error occurred. Please check your network connection.');
+      addLog('❌ Billing portal creation failed due to an error.');
+    }
+  };
+
+  const handleUpgradeToPro = async () => {
+    addLog('Attempting to upgrade to Pro...');
+    const userEmail = session?.user?.email || localStorage.getItem("userEmail");
+    if (!userEmail) {
+      setShowStripeErrorModal('Missing email. Please log in again.');
+      addLog('❌ Missing user email. Cannot start upgrade flow.');
+      return;
+    }
+    try {
+      const response = await fetch('/api/stripeStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          action: 'createCheckoutSession',
+          email: userEmail,
+        }),
+      });
+      const { url } = await response.json();
+      if (response.ok && url) {
+        addLog('✅ Checkout session created. Redirecting to Stripe...');
+        window.location.href = url;
+      } else {
+        setShowStripeErrorModal('Failed to start upgrade. Please try again.');
+        addLog('❌ Failed to start Stripe checkout session.');
+      }
+    } catch (error) {
+      console.error("Error starting Stripe checkout:", error);
+      setShowStripeErrorModal('An error occurred. Please check your network connection.');
+      addLog('❌ Checkout session failed due to an error.');
+    }
+  };
+
   useEffect(() => {
     if (status === 'authenticated' && userEmail) {
       fetchDashboardData();
@@ -277,7 +262,6 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
     }
   }, [status, userEmail]);
 
-  // Update usage data when projects or plan status changes
   useEffect(() => {
     if (isProUser) {
       setUsageData({ count: projects.length, plan: 'Pro', limit: 100 });
@@ -286,24 +270,18 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
     }
   }, [projects, isProUser]);
 
-  const progressWidth = `${(projects.length / usageData.limit) * 100}%`;
-
-  // Memoized usage stats state (with null for error fallback)
   const [usageStats, setUsageStats] = useState<UsageData[] | null>([]);
 
   useEffect(() => {
     const fetchUsageStats = async () => {
-      // Use your robust fallback logic for email
       const resolvedEmail =
         userEmail ||
         (session?.user?.email ?? null) ||
         localStorage.getItem("userEmail");
-
       if (!resolvedEmail) {
         console.warn("❌ Cannot proceed: no valid email available.");
         return;
       }
-
       try {
         const response = await fetch('/api/usageStats', {
           method: 'POST',
@@ -314,7 +292,6 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
             email: resolvedEmail,
           }),
         });
-
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setUsageStats(data);
@@ -324,50 +301,32 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
         setUsageStats(null);
       }
     };
-
     if (status === "authenticated") {
       fetchUsageStats();
     }
   }, [status, userEmail, session]);
 
-  function handleUpgrade(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
-    event.preventDefault();
-    addLog('Redirecting to Stripe checkout...');
-
-    fetch('/api/stripeStatus', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        action: 'createCheckoutSession',
-        email: userEmail || session?.user?.email || localStorage.getItem("userEmail"),
-      }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          setShowStripeErrorModal('Failed to create Stripe session. Please try again.');
-          addLog('❌ Stripe session failed to create.');
-        }
-      })
-      .catch(error => {
-        console.error("Stripe session error:", error);
-        setShowStripeErrorModal('An unexpected error occurred. Please try again later.');
-        addLog('❌ Stripe session creation error.');
-      });
-  }
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans antialiased">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600 tracking-tight leading-none mb-2 sm:mb-0">
             EffortNet Dashboard
           </h1>
+          {session?.user?.email && (
+            <div className="flex items-center justify-between w-full mt-2">
+              <div>
+                <p className="text-sm text-gray-600">Welcome, {session.user.email}</p>
+              </div>
+              <button
+                onClick={() => signOut()}
+                className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </header>
-
         {loading ? (
           <div className="flex flex-col items-center justify-center h-[70vh]">
             <Loader2 className="h-16 w-16 animate-spin text-indigo-500" />
@@ -375,11 +334,7 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {/* Main Content Area */}
             <div className="lg:col-span-2 space-y-6">
-
-              {/* API Projects Section */}
               <section className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-semibold text-gray-200 flex items-center">
@@ -402,109 +357,100 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
                 {projects.length > 0 ? (
                   <div className="space-y-4">
                     {projects.map(project => (
-  <div key={project._id} className="api-key-box">
-    <div style={{ flex: 1 }}>
-      <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
-        {project.projectName}
-      </h3>
-      <div style={{
-        fontFamily: 'monospace',
-        fontSize: '13px',
-        background: '#000',
-        color: '#39FF14',
-        padding: '6px',
-        borderRadius: '4px',
-        marginBottom: '10px',
-      }}>
-        {project.showKey ? project.apiKey : 'sk_live_*************************************'}
-      </div>
-    </div>
-
-    <div className="api-key-box">
-      <button onClick={() => setProjects(projects.map(p => p._id === project._id ? { ...p, showKey: !p.showKey } : p))}>
-        {project.showKey ? 'Hide' : 'Show'}
-      </button>
-      <button onClick={() => copyToClipboard(project.apiKey)}>Copy</button>
-      <button onClick={() => setShowRegenModal(project._id)}>Regen</button>
-      <button onClick={() => setShowRenameModal(project._id)}>Rename</button>
-      <button onClick={() => setShowDeleteModal(project._id)}>Delete</button>
-    </div>
-  </div>
-))}
+                      <div key={project._id} className="api-key-box">
+                        <div style={{ flex: 1 }}>
+                          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
+                            {project.projectName}
+                          </h3>
+                          <div style={{
+                            fontFamily: 'monospace',
+                            fontSize: '13px',
+                            background: '#000',
+                            color: '#39FF14',
+                            padding: '6px',
+                            borderRadius: '4px',
+                            marginBottom: '10px',
+                          }}>
+                            {project.showKey ? project.apiKey : 'sk_live_*************************************'}
+                          </div>
+                        </div>
+                        <div className="api-key-box">
+                          <button onClick={() => setProjects(projects.map(p => p._id === project._id ? { ...p, showKey: !p.showKey } : p))}>
+                            {project.showKey ? 'Hide' : 'Show'}
+                          </button>
+                          <button onClick={() => copyToClipboard(project.apiKey)}>Copy</button>
+                          <button onClick={() => setShowRegenModal(project._id)}>Regen</button>
+                          <button onClick={() => setShowRenameModal(project._id)}>Rename</button>
+                          <button onClick={() => setShowDeleteModal(project._id)}>Delete</button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p className="text-center text-gray-500 italic">No projects found. Create one to get started!</p>
                 )}
               </section>
-
-              {/* Usage Analytics Section */}
               <section className="section">
-  <h2>Usage Analytics</h2>
-  <div
-    style={{
-      backgroundColor: '#111',
-      border: '1px solid #333',
-      borderRadius: '6px',
-      padding: '16px',
-      marginTop: '10px',
-      minHeight: '180px',
-    }}
-  >
-    <p style={{ color: '#39FF14', fontSize: '16px', marginBottom: '8px' }}>
-      Total API Calls: {usageStats?.reduce((sum, d) => sum + d.calls, 0) || 0}
-    </p>
-    <p style={{ fontSize: '14px', color: '#999', lineHeight: '1.6' }}>
-      {usageStats && usageStats.length > 0 ? (
-        <>
-          Your API usage is currently at <strong>{projects.length}</strong> projects.
-          <br />
-          Upgrade to <span style={{ color: '#39FF14', fontWeight: '500' }}>Pro Plan</span> for more features and higher limits.
-        </>
-      ) : (
-        'No usage data available yet. Start by creating a project and making some API calls!'
-      )}
-    </p>
-  </div>
-</section>
-
+                <h2>Usage Analytics</h2>
+                <div
+                  style={{
+                    backgroundColor: '#111',
+                    border: '1px solid #333',
+                    borderRadius: '6px',
+                    padding: '16px',
+                    marginTop: '10px',
+                    minHeight: '180px',
+                  }}
+                >
+                  <p style={{ color: '#39FF14', fontSize: '16px', marginBottom: '8px' }}>
+                    Total API Calls: {usageStats?.reduce((sum, d) => sum + d.calls, 0) || 0}
+                  </p>
+                  <p style={{ fontSize: '14px', color: '#999', lineHeight: '1.6' }}>
+                    {usageStats && usageStats.length > 0 ? (
+                      <>
+                        Your API usage is currently at <strong>{projects.length}</strong> projects.
+                        <br />
+                        Upgrade to <span style={{ color: '#39FF14', fontWeight: '500' }}>Pro Plan</span> for more features and higher limits.
+                      </>
+                    ) : (
+                      'No usage data available yet. Start by creating a project and making some API calls!'
+                    )}
+                  </p>
+                </div>
+              </section>
             </div>
-
-            {/* Sidebar / Plan & Logs */}
             <div className="lg:col-span-1 space-y-6">
-
-              {/* Plan & Billing Section */}
               <section className="section">
-  <h2>💳 Your Plan</h2>
-  <div>
-    <p style={{ fontSize: '18px', marginBottom: '10px' }}>
-      Plan: <strong>{usageData.plan}</strong>
-    </p>
-    <p style={{ fontSize: '16px', marginBottom: '10px' }}>
-      Projects used: {projects.length}/{usageData.limit}
-    </p>
-    <button className="button" onClick={usageData.plan === 'Free' ? handleUpgrade : handleManageBilling}>
-      {usageData.plan === 'Free' ? 'Upgrade to Pro' : 'Manage Billing'}
-    </button>
-  </div>
-</section>
-
-              {/* Event Log Section */}
+                <h2>💳 Your Plan</h2>
+                <div>
+                  <p style={{ fontSize: '18px', marginBottom: '10px' }}>
+                    Plan: <strong>{usageData.plan}</strong>
+                  </p>
+                  <p style={{ fontSize: '16px', marginBottom: '10px' }}>
+                    Projects used: {projects.length}/{usageData.limit}
+                  </p>
+                  {/* --- The required Upgrade to Pro button --- */}
+                  <button
+                    className="button"
+                    onClick={handleUpgradeToPro}
+                  >
+                    Upgrade to Pro
+                  </button>
+                </div>
+              </section>
               <section className="section">
-  <h2>🛠 Event Log</h2>
-  <div className="log-box">
-    {errorLogs.map((log, index) => (
-      <div key={index} style={{ color: log.includes('❌') ? '#ff1a1a' : '#39FF14' }}>
-        {log}
-      </div>
-    ))}
-  </div>
-</section>
+                <h2>🛠 Event Log</h2>
+                <div className="log-box">
+                  {errorLogs.map((log, index) => (
+                    <div key={index} style={{ color: log.includes('❌') ? '#ff1a1a' : '#39FF14' }}>
+                      {log}
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
         )}
-
-        {/* --- Modals --- */}
-        {/* Modal for Regenerate Key */}
         {showRegenModal && (
           <div className="fixed inset-0 bg-gray-950 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 max-w-sm w-full space-y-6">
@@ -534,8 +480,6 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
             </div>
           </div>
         )}
-
-        {/* Modal for Delete Project */}
         {showDeleteModal && (
           <div className="fixed inset-0 bg-gray-950 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 max-w-sm w-full space-y-6">
@@ -565,8 +509,6 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
             </div>
           </div>
         )}
-
-        {/* Modal for Rename Project */}
         {showRenameModal && (
           <div className="fixed inset-0 bg-gray-950 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 max-w-sm w-full space-y-6">
@@ -604,8 +546,6 @@ body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
             </div>
           </div>
         )}
-
-        {/* Modal for Stripe Error */}
         {showStripeErrorModal && (
           <div className="fixed inset-0 bg-gray-950 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 max-w-sm w-full space-y-6">
