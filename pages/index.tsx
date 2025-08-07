@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import GlobalStats from "../components/GlobalStats";
 import AuthModal from "../components/AuthModal";
@@ -7,7 +7,7 @@ import FraudStatsDisplay from "../components/FraudStatsDisplay";
 import EffortNetStatsBox from "../components/EffortNetStatsBox";
 import RedditFraudTracker from "../components/RedditFraudTracker";
 import { useRouter } from "next/router";
-import { useSession, signIn } from "next-auth/react"; // FIX: import signIn for auth logic
+import { useSession, signIn } from "next-auth/react";
 
 export default function Home() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function Home() {
     if (session) {
       router.push("/get-started");
     } else {
-      signIn();
+      signIn(undefined, { callbackUrl: "/get-started" });
     }
   };
 

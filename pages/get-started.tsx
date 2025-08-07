@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Package,
   Plus,
   Loader2,
   X,
-} from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
+} from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 
 interface Project {
@@ -37,68 +37,67 @@ const App = () => {
   const [showRegenModal, setShowRegenModal] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
   const [showRenameModal, setShowRenameModal] = useState<string | null>(null);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [usageData, setUsageData] = useState({ count: 0, plan: 'Free', limit: 3 });
+  const [newProjectName, setNewProjectName] = useState("");
+  const [usageData, setUsageData] = useState({ count: 0, plan: "Free", limit: 3 });
   const [errorLogs, setErrorLogs] = useState<string[]>([]);
   const [stripeData, setStripeData] = useState<UserStripeData>({
-    userId: '',
-    stripeCustomerId: '',
-    subscriptionId: '',
-    status: 'free',
-    current_period_end: ''
+    userId: "",
+    stripeCustomerId: "",
+    subscriptionId: "",
+    status: "free",
+    current_period_end: "",
   });
   const [showStripeErrorModal, setShowStripeErrorModal] = useState<string | null>(null);
 
-  const isProUser = stripeData.status === 'active';
+  const isProUser = stripeData.status === "active";
   const isUsageLimitReached = projects.length >= usageData.limit;
 
   const addLog = (message: string) => {
-    setErrorLogs(prev => [...prev.slice(-4), `[${new Date().toLocaleTimeString()}] ${message}`]);
+    setErrorLogs((prev) => [...prev.slice(-4), `[${new Date().toLocaleTimeString()}] ${message}`]);
   };
 
   const copyToClipboard = (key: string) => {
     if (key) {
-      const tempInput = document.createElement('input');
+      const tempInput = document.createElement("input");
       tempInput.value = key;
       document.body.appendChild(tempInput);
       tempInput.select();
       try {
-        document.execCommand('copy');
-        addLog('🔐 API key copied to clipboard!');
+        document.execCommand("copy");
+        addLog("🔐 API key copied to clipboard!");
       } catch (err) {
-        addLog('❌ Failed to copy API key.');
-        console.error('Copy to clipboard failed:', err);
+        addLog("❌ Failed to copy API key.");
+        console.error("Copy to clipboard failed:", err);
       }
       document.body.removeChild(tempInput);
     }
   };
 
   const fetchDashboardData = async () => {
-    if (status !== 'authenticated' || !userEmail) {
+    if (status !== "authenticated" || !userEmail) {
       setLoading(false);
       return;
     }
     try {
       setLoading(true);
-      addLog('Fetching projects...');
-      const projectsResponse = await fetch('/api/getProjects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
-        credentials: 'include',
+      addLog("Fetching projects...");
+      const projectsResponse = await fetch("/api/getProjects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail }),
+        credentials: "include",
       });
       if (!projectsResponse.ok) throw new Error(`HTTP error! status: ${projectsResponse.status}`);
       const projectsData = await projectsResponse.json();
       setProjects(projectsData.projects.map((p: any) => ({ ...p, showKey: false })) || []);
       addLog(`✅ Found ${projectsData.projects?.length || 0} projects.`);
 
-      addLog('Fetching subscription status...');
-      const stripeStatusResponse = await fetch('/api/stripeStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      addLog("Fetching subscription status...");
+      const stripeStatusResponse = await fetch("/api/stripeStatus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
-          action: 'createCheckoutSession',
           email: userEmail || session?.user?.email || localStorage.getItem("userEmail"),
         }),
       });
@@ -114,17 +113,31 @@ const App = () => {
     }
   };
 
+  // === NEW PROJECT BUTTON ===
+  // If user is pro, or within free limit, allows project creation.
+  // If project creation requires payment, will redirect to stripe checkout.
   const createProject = async () => {
     if (!userEmail) return;
     try {
-      addLog('Attempting to create new project...');
-      const response = await fetch('/api/createProject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'createCheckoutSession', email: userEmail }),
+      addLog("Attempting to create new project...");
+      // Call createProject API, which should check subscription & trigger Stripe checkout/paywall if needed.
+      const response = await fetch("/api/createProject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail }),
+        credentials: "include",
       });
+      const data = await response.json();
+
+      // If backend returns a Stripe URL for payment, redirect user.
+      if (data?.stripeCheckoutUrl) {
+        addLog("🔗 Redirecting to Stripe for payment...");
+        window.location.href = data.stripeCheckoutUrl;
+        return;
+      }
+
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      addLog('✅ New project created.');
+      addLog("✅ New project created.");
       fetchDashboardData();
     } catch (error: any) {
       console.error("Error creating project:", error);
@@ -136,9 +149,9 @@ const App = () => {
     if (!userEmail) return;
     try {
       addLog(`Attempting to regenerate key for project ID: ${projectId}`);
-      const response = await fetch('/api/updateProject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/updateProject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId, newKey: true }),
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -155,13 +168,13 @@ const App = () => {
     if (!userEmail) return;
     try {
       addLog(`Attempting to delete project ID: ${projectId}`);
-      const response = await fetch('/api/deleteProject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/deleteProject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId }),
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      addLog('✅ Project deleted successfully.');
+      addLog("✅ Project deleted successfully.");
       fetchDashboardData();
     } catch (error: any) {
       console.error("Error deleting project:", error);
@@ -174,9 +187,9 @@ const App = () => {
     if (!newName || !userEmail) return;
     try {
       addLog(`Attempting to rename project ID: ${projectId} to '${newName}'`);
-      const response = await fetch('/api/updateProject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/updateProject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId, newName }),
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -187,72 +200,39 @@ const App = () => {
       addLog(`❌ Failed to rename project: ${error.message}`);
     }
     setShowRenameModal(null);
-    setNewProjectName('');
-  };
-
-  const handleManageBilling = async () => {
-    addLog('Attempting to create Stripe billing portal session...');
-    const userEmail = session?.user?.email || localStorage.getItem("userEmail");
-    if (!userEmail) {
-      setShowStripeErrorModal('Missing email. Please log in again.');
-      addLog('❌ Missing user email. Cannot open billing portal.');
-      return;
-    }
-    try {
-      const response = await fetch('/api/stripeStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          action: 'createBillingPortalSession',
-          email: userEmail,
-        }),
-      });
-      const { url } = await response.json();
-      if (response.ok && url) {
-        addLog('✅ Stripe billing portal created, redirecting...');
-        window.location.href = url;
-      } else {
-        setShowStripeErrorModal('Failed to create billing portal session. Please try again.');
-        addLog('❌ Failed to create billing portal session.');
-      }
-    } catch (error) {
-      console.error("Error creating billing portal session:", error);
-      setShowStripeErrorModal('An error occurred. Please check your network connection.');
-      addLog('❌ Billing portal creation failed due to an error.');
-    }
+    setNewProjectName("");
   };
 
   const handleUpgradeToPro = async () => {
-    addLog('Attempting to upgrade to Pro...');
+    addLog("Attempting to upgrade to Pro...");
     const userEmail = session?.user?.email || localStorage.getItem("userEmail");
     if (!userEmail) {
-      setShowStripeErrorModal('Missing email. Please log in again.');
-      addLog('❌ Missing user email. Cannot start upgrade flow.');
+      setShowStripeErrorModal("Missing email. Please log in again.");
+      addLog("❌ Missing user email. Cannot start upgrade flow.");
       return;
     }
     try {
-      const response = await fetch('/api/stripeStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const response = await fetch("/api/stripeStatus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
-          action: 'createCheckoutSession',
+          action: "createCheckoutSession",
           email: userEmail,
         }),
       });
       const { url } = await response.json();
       if (response.ok && url) {
-        addLog('✅ Checkout session created. Redirecting to Stripe...');
+        addLog("✅ Checkout session created. Redirecting to Stripe...");
         window.location.href = url;
       } else {
-        setShowStripeErrorModal('Failed to start upgrade. Please try again.');
-        addLog('❌ Failed to start Stripe checkout session.');
+        setShowStripeErrorModal("Failed to start upgrade. Please try again.");
+        addLog("❌ Failed to start Stripe checkout session.");
       }
     } catch (error) {
       console.error("Error starting Stripe checkout:", error);
-      setShowStripeErrorModal('An error occurred. Please check your network connection.');
-      addLog('❌ Checkout session failed due to an error.');
+      setShowStripeErrorModal("An error occurred. Please check your network connection.");
+      addLog("❌ Checkout session failed due to an error.");
     }
   };
 
@@ -262,18 +242,18 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (status === 'authenticated' && userEmail) {
+    if (status === "authenticated" && userEmail) {
       fetchDashboardData();
-    } else if (status !== 'loading') {
+    } else if (status !== "loading") {
       setLoading(false);
     }
   }, [status, userEmail]);
 
   useEffect(() => {
     if (isProUser) {
-      setUsageData({ count: projects.length, plan: 'Pro', limit: 100 });
+      setUsageData({ count: projects.length, plan: "Pro", limit: 100 });
     } else {
-      setUsageData({ count: projects.length, plan: 'Free', limit: 3 });
+      setUsageData({ count: projects.length, plan: "Free", limit: 3 });
     }
   }, [projects, isProUser]);
 
@@ -290,12 +270,11 @@ const App = () => {
         return;
       }
       try {
-        const response = await fetch('/api/usageStats', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+        const response = await fetch("/api/usageStats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
-            action: 'createCheckoutSession',
             email: resolvedEmail,
           }),
         });
@@ -317,11 +296,12 @@ const App = () => {
     <main className="min-h-screen flex flex-col items-center justify-start px-6 py-10">
       <div className="w-full max-w-3xl">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-         
           {session?.user?.email && (
             <div className="flex items-center justify-between w-full mt-2">
               <div>
-                <p className="text-sm text-gray-600">Welcome, {session.user.email}</p>
+                <p className="text-lg text-gray-700 font-semibold">
+                  Welcome, {session.user.email}
+                </p>
               </div>
               <button
                 onClick={() => signOut()}
@@ -356,12 +336,12 @@ const App = () => {
                     API Projects
                   </h2>
                   <button
-                    onClick={() => createProject()}
-                    disabled={isUsageLimitReached}
+                    onClick={createProject}
+                    disabled={isUsageLimitReached && !isProUser}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-full font-medium transition-colors duration-300
-                      ${isUsageLimitReached
-                        ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg'
+                      ${isUsageLimitReached && !isProUser
+                        ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                        : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg"
                       }`}
                   >
                     <Plus className="h-5 w-5" />
@@ -370,27 +350,37 @@ const App = () => {
                 </div>
                 {projects.length > 0 ? (
                   <div className="space-y-4">
-                    {projects.map(project => (
+                    {projects.map((project) => (
                       <div key={project._id} className="api-key-box">
                         <div style={{ flex: 1 }}>
-                          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
+                          <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "6px" }}>
                             {project.projectName}
                           </h3>
-                          <div style={{
-                            fontFamily: 'monospace',
-                            fontSize: '13px',
-                            background: '#000',
-                            color: '#39FF14',
-                            padding: '6px',
-                            borderRadius: '4px',
-                            marginBottom: '10px',
-                          }}>
-                            {project.showKey ? project.apiKey : 'sk_live_*************************************'}
+                          <div
+                            style={{
+                              fontFamily: "monospace",
+                              fontSize: "13px",
+                              background: "#000",
+                              color: "#39FF14",
+                              padding: "6px",
+                              borderRadius: "4px",
+                              marginBottom: "10px",
+                            }}
+                          >
+                            {project.showKey ? project.apiKey : "sk_live_*************************************"}
                           </div>
                         </div>
                         <div className="api-key-box">
-                          <button onClick={() => setProjects(projects.map(p => p._id === project._id ? { ...p, showKey: !p.showKey } : p))}>
-                            {project.showKey ? 'Hide' : 'Show'}
+                          <button
+                            onClick={() =>
+                              setProjects(
+                                projects.map((p) =>
+                                  p._id === project._id ? { ...p, showKey: !p.showKey } : p
+                                )
+                              )
+                            }
+                          >
+                            {project.showKey ? "Hide" : "Show"}
                           </button>
                           <button onClick={() => copyToClipboard(project.apiKey)}>Copy</button>
                           <button onClick={() => setShowRegenModal(project._id)}>Regen</button>
@@ -401,33 +391,36 @@ const App = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-gray-500 italic">No projects found. Create one to get started!</p>
+                  <p className="text-center text-gray-500 italic">
+                    No projects found. Create one to get started!
+                  </p>
                 )}
               </section>
               <section className="section">
                 <h2>Usage Analytics</h2>
                 <div
                   style={{
-                    backgroundColor: '#111',
-                    border: '1px solid #333',
-                    borderRadius: '6px',
-                    padding: '16px',
-                    marginTop: '10px',
-                    minHeight: '180px',
+                    backgroundColor: "#111",
+                    border: "1px solid #333",
+                    borderRadius: "6px",
+                    padding: "16px",
+                    marginTop: "10px",
+                    minHeight: "180px",
                   }}
                 >
-                  <p style={{ color: '#39FF14', fontSize: '16px', marginBottom: '8px' }}>
+                  <p style={{ color: "#39FF14", fontSize: "16px", marginBottom: "8px" }}>
                     Total API Calls: {usageStats?.reduce((sum, d) => sum + d.calls, 0) || 0}
                   </p>
-                  <p style={{ fontSize: '14px', color: '#999', lineHeight: '1.6' }}>
+                  <p style={{ fontSize: "14px", color: "#999", lineHeight: "1.6" }}>
                     {usageStats && usageStats.length > 0 ? (
                       <>
                         Your API usage is currently at <strong>{projects.length}</strong> projects.
                         <br />
-                        Upgrade to <span style={{ color: '#39FF14', fontWeight: '500' }}>Pro Plan</span> for more features and higher limits.
+                        Upgrade to{" "}
+                        <span style={{ color: "#39FF14", fontWeight: "500" }}>Pro Plan</span> for more features and higher limits.
                       </>
                     ) : (
-                      'No usage data available yet. Start by creating a project and making some API calls!'
+                      "No usage data available yet. Start by creating a project and making some API calls!"
                     )}
                   </p>
                 </div>
@@ -437,16 +430,13 @@ const App = () => {
               <section className="section">
                 <h2>💳 Your Plan</h2>
                 <div>
-                  <p style={{ fontSize: '18px', marginBottom: '10px' }}>
+                  <p style={{ fontSize: "18px", marginBottom: "10px" }}>
                     Plan: <strong>{usageData.plan}</strong>
                   </p>
-                  <p style={{ fontSize: '16px', marginBottom: '10px' }}>
+                  <p style={{ fontSize: "16px", marginBottom: "10px" }}>
                     Projects used: {projects.length}/{usageData.limit}
                   </p>
-                  <button
-                    className="button"
-                    onClick={handleUpgradeToPro}
-                  >
+                  <button className="button" onClick={handleUpgradeToPro}>
                     Upgrade to Pro
                   </button>
                 </div>
@@ -455,7 +445,7 @@ const App = () => {
                 <h2>🛠 Event Log</h2>
                 <div className="log-box">
                   {errorLogs.map((log, index) => (
-                    <div key={index} style={{ color: log.includes('❌') ? '#ff1a1a' : '#39FF14' }}>
+                    <div key={index} style={{ color: log.includes("❌") ? "#ff1a1a" : "#39FF14" }}>
                       {log}
                     </div>
                   ))}
@@ -542,7 +532,7 @@ const App = () => {
                 <button
                   onClick={() => {
                     setShowRenameModal(null);
-                    setNewProjectName('');
+                    setNewProjectName("");
                   }}
                   className="px-4 py-2 rounded-full font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors"
                 >
@@ -568,9 +558,7 @@ const App = () => {
                   <X className="h-6 w-6" />
                 </button>
               </div>
-              <p className="text-gray-400">
-                {showStripeErrorModal}
-              </p>
+              <p className="text-gray-400">{showStripeErrorModal}</p>
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={() => setShowStripeErrorModal(null)}
@@ -582,25 +570,27 @@ const App = () => {
             </div>
           </div>
         )}
-        <footer style={{
-          marginTop: '40px',
-          padding: '20px',
-          textAlign: 'center',
-          borderTop: '1px solid #333',
-          fontSize: '14px'
-        }}>
+        <footer
+          style={{
+            marginTop: "40px",
+            padding: "20px",
+            textAlign: "center",
+            borderTop: "1px solid #333",
+            fontSize: "14px",
+          }}
+        >
           <button
             onClick={goToDocs}
             style={{
-              color: '#39FF14',
-              textDecoration: 'none',
-              padding: '10px 20px',
-              border: '1px solid #39FF14',
-              borderRadius: '6px',
-              display: 'inline-block',
+              color: "#39FF14",
+              textDecoration: "none",
+              padding: "10px 20px",
+              border: "1px solid #39FF14",
+              borderRadius: "6px",
+              display: "inline-block",
               fontWeight: 500,
-              background: 'transparent',
-              cursor: 'pointer'
+              background: "transparent",
+              cursor: "pointer",
             }}
           >
             📄 View API Docs
