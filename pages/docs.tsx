@@ -28,9 +28,9 @@ export default function DocsPage() {
 
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-800">
             <div>
-              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600 tracking-tight leading-none mb-1">
-                EVE Engine API Docs
-              </h1>
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600 tracking-tight leading-none mb-1">
+  EVE Engine API Docs 🔥
+</h1>
               <p className="text-gray-400">Version: v1 (last updated August 2025)</p>
             </div>
             <div className="p-3 rounded-full bg-gray-800 border border-gray-700 shadow-lg">
