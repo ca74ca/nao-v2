@@ -1,35 +1,40 @@
 import React, { useState, useEffect } from "react";
-import Head from "next/head"; // FIX: Import the Next.js Head component
-// Using relative paths for component imports.
-// This assumes 'index.tsx' is in 'pages/' and your components are in a 'components/' directory
-// that is a direct sibling to the 'pages/' directory (i.e., both are under the project root).
+import Head from "next/head";
 import GlobalStats from "../components/GlobalStats";
 import AuthModal from "../components/AuthModal";
 import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
-import FraudStatsDisplay from "../components/FraudStatsDisplay"; // Your live meter component
+import FraudStatsDisplay from "../components/FraudStatsDisplay";
 import EffortNetStatsBox from "../components/EffortNetStatsBox";
-import RedditFraudTracker from "../components/RedditFraudTracker"; // NEW: Import the Reddit tracker
-
-import { useRouter } from "next/router"; // Standard Next.js import
+import RedditFraudTracker from "../components/RedditFraudTracker";
+import { useRouter } from "next/router";
+import { useSession, signIn } from "next-auth/react"; // FIX: import signIn for auth logic
 
 export default function Home() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const { data: session } = useSession();
 
   // Define your highest impact metrics here for the headline and subheading.
-  // These are the "shocking" numbers that grab attention immediately.
-  // In a real application, these might be fetched from a high-level analytics API.
-  const projectedEcommerceFraud2029 = "$107 Billion"; // Global E-commerce Fraud Losses by 2029
-  const projectedAdFraud2028 = "$172 Billion";       // Digital Ad Fraud Losses by 2028
-  const costPer100Fraud = "$207";                   // Cost multiplier: for every $100 of fraud, it costs $207
-  const projectedAIFraud2027 = "$40 Billion";         // AI's Direct Financial Impact on US Financial Sector Fraud by 2027
+  const projectedEcommerceFraud2029 = "$107 Billion";
+  const projectedAdFraud2028 = "$172 Billion";
+  const costPer100Fraud = "$207";
+  const projectedAIFraud2027 = "$40 Billion";
+
+  // Button logic:  
+  // If user is authenticated, go to /get-started; else open sign-in (Google/GitHub popup)
+  const handleSecureClick = () => {
+    if (session) {
+      router.push("/get-started");
+    } else {
+      signIn();
+    }
+  };
 
   return (
     <>
-      {/* FIX: Use Next.js Head component to prevent hydration errors */}
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>EffortNet</title>
+        <title>EffortNet</title>
         <meta name="description" content="EffortNet: Stop the AI Fraud Epidemic. Protect your revenue with our unique Human Effort Score." />
       </Head>
 
@@ -50,27 +55,25 @@ export default function Home() {
         }}
       />
 
-      {/* Main Layout Content */}
       <div
         style={{
           position: "relative",
           zIndex: 10,
           display: "flex",
-          minHeight: "100vh", // Ensures content pushes layout if it overflows viewport
+          minHeight: "100vh",
           flexDirection: "column",
-          fontFamily: "Inter, sans-serif", // Apply font globally
+          fontFamily: "Inter, sans-serif",
         }}
       >
-        {/* Header - Sharp, direct, and financially impactful */}
         <header style={{ padding: "2rem 1.5rem 0", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
           <h1
             style={{
               color: "#f6fafaff",
               fontWeight: 800,
-              fontSize: "clamp(1.5rem, 5vw, 2.75rem)", // Responsive font size
+              fontSize: "clamp(1.5rem, 5vw, 2.75rem)",
               letterSpacing: "0.05em",
               lineHeight: 1.2,
-              maxWidth: "900px", // Limit width for readability
+              maxWidth: "900px",
             }}
           >
             EVE: EffortIQ.
@@ -79,16 +82,15 @@ export default function Home() {
           </h1>
         </header>
 
-        {/* Subheading - Reinforce the problem and introduce the unique solution */}
         <div
           style={{
             padding: "0 1.5rem 2rem",
             color: "#cceeff",
             fontWeight: 600,
-            fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)", // Responsive font size
+            fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)",
             textAlign: "center",
-            maxWidth: "700px", // Limit width for readability
-            margin: "1rem auto 0", // Center align
+            maxWidth: "700px",
+            margin: "1rem auto 0",
             lineHeight: 1.5,
           }}
         >
@@ -97,19 +99,17 @@ export default function Home() {
           EVE's unique <strong>Human Effort Score</strong> identifies genuine interactions, blocks sophisticated fakes, and recovers your wasted spending.
         </div>
 
-        {/* Live Fraud Impact Meter (FraudStatsDisplay) - Placed prominently */}
         <div
           style={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: "2rem", // Adjust margin to position it well
+            marginTop: "2rem",
             width: "100%",
-            padding: "0 1.5rem", // Add padding for mobile
-            boxSizing: "border-box", // Include padding in width calculation
+            padding: "0 1.5rem",
+            boxSizing: "border-box",
           }}
         >
-          {/* This is your component that fetches and displays live fraud stats */}
           <FraudStatsDisplay />
         </div>
 
@@ -117,7 +117,7 @@ export default function Home() {
         <div style={{ textAlign: "center", marginTop: "2rem" }}>
           <p
             style={{
-              fontSize: "clamp(0.9rem, 2.5vw, 1rem)", // Responsive font size
+              fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
               color: "#fff",
               marginBottom: "1rem",
               lineHeight: 1.5,
@@ -132,20 +132,20 @@ export default function Home() {
           </p>
 
           <button
-            onClick={() => router.push("/get-started")}
+            onClick={handleSecureClick}
             style={{
               display: "inline-block",
               background: "linear-gradient(90deg, #f0f4f6ff, #39FF14)",
               color: "#000",
               fontWeight: "700",
-              fontSize: "clamp(0.9rem, 3vw, 1.1rem)", // Responsive font size
+              fontSize: "clamp(0.9rem, 3vw, 1.1rem)",
               padding: "1rem 2rem",
               borderRadius: "999px",
               textDecoration: "none",
               boxShadow: "0 0 18px #39FF14",
               transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
               cursor: "pointer",
-              border: "none", // Ensure no default button border
+              border: "none",
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = "scale(1.05)";
@@ -160,13 +160,12 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Other Stats Sections - Can follow the main live meter and CTA */}
         <div
           style={{
             position: "relative",
             width: "100%",
             maxWidth: 1280,
-            margin: "4rem auto 0", // Increased margin to separate from CTA/Live Meter
+            margin: "4rem auto 0",
             padding: "2rem 1.5rem",
             display: "flex",
             flexDirection: "column",
@@ -176,23 +175,16 @@ export default function Home() {
             zIndex: 1,
           }}
         >
-          {/* GlobalStats component is now here, displaying live global fraud data */}
           <GlobalStats />
- {/* RedditFraudTracker component (simulated live Reddit-specific fraud data) */}
           <RedditFraudTracker />
-
-          {/* EffortNetStatsBox */}
           <div style={{ marginTop: "3rem", width: "100%" }}>
             <EffortNetStatsBox />
           </div>
-
-          {/* LeftColumnLiveFeed */}
           <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
             <LeftColumnLiveFeed />
           </div>
         </div>
 
-        {/* Auth Modal - OUTSIDE LAYOUT for correct stacking and pointer events */}
         {showModal && <AuthModal onClose={() => setShowModal(false)} />}
       </div>
     </>
