@@ -317,9 +317,7 @@ const App = () => {
     <main className="min-h-screen flex flex-col items-center justify-start px-6 py-10">
       <div className="w-full max-w-3xl">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-         h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600 tracking-tight leading-none mb-1">
-  EVE Engine API Docs 🔥
-</h1>
+         
           {session?.user?.email && (
             <div className="flex items-center justify-between w-full mt-2">
               <div>
