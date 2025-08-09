@@ -7,7 +7,25 @@ import FraudStatsDisplay from "../components/FraudStatsDisplay";
 import EffortNetStatsBox from "../components/EffortNetStatsBox";
 import RedditFraudTracker from "../components/RedditFraudTracker";
 import { useRouter } from "next/router";
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, getSession } from "next-auth/react";
+
+// Add getServerSideProps for server-side session check and redirect
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/auth/signin",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: { session },
+  };
+}
 
 export default function Home() {
   const router = useRouter();
