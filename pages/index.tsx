@@ -16,19 +16,20 @@ export async function getServerSideProps() {
 export default function Home() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const projectedEcommerceFraud2029 = "$107 Billion";
   const projectedAdFraud2028 = "$172 Billion";
   const costPer100Fraud = "$207";
   const projectedAIFraud2027 = "$40 Billion";
 
-  // ✅ Opens NextAuth provider chooser (Google + GitHub)
+  // ✅ CTA click handler
   const handleSecureClick = () => {
-    if (session) {
-      router.push("/get-started");
+    if (status === "loading") return; // wait until auth check finishes
+    if (status === "authenticated") {
+      router.push("/get-started"); // already signed in → dashboard
     } else {
-      signIn(undefined, { callbackUrl: "/get-started" });
+      signIn(undefined, { callbackUrl: "/get-started" }); // opens NextAuth Google/GitHub
     }
   };
 
