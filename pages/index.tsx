@@ -7,24 +7,10 @@ import FraudStatsDisplay from "../components/FraudStatsDisplay";
 import EffortNetStatsBox from "../components/EffortNetStatsBox";
 import RedditFraudTracker from "../components/RedditFraudTracker";
 import { useRouter } from "next/router";
-import { useSession, signIn, getSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 
-// Add getServerSideProps for server-side session check and redirect
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/auth/signin",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: { session },
-  };
+export async function getServerSideProps() {
+  return { props: {} };
 }
 
 export default function Home() {
@@ -32,14 +18,12 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const { data: session } = useSession();
 
-  // Define your highest impact metrics here for the headline and subheading.
   const projectedEcommerceFraud2029 = "$107 Billion";
   const projectedAdFraud2028 = "$172 Billion";
   const costPer100Fraud = "$207";
   const projectedAIFraud2027 = "$40 Billion";
 
-  // Button logic:  
-  // If user is authenticated, go to /get-started; else open sign-in (Google/GitHub popup)
+  // ✅ Opens NextAuth provider chooser (Google + GitHub)
   const handleSecureClick = () => {
     if (session) {
       router.push("/get-started");
@@ -53,10 +37,13 @@ export default function Home() {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>EffortNet</title>
-        <meta name="description" content="EffortNet: Stop the AI Fraud Epidemic. Protect your revenue with our unique Human Effort Score." />
+        <meta
+          name="description"
+          content="EffortNet: Stop the AI Fraud Epidemic. Protect your revenue with our unique Human Effort Score."
+        />
       </Head>
 
-      {/* Full Screen Background */}
+      {/* Background */}
       <div
         style={{
           position: "fixed",
@@ -83,7 +70,15 @@ export default function Home() {
           fontFamily: "Inter, sans-serif",
         }}
       >
-        <header style={{ padding: "2rem 1.5rem 0", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+        <header
+          style={{
+            padding: "2rem 1.5rem 0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+          }}
+        >
           <h1
             style={{
               color: "#f6fafaff",
@@ -112,26 +107,20 @@ export default function Home() {
             lineHeight: 1.5,
           }}
         >
-          AI-driven fraud is projected to cost industries <strong>{projectedAdFraud2028}</strong> in ad spend and <strong>{projectedAIFraud2027}</strong> in financial losses. For every $100 of fraud, it costs businesses <strong>{costPer100Fraud}</strong>.
+          AI-driven fraud is projected to cost industries{" "}
+          <strong>{projectedAdFraud2028}</strong> in ad spend and{" "}
+          <strong>{projectedAIFraud2027}</strong> in financial losses. For every
+          $100 of fraud, it costs businesses <strong>{costPer100Fraud}</strong>.
           <br />
-          EVE's unique <strong>Human Effort Score</strong> identifies genuine interactions, blocks sophisticated fakes, and recovers your wasted spending.
+          EVE&apos;s unique <strong>Human Effort Score</strong> identifies genuine
+          interactions, blocks sophisticated fakes, and recovers your wasted spending.
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "2rem",
-            width: "100%",
-            padding: "0 1.5rem",
-            boxSizing: "border-box",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}>
           <FraudStatsDisplay />
         </div>
 
-        {/* CTA Button and supporting text */}
+        {/* CTA */}
         <div style={{ textAlign: "center", marginTop: "2rem" }}>
           <p
             style={{
@@ -159,19 +148,9 @@ export default function Home() {
               fontSize: "clamp(0.9rem, 3vw, 1.1rem)",
               padding: "1rem 2rem",
               borderRadius: "999px",
-              textDecoration: "none",
               boxShadow: "0 0 18px #39FF14",
-              transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
               cursor: "pointer",
               border: "none",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = "scale(1.05)";
-              e.currentTarget.style.boxShadow = "0 0 28px #00ff87";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 0 18px #39FF14";
             }}
           >
             SECURE YOUR PLATFORM NOW
@@ -180,7 +159,6 @@ export default function Home() {
 
         <div
           style={{
-            position: "relative",
             width: "100%",
             maxWidth: 1280,
             margin: "4rem auto 0",
