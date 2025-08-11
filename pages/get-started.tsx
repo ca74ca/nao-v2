@@ -296,15 +296,15 @@ const App = () => {
     <main className="min-h-screen flex flex-col items-center justify-start px-6 py-10">
       <div className="w-full max-w-3xl">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          {session?.user?.email && (
+          {status === "authenticated" && (
             <div className="flex items-center justify-between w-full mt-2">
               <div>
                 <p className="text-lg text-gray-700 font-semibold">
-                  Welcome, {session.user.email}
+                  Welcome, {session?.user?.email || "User"}
                 </p>
               </div>
               <button
-                onClick={() => signOut()}
+                onClick={() => signOut({ callbackUrl: "/" })}
                 className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
               >
                 Sign Out

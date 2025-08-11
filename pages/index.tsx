@@ -37,10 +37,13 @@ const handleSecureClick = () => {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>EffortNet</title>
-        <meta
-          name="description"
-          content="EffortNet: Stop the AI Fraud Epidemic. Protect your revenue with our unique Human Effort Score."
-        />
+<meta
+  name="description"
+  content="EffortNet: Stop the AI Fraud Epidemic. is the plug-and-play API for verifying real human effort across content, gaming, fitness, and rewards platforms — 
+  preventing AI spam, bot farming, and fraud before payouts. Protect your revenue with our unique Human Effort Score. NFT Airdrop Anti-Sybil (Wallet Checks): Verify 
+  'human effort' on wallets by correlating linked social media activity with wallet addresses. For airdrops requiring actions like retweets or joining Discord servers,
+   EVE analyzes the posted content for AI-generation or spam patterns—flagging suspicious wallets before rewards are sent."
+/>
       </Head>
 
       {/* Background */}
