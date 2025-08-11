@@ -23,16 +23,15 @@ export default function Home() {
   const costPer100Fraud = "$207";
   const projectedAIFraud2027 = "$40 Billion";
 
-  // ✅ CTA click handler
-  const handleSecureClick = () => {
-    if (status === "loading") return; // wait until auth check finishes
-    if (status === "authenticated") {
-      router.push("/get-started"); // already signed in → dashboard
-    } else {
-      signIn(undefined, { callbackUrl: "/get-started" }); // opens NextAuth Google/GitHub
-    }
-  };
-
+// ✅ CTA click handler
+const handleSecureClick = () => {
+  if (status === "loading") return; // wait until auth check finishes
+  if (status === "authenticated") {
+    router.push("/get-started"); // already signed in → dashboard
+  } else {
+    signIn(undefined, { callbackUrl: "https://naoverse.io/get-started" }); // ✅ absolute URL so callback works
+  }
+};
   return (
     <>
       <Head>
