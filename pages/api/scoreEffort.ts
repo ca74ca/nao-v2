@@ -1,12 +1,23 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth/next';
-// Update the path below if your [...nextauth].ts file is in a different location
-// Update the path below to match the actual location of your [...nextauth].ts file
 import authOptions from './auth/[...nextauth]';
 import { stripe } from '@/lib/stripe';
 import { runEffortScore } from '@/utils/runEffortScore';
 import { calculateEffortScore } from '@/utils/effortRecipe';
 const { connect } = require('../../backend/db'); // ✅ Your working MongoDB logic
+
+// 🔍 Helper: Detect platform from URL
+function detectPlatformFromURL(url: string) {
+  const patterns: Record<string, RegExp> = {
+    instagram: /instagram\.com/i,
+    amazon: /amazon\.[a-z.]+/i,
+    tiktokShop: /tiktok\.com\/.*shop/i,
+  };
+  for (const [platform, regex] of Object.entries(patterns)) {
+    if (regex.test(url)) return platform;
+  }
+  return 'unknown';
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -20,10 +31,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const userEmail = session.user.email;
-  const { url, sourceType, wallet, subscriptionItemId } = req.body;
+  let { url, sourceType, wallet, subscriptionItemId } = req.body;
 
-  if (!url || !sourceType || !wallet) {
-    return res.status(400).json({ error: 'Missing url, sourceType, or wallet' });
+  if (!url) {
+    return res.status(400).json({ error: 'Missing url' });
+  }
+
+  // Auto-detect platform if not provided
+  const detectedPlatform = detectPlatformFromURL(url);
+  if (!sourceType || sourceType === 'unknown') {
+    sourceType = detectedPlatform;
+  }
+
+  // Require wallet for Web3 scoring, allow skip for e-commerce/social
+  if (!wallet && ['instagram', 'amazon', 'tiktokShop'].indexOf(sourceType) === -1) {
+    return res.status(400).json({ error: 'Missing wallet for Web3 sources' });
   }
 
   // 🔐 STEP 1: Check MongoDB user + plan via email or wallet
@@ -51,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // 🧠 Step 1: Scrape metadata
     const metadata = await runEffortScore(sourceType, url);
-    console.log('Collected Metadata:', metadata);
+    console.log(`Collected Metadata for ${sourceType}:`, metadata);
 
     // 🎯 Step 2: Score it
     const { score, reasons, tags } = await calculateEffortScore(metadata);
@@ -77,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       fraudSignal,
       message: fraudSignal ? '⚠️ Possible AI or low-effort content' : '✅ Human effort detected',
       reasons,
-      tags,
+      tags: [...tags, `platform:${sourceType}`],
       metadata,
     });
   } catch (err: any) {

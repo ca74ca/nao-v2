@@ -98,26 +98,24 @@ const handleSecureClick = () => {
           </h1>
         </header>
 
-        <div
-          style={{
-            padding: "0 1.5rem 2rem",
-            color: "#cceeff",
-            fontWeight: 600,
-            fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)",
-            textAlign: "center",
-            maxWidth: "700px",
-            margin: "1rem auto 0",
-            lineHeight: 1.5,
-          }}
-        >
-          AI-driven fraud is projected to cost industries{" "}
-          <strong>{projectedAdFraud2028}</strong> in ad spend and{" "}
-          <strong>{projectedAIFraud2027}</strong> in financial losses. For every
-          $100 of fraud, it costs businesses <strong>{costPer100Fraud}</strong>.
-          <br />
-          EVE&apos;s unique <strong>Human Effort Score</strong> identifies genuine
-          interactions, blocks sophisticated fakes, and recovers your wasted spending.
-        </div>
+<div
+  style={{
+    padding: "0 1.5rem 2rem",
+    color: "#cceeff",
+    fontWeight: 600,
+    fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)",
+    textAlign: "center",
+    maxWidth: "700px",
+    margin: "1rem auto 0",
+    lineHeight: 1.5,
+  }}
+>
+  EVE: Stop the AI Fraud Epidemic. The plug-and-play API for verifying real human effort across content, gaming, fitness, and rewards platforms — preventing AI spam, bot farming, and fraud before payouts. Protect your revenue with our unique <strong>Human Effort Score</strong>.
+  <br /><br />
+  AI-driven fraud is projected to cost industries <strong>{projectedAdFraud2028}</strong> in ad spend and <strong>{projectedAIFraud2027}</strong> in financial losses. For every $100 of fraud, it costs businesses <strong>{costPer100Fraud}</strong>.
+  <br /><br />
+  <strong>NFT Airdrop Anti-Sybil (Wallet Checks):</strong> Verify &apos;human effort&apos; on wallets by correlating linked social media activity with wallet addresses. For airdrops requiring actions like retweets or joining Discord servers, EVE analyzes the posted content for AI-generation or spam patterns — flagging suspicious wallets before rewards are sent.
+</div>
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}>
           <FraudStatsDisplay />
