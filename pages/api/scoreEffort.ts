@@ -45,13 +45,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let user = null;
   try {
     const db = await connect();
-    user = await db.collection("users").findOne({
-      $or: [
-        { email: userEmail },
-        { wallet }
-      ].filter(Boolean)
-    });
-
+let user: any = await db.collection("users").findOne({
+  $or: [{ email: userEmail }, { wallet }],
+});
     // If no user, create guest record
     if (!user) {
       user = {
