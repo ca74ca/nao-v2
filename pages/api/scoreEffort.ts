@@ -1,10 +1,11 @@
+// pages/api/scoreEffort.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth/next';
 import authOptions from './auth/[...nextauth]';
 import { stripe } from '@/lib/stripe';
 import { runEffortScore } from '@/utils/runEffortScore';
 import { calculateEffortScore } from '@/utils/effortRecipe';
-const { connect } = require('../../backend/db'); // ✅ Your working MongoDB logic
+const { connect } = require('../../backend/db');
 
 // 🔍 Helper: Detect platform from URL
 function detectPlatformFromURL(url: string) {
@@ -24,46 +25,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // ✅ Require NextAuth login
+  // ✅ Optional: Allow guest use but try to get session
   const session = await getServerSession(req, res, authOptions) as { user?: { email?: string } } | null;
-  if (!session || !session.user?.email) {
-    return res.status(401).json({ error: 'Unauthorized. Please log in.' });
-  }
+  const userEmail = session?.user?.email || null;
 
-  const userEmail = session.user.email;
   let { url, sourceType, wallet, subscriptionItemId } = req.body;
-
-  if (!url) {
-    return res.status(400).json({ error: 'Missing url' });
-  }
+  if (!url) return res.status(400).json({ error: 'Missing url' });
 
   // Auto-detect platform if not provided
   const detectedPlatform = detectPlatformFromURL(url);
-  if (!sourceType || sourceType === 'unknown') {
-    sourceType = detectedPlatform;
-  }
+  if (!sourceType || sourceType === 'unknown') sourceType = detectedPlatform;
 
   // Require wallet for Web3 scoring, allow skip for e-commerce/social
   if (!wallet && ['instagram', 'amazon', 'tiktokShop'].indexOf(sourceType) === -1) {
     return res.status(400).json({ error: 'Missing wallet for Web3 sources' });
   }
 
-  // 🔐 STEP 1: Check MongoDB user + plan via email or wallet
+  // 🔐 STEP 1: Check MongoDB user OR create guest record
+  let user = null;
   try {
     const db = await connect();
-    const user = await db.collection("users").findOne({
+    user = await db.collection("users").findOne({
       $or: [
         { email: userEmail },
-        { wallet },
-      ],
+        { wallet }
+      ].filter(Boolean)
     });
 
+    // If no user, create guest record
     if (!user) {
-      return res.status(401).json({ error: "User not found" });
+      user = {
+        email: userEmail || null,
+        wallet: wallet || null,
+        plan: "free",
+        freeChecksUsed: 0
+      };
+      await db.collection("users").insertOne(user);
     }
 
+    // STEP 2: Free check logic
     if (user.plan !== "pro") {
-      return res.status(402).json({ error: "Upgrade to Pro to use this feature" });
+      if (!user.freeChecksUsed) user.freeChecksUsed = 0;
+
+      if (user.freeChecksUsed >= 5) {
+        return res.status(402).json({
+          error: "Free limit reached. Upgrade to Pro to continue.",
+          upgradeLink: "/upgrade" // <-- Your Stripe checkout link or route
+        });
+      }
+
+      // Increment free checks
+      await db.collection("users").updateOne(
+        { _id: user._id },
+        { $inc: { freeChecksUsed: 1 } }
+      );
     }
   } catch (err: any) {
     console.error("MongoDB error:", err.message);
@@ -79,8 +94,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { score, reasons, tags } = await calculateEffortScore(metadata);
     const fraudSignal = score < 70;
 
-    // 💳 Step 3: Stripe Usage Logging (optional)
-    if (subscriptionItemId) {
+    // 💳 Step 3: Stripe Usage Logging for Pro users
+    if (subscriptionItemId && user?.plan === "pro") {
       try {
         await (stripe.subscriptionItems as any).createUsageRecord(subscriptionItemId, {
           quantity: 1,
@@ -101,6 +116,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       reasons,
       tags: [...tags, `platform:${sourceType}`],
       metadata,
+      freeChecksRemaining: user?.plan === "pro" ? null : (5 - (user.freeChecksUsed || 0))
     });
   } catch (err: any) {
     console.error('❌ Effort score error:', err.message);
