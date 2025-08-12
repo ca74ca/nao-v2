@@ -42,12 +42,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 🔐 STEP 1: Check MongoDB user OR create guest record
-  let user = null;
+  let user: any = null;
   try {
     const db = await connect();
-let user: any = await db.collection("users").findOne({
-  $or: [{ email: userEmail }, { wallet }],
-});
+
+    user = await db.collection("users").findOne({
+      $or: [{ email: userEmail }, { wallet }],
+    });
+
     // If no user, create guest record
     if (!user) {
       user = {
@@ -56,7 +58,8 @@ let user: any = await db.collection("users").findOne({
         plan: "free",
         freeChecksUsed: 0
       };
-      await db.collection("users").insertOne(user);
+      const insertResult = await db.collection("users").insertOne(user);
+      user._id = insertResult.insertedId;
     }
 
     // STEP 2: Free check logic
