@@ -1,4 +1,4 @@
-// utils/runEffortScore.ts
+import fetch from "node-fetch";
 
 // --- Decodos API Configuration ---
 const DECODOS_API_KEY = process.env.DECODOS_API_KEY;
@@ -27,7 +27,7 @@ function getPlatformFromUrl(url: string): string | null {
   }
   if (url.includes('instagram.com')) return 'instagram';
   if (url.includes('reddit.com')) return 'reddit';
-  if (url.includes('youtube.com')) return 'youtube';
+  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
   if (url.includes('amazon.') && url.match(/\/dp\/|\/gp\//)) return 'amazon';
   return null;
 }

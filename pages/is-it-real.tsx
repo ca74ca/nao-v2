@@ -10,7 +10,8 @@ export default function IsItReal() {
   const [input, setInput] = useState(""); // User's input in the textarea
   const [loading, setLoading] = useState(false); // Loading state for API calls
   const [result, setResult] = useState<{ verdict: string; score: number; reasons: string[]; platform?: string } | null>(null); // API response result
-  const [error, setError] = useState<string | null>(null); // Error message
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<{ email?: string; id?: string } | null>(null); // Make sure you set user info somewhere
 
   // Memoized value to detect platform from a link input
   const detectedPlatform = useMemo(() => {
@@ -30,29 +31,28 @@ export default function IsItReal() {
 
   // Function to execute the check by calling the backend API
   const runCheck = async () => {
-    setError(null); // Clear previous errors
-    setResult(null); // Clear previous results
+    setError(null);
+    setResult(null);
     if (!input.trim()) {
-      setError("Please paste some content to check."); // Input validation
+      setError("Please paste some content to check.");
       return;
     }
 
     try {
-      setLoading(true); // Set loading state to true
+      setLoading(true);
 
-      // Real API call (EVE hidden behind /api/scoreEffort)
       const res = await fetch("/api/scoreEffort", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mode,
           value: input,
-          platformHint: detectedPlatform, // helps for link mode
+          platformHint: detectedPlatform,
+          apiKey: process.env.NEXT_PUBLIC_EVE_DEMO_KEY, // <-- Added here
         }),
       });
 
       if (!res.ok) {
-        // Optional: fall back to a friendly message if server returns 4xx/5xx
         throw new Error(`Check failed (HTTP ${res.status})`);
       }
 
@@ -62,6 +62,33 @@ export default function IsItReal() {
       setError(e.message || "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false); // Always reset loading state
+    }
+  };
+
+  const handleUpgrade = async () => {
+    if (!user || !user.email || !user.id) {
+      setError("Please log in first to upgrade.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/createCheckoutSession", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          userId: user.id,
+          projectId: "is-it-real", // track where upgrade started
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Unable to start checkout");
+
+      window.location.href = data.url; // Send user to Stripe checkout
+    } catch (err: any) {
+      console.error("Upgrade error:", err);
+      setError(err.message);
     }
   };
 
@@ -387,6 +414,9 @@ export default function IsItReal() {
 
           <p className="subtitle">
             Paste a <strong>review</strong>, <strong>wallet</strong>, <strong>Discord message</strong>, or a <strong>link</strong> (Instagram, Amazon, TikTok Shop). We’ll check authenticity.
+          </p>
+          <p style={{ color: "#ccc", fontSize: "0.95rem", marginBottom: "1rem" }}>
+            Paste any link from TikTok, Instagram, Reddit, YouTube, or other supported content sources.
           </p>
 
           {/* Tab Buttons for Mode Selection */}
