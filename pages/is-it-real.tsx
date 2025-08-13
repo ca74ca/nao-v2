@@ -11,7 +11,7 @@ export default function IsItReal() {
   const [loading, setLoading] = useState(false); // Loading state for API calls
   const [result, setResult] = useState<{ verdict: string; score: number; reasons: string[]; platform?: string } | null>(null); // API response result
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<{ email?: string; id?: string } | null>(null); // Make sure you set user info somewhere
+  const [user, setUser] = useState<{ email?: string; id?: string; plan?: string } | null>(null); // Make sure you set user info somewhere
 
   // Memoized value to detect platform from a link input
   const detectedPlatform = useMemo(() => {
@@ -41,14 +41,15 @@ export default function IsItReal() {
     try {
       setLoading(true);
 
+      // Example payload for /api/scoreEffort
       const res = await fetch("/api/scoreEffort", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mode,
-          value: input,
-          platformHint: detectedPlatform,
-          apiKey: process.env.NEXT_PUBLIC_EVE_DEMO_KEY, // <-- Added here
+          url: input, // Use input as the URL
+          sourceType: detectedPlatform || mode, // Use detected platform or mode
+          wallet: mode === "wallet" ? input : undefined,
+          subscriptionItemId: "si_abc123", // Replace with actual subscription item id if available
         }),
       });
 
@@ -464,6 +465,11 @@ export default function IsItReal() {
               </div>
             </div>
           )}
+
+          {/* Upgrade button for non-pro users */}
+          <button onClick={() => window.location.href = "/upgrade"}>
+            Upgrade to Pro
+          </button>
         </div>
       </div>
     </>

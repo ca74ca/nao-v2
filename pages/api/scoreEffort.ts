@@ -1,4 +1,3 @@
-// pages/api/scoreEffort.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth/next';
 import authOptions from './auth/[...nextauth]';
@@ -8,7 +7,8 @@ import { calculateEffortScore } from '@/utils/effortRecipe';
 const { connect } = require('../../backend/db');
 
 // 🔍 Helper: Detect platform from URL
-function detectPlatformFromURL(url: string) {
+function detectPlatformFromURL(rawUrl: string) {
+  const url = (rawUrl || '').trim();
   const patterns: Record<string, RegExp> = {
     instagram: /instagram\.com/i,
     amazon: /amazon\.[a-z.]+/i,
@@ -17,6 +17,7 @@ function detectPlatformFromURL(url: string) {
     reddit: /reddit\.com/i,
     youtube: /(?:youtube\.com|youtu\.be)/i,
     twitter: /(?:twitter\.com|x\.com)/i,
+    // Add web3/onchain/wallet if needed in future!
   };
   for (const [platform, regex] of Object.entries(patterns)) {
     if (regex.test(url)) return platform;
@@ -24,28 +25,43 @@ function detectPlatformFromURL(url: string) {
   return 'unknown';
 }
 
+// Platforms that actually require a wallet (none of the main social/content sources)
+const WEB3_ONLY_PLATFORMS = new Set(['web3', 'wallet', 'onchain']);
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // ✅ Optional: Allow guest use but try to get session
+  // Try to get session (optional for guests)
   const session = (await getServerSession(req, res, authOptions)) as
     | { user?: { email?: string } }
     | null;
   const userEmail = session?.user?.email || null;
 
-  let { url, sourceType, value, platformHint, wallet, subscriptionItemId } = req.body;
+  // Accept multiple payload shapes
+  let { url, sourceType, value, platformHint, wallet, subscriptionItemId, mode } = req.body || {};
 
   // Map alternative payload keys from current frontend
   if (!url && value) url = value;
   if (!sourceType && platformHint) sourceType = platformHint;
+  if (!sourceType && mode) sourceType = mode;
 
-  if (!url) return res.status(400).json({ error: 'Missing url' });
+  // MUST have a url
+  if (!url || typeof url !== 'string') return res.status(400).json({ error: 'Missing url' });
+  url = url.trim();
 
-  // Auto-detect platform if not provided
+  // Auto-detect platform if not provided or unknown
   const detectedPlatform = detectPlatformFromURL(url);
   if (!sourceType || sourceType === 'unknown') sourceType = detectedPlatform;
+
+  // Only require wallet for true onchain/web3 sources (not for TikTok/Instagram/etc)
+  if (WEB3_ONLY_PLATFORMS.has(sourceType) && !wallet) {
+    return res.status(422).json({
+      error: 'Missing wallet address for Web3/onchain sources',
+      details: { sourceType },
+    });
+  }
 
   // 🔐 STEP 1: Check MongoDB user OR create guest record
   let user: any = null;
@@ -87,7 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       user.freeChecksUsed += 1; // keep in sync for response
     }
   } catch (err: any) {
-    console.error('MongoDB error:', err.message);
+    console.error('MongoDB error:', err.message || err);
     return res.status(500).json({ error: 'Server error checking subscription status.' });
   }
 
@@ -110,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         console.log('✅ Stripe usage logged');
       } catch (err: any) {
-        console.error('❌ Stripe usage error:', err.message);
+        console.error('❌ Stripe usage error:', err?.message || err);
       }
     }
 
@@ -122,13 +138,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ? '⚠️ Possible AI or low-effort content'
         : '✅ Human effort detected',
       reasons,
-      tags: [...tags, `platform:${sourceType}`],
+      tags: [...(tags || []), `platform:${sourceType}`],
       metadata,
       freeChecksRemaining:
         user?.plan === 'pro' ? null : Math.max(0, 5 - (user.freeChecksUsed || 0)),
     });
   } catch (err: any) {
-    console.error('❌ Effort score error:', err.message);
-    return res.status(500).json({ error: `Failed to score effort: ${err.message}` });
+    console.error('❌ Effort score error:', err?.message || err);
+    return res.status(500).json({ error: `Failed to score effort: ${err?.message || 'Unknown error'}` });
   }
 }
