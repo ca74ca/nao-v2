@@ -1,35 +1,60 @@
 // /pages/api/verifyEffort.ts
-
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripe } from '@/lib/stripe'; // Assuming this path is correct for your Stripe initialization
+import { stripe } from '@/lib/stripe';
+import { runEffortScore } from '@/utils/runEffortScore';
+import { calculateEffortScore } from '@/utils/effortRecipe';
 
-import { runEffortScore } from '@/utils/runEffortScore'; // Corrected import path
-import { calculateEffortScore } from '@/utils/effortRecipe'; // Corrected import path
+// Minimal detector (kept local to avoid imports)
+function detectPlatformFromURL(rawUrl: string | undefined) {
+  const url = (rawUrl || '').toLowerCase();
+  if (!url) return 'unknown';
+  if (url.includes('tiktok.com')) return url.includes('/shop/') ? 'tiktok_shop' : 'tiktok';
+  if (url.includes('instagram.com')) return 'instagram';
+  if (url.includes('reddit.com')) return 'reddit';
+  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+  if (url.includes('amazon.') && /\/(dp|gp)\//.test(url)) return 'amazon';
+  if (url.includes('etherscan.io') || url.includes('polygonscan.com')) return 'web3';
+  return 'web';
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { url, sourceType, wallet, subscriptionItemId } = req.body;
+  // Accept both clean and UI payload shapes
+  let {
+    url,
+    sourceType,
+    value,
+    platformHint,
+    mode,
+    wallet,                // kept for parity with scoreEffort (not required)
+    subscriptionItemId,    // optional Stripe usage logging
+  } = (req.body || {}) as any;
 
-  if (!url || !sourceType) {
-    return res.status(400).json({ error: 'Missing url or sourceType' });
+  if (!url && value) url = value;
+  if (!sourceType) sourceType = platformHint || mode || detectPlatformFromURL(url);
+
+  if (!url) {
+    return res.status(400).json({ error: 'Missing url' });
+  }
+  if (!sourceType || sourceType === 'unknown') {
+    sourceType = detectPlatformFromURL(url);
   }
 
   try {
-    // Step 1: Pull public data from TikTok, Reddit, YouTube, etc., using Decodos
-    // The runEffortScore function will handle the actual API calls to Decodos
+    // Step 1: Collect public data via **hybrid pipeline**:
+    // - Public/Open APIs first (Reddit JSON, YouTube oEmbed, etc.)
+    // - Self-hosted Puppeteer/Playwright scrapers for TikTok/Instagram/Amazon
     const metadata = await runEffortScore(sourceType, url);
-    console.log('Collected Metadata:', metadata);
+    console.log('[verifyEffort] Collected metadata:', { platform: metadata.platform, url: metadata.url });
 
-    // Step 2: Score the content based on the collected metadata and your 'Proof of Human' recipe
-    // The calculateEffortScore function will contain your proprietary logic
-    // FIX: Added 'await' here and destructured 'tags' as calculateEffortScore is now async and returns tags.
+    // Step 2: Score using your Proof-of-Human recipe (hybrid heuristics)
     const { score, reasons, tags } = await calculateEffortScore(metadata);
-    const fraudSignal = score < 70; // Example threshold for fraud detection
+    const fraudSignal = score < 70;
 
-    // Step 3: Log usage to Stripe (optional)
+    // Step 3: Optional Stripe metering
     if (subscriptionItemId) {
       try {
         await (stripe.subscriptionItems as any).createUsageRecord(subscriptionItemId, {
@@ -37,26 +62,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           timestamp: Math.floor(Date.now() / 1000),
           action: 'increment',
         });
-        console.log('✅ Logged $0.01 usage to Stripe');
+        console.log('[verifyEffort] Stripe usage logged');
       } catch (err: any) {
-        console.error('❌ Failed to log Stripe usage:', err.message);
-        // In a live environment, you might want to log this error to a monitoring service
-        // but still proceed with the verification result if the core logic was successful.
+        console.error('[verifyEffort] Stripe usage error:', err?.message || err);
+        // non-fatal
       }
     }
 
-    // Step 4: Return full response
+    // Step 4: Return result
     return res.status(200).json({
       score,
       fraudSignal,
       message: fraudSignal ? '⚠️ Possible AI or low-effort content' : '✅ Human effort detected',
-      reasons, // Provide specific reasons for the score
-      tags,    // Include tags in the response
-      metadata, // Include the raw metadata for debugging/transparency if needed
+      reasons,
+      tags,
+      metadata,
     });
   } catch (err: any) {
-    console.error('❌ Scoring error:', err.message);
-    // Return a 500 status for internal server errors during the scoring process
-    return res.status(500).json({ error: `Failed to score effort: ${err.message}` });
+    console.error('[verifyEffort] Error:', err?.message || err);
+    return res.status(500).json({ error: `Failed to score effort: ${err?.message || 'Unknown error'}` });
   }
 }
