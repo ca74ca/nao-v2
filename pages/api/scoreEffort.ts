@@ -35,7 +35,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     | null;
   const userEmail = session?.user?.email || null;
 
-  let { url, sourceType, wallet, subscriptionItemId } = req.body;
+  let { url, sourceType, value, platformHint, wallet, subscriptionItemId } = req.body;
+
+  // Map alternative payload keys from current frontend
+  if (!url && value) url = value;
+  if (!sourceType && platformHint) sourceType = platformHint;
+
   if (!url) return res.status(400).json({ error: 'Missing url' });
 
   // Auto-detect platform if not provided
