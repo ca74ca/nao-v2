@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "TRUSTE – Authenticity Badges",
+  "version": "0.2.0",
+  "description": "Scores comments/reviews for human authenticity and shows a TRUSTE badge with reasons.",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://nao-sdk-api.onrender.com/*",
+    "https://*.reddit.com/*",
+    "https://*.tiktok.com/*",
+    "https://www.amazon.*/*"
+  ],
+  "background": { "service_worker": "service_worker.js" },
+  "content_scripts": [{
+    "matches": [
+      "https://www.reddit.com/*",
+      "https://www.tiktok.com/*",
+      "https://www.amazon.*/*"
+    ],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "web_accessible_resources": [{
+    "resources": ["badge.css"],
+    "matches": ["<all_urls>"]
+  }],
+  "action": { "default_title": "TRUSTE" }
+}
