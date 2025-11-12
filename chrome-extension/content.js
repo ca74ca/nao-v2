@@ -127,6 +127,7 @@ const io = new IntersectionObserver((entries) => {
 }, { root: null, rootMargin: "0px", threshold: 0.05 });
 
 // -------- Find + observe --------
+let initialForcedScoreDone = false;
 function scan() {
   console.log("[TRUSTE] scanning for text nodes...");
   // try site adapter first
@@ -140,9 +141,11 @@ function scan() {
   }
   for (const el of nodes) io.observe(el);
   // FORCE a first score for what's already on screen (helps confirm end-to-end)
-  if (nodes.length) {
+  // Only do this once per page load to avoid repeated batches on rapid scans
+  if (nodes.length && !initialForcedScoreDone) {
     console.log("[TRUSTE] forcing first score for", Math.min(nodes.length, 5), "nodes");
     scoreNodes(nodes.slice(0, 5));
+    initialForcedScoreDone = true;
   }
 }
 
