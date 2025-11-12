@@ -1,18 +1,30 @@
 {
   "manifest_version": 3,
-  "name": "TRUSTE – Authenticity",
-  "version": "0.3.0",
-  "permissions": ["storage", "scripting", "activeTab"],
-  "host_permissions": ["<all_urls>"],             
-  "background": { "service_worker": "service_worker.js" },
-  "content_scripts": [{
-    "matches": ["<all_urls>"],                     
-    "js": ["content.js"],
-    "run_at": "document_idle"
-  }],
-  "web_accessible_resources": [{
-    "resources": ["badge.css"],
-    "matches": ["<all_urls>"]
-  }],
-  "action": { "default_title": "TRUSTE" }
+  "name": "EVE TRUSTE",
+  "version": "0.4.0",
+  "description": "Effort/Trust scoring overlay for UGC surfaces.",
+  "action": { "default_title": "TRUSTE" },
+
+  "permissions": ["storage", "alarms", "scripting"],
+  "host_permissions": ["https://*/*", "http://*/*"],
+
+  "background": {
+    "service_worker": "service_worker.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content.js"],
+      "css": ["badge.css"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+
+  "minimum_chrome_version": "120"
 }
