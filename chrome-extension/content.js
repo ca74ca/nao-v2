@@ -1,39 +1,78 @@
-// -------- Site adapters --------
+// --- boot logs so we can see activity in DevTools ---
+console.log("[TRUSTE] content script loaded on", location.href);
+
+// -------- Site adapters (site-specific selectors) --------
 const TRUSTE_SITES = {
   "www.reddit.com": {
-    find: () => Array.from(document.querySelectorAll('[data-test-id="comment"] p, .Comment div[data-click-id="text"]')),
-    text: el => el.innerText || "",
-    mount: (el, host) => el.closest('[data-test-id="comment"]')?.appendChild(host),
-    platform: "reddit"
+    find: () =>
+      Array.from(
+        document.querySelectorAll(
+          // comments often live under data-test-id or data-click-id; cover both
+          '[data-test-id="comment"] p, .Comment div[data-click-id="text"], div[id^="t1_"] p'
+        )
+      ),
+    text: (el) => el.innerText || "",
+    mount: (el, host) => el.closest('[data-test-id="comment"], .Comment, div[id^="t1_"]')?.appendChild(host),
+    platform: "reddit",
   },
   "www.tiktok.com": {
-    find: () => Array.from(document.querySelectorAll('[data-e2e="comment-level-1"] [data-e2e="comment-level-1-text"]')),
-    text: el => el.innerText || "",
+    find: () =>
+      Array.from(
+        document.querySelectorAll(
+          '[data-e2e="comment-level-1"] [data-e2e="comment-level-1-text"], [data-e2e="comment-text"]'
+        )
+      ),
+    text: (el) => el.innerText || "",
     mount: (el, host) => el.parentElement?.appendChild(host),
-    platform: "tiktok"
+    platform: "tiktok",
   },
   "www.amazon.com": {
-    find: () => Array.from(document.querySelectorAll('.review[data-hook="review"] .review-text')),
-    text: el => el.innerText || "",
+    find: () =>
+      Array.from(
+        document.querySelectorAll(
+          '.review[data-hook="review"] .review-text, [data-hook="review-body"]'
+        )
+      ),
+    text: (el) => el.innerText || "",
     mount: (el, host) => el.parentElement?.insertBefore(host, el),
-    platform: "amazon"
-  }
+    platform: "amazon",
+  },
 };
 
-const site = TRUSTE_SITES[location.host];
-if (!site) console.debug("[TRUSTE] unsupported host:", location.host);
+// -------- Universal fallback (any site) --------
+// Pick visible paragraphs/blocks with enough text, avoid nav/footers.
+const GENERIC_FALLBACK = {
+  find: () => {
+    const candidates = Array.from(
+      document.querySelectorAll("p, blockquote, article p, .comment, [role='article'] p")
+    ).filter((el) => {
+      const t = (el.innerText || "").trim();
+      const visible = !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+      return visible && t.length >= 40; // only non-trivial text
+    });
+    // Cap to first 12 per scan to avoid spamming API
+    return candidates.slice(0, 12);
+  },
+  text: (el) => el.innerText || "",
+  mount: (el, host) => {
+    // append in a safe spot
+    (el.parentElement || el).appendChild(host);
+  },
+  platform: "web",
+};
+
+const site = TRUSTE_SITES[location.host] || null;
+if (!site) console.debug("[TRUSTE] no site adapter, will use fallback:", location.host);
 
 // -------- Badge factory (Shadow DOM) --------
 function makeBadge(level = "human", humanScore = 0, reasons = []) {
   const wrap = document.createElement("span");
   const shadow = wrap.attachShadow({ mode: "open" });
 
-  // Host styles
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = chrome.runtime.getURL("badge.css");
 
-  // Pill
   const container = document.createElement("span");
   container.className = "eve-wrap";
   const pill = document.createElement("span");
@@ -47,7 +86,6 @@ function makeBadge(level = "human", humanScore = 0, reasons = []) {
 
   pill.append(dot, brand, score);
 
-  // Tooltip with reasons (if any)
   const tipWrap = document.createElement("span");
   tipWrap.className = "eve-tip";
   if (reasons?.length) tipWrap.textContent = reasons.slice(0, 3).join(" • ");
@@ -57,22 +95,18 @@ function makeBadge(level = "human", humanScore = 0, reasons = []) {
   return wrap;
 }
 
-// -------- Helper: normalize score shape from API --------
-// Accepts: { humanScore } or { aiScore } or { score } (ai-likelihood or human-likelihood)
-// We normalize to humanScore in [0..1].
+// -------- Score normalization --------
 function toHumanScore(r) {
   if (typeof r.humanScore === "number") return clamp01(r.humanScore);
   if (typeof r.aiScore === "number") return clamp01(1 - r.aiScore);
   if (typeof r.score === "number") {
-    // Heuristic: if label says 'ai' and score high, treat score as ai-likelihood
     if (r.label && /ai|bot|fake/i.test(r.label)) return clamp01(1 - r.score);
-    return clamp01(r.score); // otherwise treat as human-likelihood
+    return clamp01(r.score);
   }
   return 0.5;
 }
-function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+function clamp01(x) { return Math.max(0, Math.min(1, x)); }
 
-// -------- Buckets (labels) --------
 function bucket(h) {
   if (h >= 0.80) return "human";
   if (h >= 0.60) return "likely-human";
@@ -80,9 +114,9 @@ function bucket(h) {
   return "ai";
 }
 
-// -------- Visiblity filter to avoid scoring hidden nodes --------
+// -------- Visibility + batching --------
 const seen = new WeakSet();
-const io = new IntersectionObserver(entries => {
+const io = new IntersectionObserver((entries) => {
   const batch = [];
   for (const { target, isIntersecting } of entries) {
     if (!isIntersecting || seen.has(target)) continue;
@@ -94,11 +128,20 @@ const io = new IntersectionObserver(entries => {
 
 // -------- Find + observe --------
 function scan() {
-  if (!site) return;
-  for (const el of site.find()) io.observe(el);
+  console.log("[TRUSTE] scanning for text nodes...");
+  // try site adapter first
+  let nodes = site ? site.find() : [];
+  if (!nodes || nodes.length === 0) {
+    // fallback to generic
+    nodes = GENERIC_FALLBACK.find();
+    if (nodes.length) console.debug("[TRUSTE] using generic fallback, nodes:", nodes.length);
+  } else {
+    console.debug("[TRUSTE] site adapter matches:", nodes.length, "on", location.host);
+  }
+  for (const el of nodes) io.observe(el);
 }
 
-// Debounce scanning on DOM changes / scroll
+// Debounced scanning
 let deb;
 function scheduleScan(){ clearTimeout(deb); deb = setTimeout(scan, 300); }
 
@@ -108,11 +151,14 @@ new MutationObserver(scheduleScan).observe(document.body, { childList:true, subt
 
 // -------- Batch scoring --------
 function scoreNodes(nodes) {
-  const items = nodes.map(el => ({
-    id: el.dataset.eveId = el.dataset.eveId || Math.random().toString(36).slice(2),
-    text: site.text(el).slice(0, 1500),
-    context: { platform: site.platform, url: location.href }
-  })).filter(x => x.text && x.text.length > 3);
+  // choose active adapter (site or generic)
+  const A = (site && site.find().length) ? site : GENERIC_FALLBACK;
+
+  const items = nodes.map((el) => ({
+    id: (el.dataset.eveId = el.dataset.eveId || Math.random().toString(36).slice(2)),
+    text: A.text(el).slice(0, 1500),
+    context: { platform: A.platform, url: location.href },
+  })).filter((x) => x.text && x.text.length > 3);
 
   if (!items.length) return;
 
@@ -120,7 +166,7 @@ function scoreNodes(nodes) {
     if (!ok || !results) return;
 
     for (const r of results) {
-      const target = document.querySelector(`[data-eve-id="${r.id}"]`) || nodes.find(n => n.dataset.eveId === r.id);
+      const target = document.querySelector(`[data-eve-id="${r.id}"]`) || nodes.find((n) => n.dataset.eveId === r.id);
       if (!target) continue;
 
       const humanScore = toHumanScore(r);
@@ -128,7 +174,7 @@ function scoreNodes(nodes) {
       const reasons = r.reasons || [];
 
       try {
-        site.mount(target, makeBadge(label, humanScore, reasons));
+        (A.mount || site?.mount || GENERIC_FALLBACK.mount)(target, makeBadge(label, humanScore, reasons));
       } catch (e) {
         console.warn("[TRUSTE] mount failed", e);
       }
