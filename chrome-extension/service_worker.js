@@ -1,104 +1,178 @@
-// EVE TRUSTE — Background (MV3 Service Worker)
-const DEBUG = false;
-const dlog = (...a) => DEBUG && console.log("[TRUSTE:SW]", ...a);
+// ============================================
+// EVE TRUSTE — Production Scoring Service Worker (Final)
+// ============================================
 
-// Simple in-memory backoff per origin
-const backoff = new Map(); // origin -> { delay, until }
+const API_URL = "https://nao-sdk-api.onrender.com/api/scoreEffort";
+const DEBUG = true;
+const dlog = (...a) => DEBUG && console.log("[EVE TRUSTE SW]", ...a);
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.alarms.create("keepalive", { periodInMinutes: 0.9 });
-});
+// ============================================
+// Config: load API key from Chrome storage
+// ============================================
+let API_KEY = null;
+if (chrome?.storage?.sync) {
+  chrome.storage.sync.get({ trusteApiKey: null }, (res) => {
+    API_KEY = res.trusteApiKey || null;
+    dlog("API_KEY loaded?", !!API_KEY);
+  });
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "sync") return;
+    if (changes.trusteApiKey) API_KEY = changes.trusteApiKey.newValue || null;
+  });
+}
 
-chrome.alarms.onAlarm.addListener((a) => {
-  if (a.name === "keepalive") {
-    // no-op ping to keep worker warm
-    dlog("keepalive");
-  }
-});
-
-// Port channel
+// ============================================
+// Port connection for batch scoring
+// ============================================
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== "TRUSTE_PORT") return;
-
   dlog("Port connected");
 
-  // Try to inject page-level passive shim into the main world for this tab.
-  try {
-    const tabId = port.sender?.tab?.id;
-    if (typeof tabId === 'number') {
-      chrome.scripting.executeScript({
-        target: { tabId },
-        files: ['inject-passive-shim.js'],
-        world: 'MAIN'
-      }).then(() => dlog('injected passive shim into tab', tabId)).catch(e => dlog('inject passive shim failed', e));
-    }
-  } catch (e) {
-    dlog('scripting.executeScript not available', e);
-  }
-
   port.onMessage.addListener(async (msg) => {
-    if (msg?.type === "TRUSTE_SCORE_BATCH") {
-      const origin = new URL(port.sender?.url || location.origin).origin;
-      await maybeWaitBackoff(origin);
-
-      try {
-        // Score via remote API (fallback to heuristic on failure)
-        let results;
-        try {
-          results = await scoreRemote(msg.items);
-          if (!results || !results.length) throw new Error('empty results');
-        } catch (e) {
-          dlog('scoreRemote failed, falling back to heuristic', e);
-          results = msg.items.map((it) => ({ elPath: it.elPath, score: heuristicScore(it.text) }));
-        }
-
-        // Adaptive backoff: if batch large, chill a bit
-        setBackoff(origin, Math.min(2000, 200 + msg.items.length * 10));
-
-        port.postMessage({ type: "TRUSTE_BATCH_RESULT", results });
-      } catch (e) {
-        setBackoff(origin, 1500);
-        dlog("batch error", e);
-        port.postMessage({ type: "TRUSTE_BATCH_RESULT", results: msg.items.map(it => ({ elPath: it.elPath, score: 0.5 })) });
-      }
+    if (msg.type === "TRUSTE_SCORE_BATCH") {
+      dlog("Scoring batch:", msg.items.length, "items from", msg.origin);
+      const results = await handleScoreBatch(msg.items, msg.origin);
+      port.postMessage({ type: "TRUSTE_BATCH_RESULT", results });
     }
   });
 });
 
-// Heuristic placeholder — deterministic & fast
-function heuristicScore(text) {
-  const t = text.toLowerCase();
-  let s = 0.6;
-  if (/\bfree\b|\bwin\b|\bcrypto\b/.test(t)) s -= 0.2;
-  if (/\blink\b|http/.test(t)) s -= 0.1;
-  if (t.length > 300) s += 0.05;
-  return Math.max(0, Math.min(1, s));
+// ============================================
+// Main Scoring Logic
+// ============================================
+async function handleScoreBatch(items, origin) {
+  // Try to score batch remotely first
+  try {
+    const remote = await scoreBatchRemote(items, origin);
+    if (remote && remote.length) {
+      return remote.map((r, i) => ({
+        elPath: r.elPath || items[i].elPath,
+        score:
+          typeof r.score === "number"
+            ? addJitter(normalizeScore(r.score, origin, items[i].text))
+            : computeHeuristicScore(items[i].text, origin),
+      }));
+    }
+  } catch (e) {
+    dlog("Batch remote scoring failed:", e && e.message);
+  }
+
+  // Fallback: local heuristic scoring
+  return items.map((it) => ({
+    elPath: it.elPath,
+    score: computeHeuristicScore(it.text, origin),
+  }));
 }
 
-// Remote scoring API
-async function scoreRemote(items) {
+// ============================================
+// Remote Scoring (Batch + Retry)
+// ============================================
+async function scoreBatchRemote(items, origin) {
   const controller = new AbortController();
-  const to = setTimeout(() => controller.abort(), 3000);
+  const to = setTimeout(() => controller.abort(), 5000);
+
   try {
-    const res = await fetch("https://nao-sdk-api.onrender.com/v1/truste/score", {
+    const headers = {
+      "Content-Type": "application/json",
+      "X-Requested-By": "EVE-TRUSTE-EXT",
+    };
+    if (API_KEY) headers["X-Api-Key"] = API_KEY;
+
+    const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Api-Key": "<KEY>" },
-      body: JSON.stringify({ items }),
-      signal: controller.signal
+      headers,
+      body: JSON.stringify({
+        items: items.map((i) => ({ text: i.text, elPath: i.elPath })),
+        origin,
+      }),
+      signal: controller.signal,
     });
+
+    if (!res.ok) throw new Error("Remote error " + res.status);
+
     const json = await res.json();
-    return json.results; // [{elPath, score}]
+    if (Array.isArray(json.results)) return json.results;
+    if (Array.isArray(json)) return json.map((r, i) => ({ elPath: items[i].elPath, score: r.score }));
+    throw new Error("Unexpected response structure");
+  } catch (err) {
+    dlog("Remote batch failed, retrying once:", err.message);
+    await new Promise((r) => setTimeout(r, 300 + Math.random() * 400));
+
+    try {
+      const res2 = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Requested-By": "EVE-TRUSTE-EXT" },
+        body: JSON.stringify({
+          items: items.map((i) => ({ text: i.text, elPath: i.elPath })),
+          origin,
+        }),
+      });
+      if (res2.ok) {
+        const json2 = await res2.json();
+        if (Array.isArray(json2.results)) return json2.results;
+      }
+    } catch (e2) {
+      dlog("Retry failed:", e2.message);
+    }
   } finally {
     clearTimeout(to);
   }
+
+  return [];
 }
 
-function setBackoff(origin, ms) {
-  backoff.set(origin, { delay: ms, until: Date.now() + ms });
+// ============================================
+// Heuristic Engine (Offline / Backup)
+// ============================================
+function computeHeuristicScore(text, origin = "generic") {
+  const len = text.length;
+  const punctuation = (text.match(/[.,!?]/g) || []).length;
+  const emoji = (text.match(/[\u{1F600}-\u{1F64F}]/gu) || []).length;
+  const urls = (text.match(/https?:\/\//g) || []).length;
+  const caps = (text.match(/[A-Z]{2,}/g) || []).length;
+  const digits = (text.match(/\d/g) || []).length;
+
+  // Baseline: longer, punctuated text = more human
+  let score = 0.4 + Math.min(len / 2000, 0.3);
+  score += Math.min(punctuation / 10, 0.1);
+  score -= Math.min(emoji / 5, 0.15);
+  score -= Math.min(urls * 0.05, 0.2);
+  score -= Math.min(caps / 20, 0.1);
+  score += Math.min(digits / 100, 0.05);
+
+  // Domain-specific modifiers
+  if (/reddit|twitter|tiktok|youtube|instagram/.test(origin)) score -= 0.05;
+  if (/amazon|yelp|tripadvisor|etsy/.test(origin)) score += 0.05;
+  if (/linkedin|medium|news|substack/.test(origin)) score += 0.1;
+
+  return clamp(score + (Math.random() - 0.5) * 0.1, 0, 1);
 }
-async function maybeWaitBackoff(origin) {
-  const b = backoff.get(origin);
-  if (!b) return;
-  const wait = b.until - Date.now();
-  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+
+// ============================================
+// Score Normalization + Jitter
+// ============================================
+function normalizeScore(raw, origin, text) {
+  let adj = raw;
+
+  // Adjust by content type
+  if (/review|testimonial/.test(text)) adj += 0.05;
+  if (/bot|AI|generated/i.test(text)) adj -= 0.2;
+  if (/reddit|twitter|tiktok/.test(origin)) adj -= 0.05;
+  if (/amazon|yelp/.test(origin)) adj += 0.05;
+  if (/news|medium|substack/.test(origin)) adj += 0.05;
+
+  return clamp(adj, 0, 1);
 }
+
+function addJitter(score) {
+  return clamp(score + (Math.random() - 0.5) * 0.05, 0, 1);
+}
+
+function clamp(x, a, b) {
+  return Math.min(Math.max(x, a), b);
+}
+
+// ============================================
+// Diagnostics / Heartbeat
+// ============================================
+setInterval(() => dlog("heartbeat", new Date().toISOString()), 600000);
