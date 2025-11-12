@@ -76,13 +76,30 @@ function pumpQueue() {
 
 // 4. Receive scores + mark nodes
 port.onMessage.addListener((msg) => {
-  if (msg.type === "TRUSTE_BATCH_RESULT") {
+    if (msg.type === "TRUSTE_BATCH_RESULT") {
     inflight = Math.max(0, inflight - 1);
     for (const r of msg.results) {
       const el = queryPath(r.elPath);
       if (!el) continue;
+      // mount the pill (if running in sites that use makeBadge) or add classes
+      try {
+        const label = r.score >= 0.8 ? 'human' : (r.score <= 0.35 ? 'ai' : 'likely-human');
+        const wrapper = document.createElement('span');
+        wrapper.className = 'eve-wrap';
+        const pill = document.createElement('span');
+        pill.className = 'eve-pill';
+        pill.setAttribute('data-level', label);
+        const dot = document.createElement('span'); dot.className = 'eve-dot';
+        const brand = document.createElement('span'); brand.className = 'eve-brand'; brand.textContent = 'TRUSTE';
+        const score = document.createElement('span'); score.className = 'eve-score'; score.textContent = `· ${Math.round((r.score||0)*100)}%`;
+        pill.append(dot, brand, score);
+        wrapper.appendChild(pill);
+        (el.parentElement || el).appendChild(wrapper);
+      } catch (e) { dlog('mount pill failed', e); }
+
+      // Add ambient color aura
       if (r.score >= 0.8) el.classList.add("truste-verified");
-      else if (r.score <= 0.35) el.classList.add("truste-flagged");
+      else if (r.score < 0.35) el.classList.add("truste-flagged");
     }
     pumpQueue();
   }
