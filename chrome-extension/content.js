@@ -1,121 +1,124 @@
-// EVE TRUSTE — Content Script
-const DEBUG = false; // flip true while dev
+// ================================================
+// EVE TRUSTE — Universal Content Scanner (2026-ready)
+// ================================================
+
+const DEBUG = true;
 const dlog = (...a) => DEBUG && console.log("[TRUSTE]", ...a);
 
-dlog("content script loaded on", location.href);
+dlog("Universal content script loaded on", location.hostname);
 
-// ===== Config =====
-const SCAN_INTERVAL_MS = 500;          // min delay between scans
-const BATCH_MAX = 20;                  // nodes per score batch
-const MAX_INFLIGHT = 2;                // concurrent batches
-const ATTR_MARK = "data-truste-scanned";
+// ---- Passive Shim Injector (still needed for performance)
+(function injectPassiveShim() {
+  try {
+    const s = document.createElement("script");
+    s.src = chrome.runtime.getURL("passive-shim.js");
+    s.onload = () => s.remove();
+    (document.head || document.documentElement).appendChild(s);
+  } catch (e) {
+    console.warn("[TRUSTE] passive shim failed", e);
+  }
+})();
 
-// Long-lived channel to SW (survives many messages)
+// ---- Universal Discovery + Scoring ----
+
 let port = chrome.runtime.connect({ name: "TRUSTE_PORT" });
 port.onDisconnect.addListener(() => {
-  // Reconnect if SW recycled
   port = chrome.runtime.connect({ name: "TRUSTE_PORT" });
 });
 
-const scoreQueue = [];
+const seen = new WeakSet();
 let inflight = 0;
-let lastScan = 0;
-let scanScheduled = false;
+const MAX_INFLIGHT = 3;
+const BATCH_SIZE = 20;
 
-// ===== Utilities =====
-const textish = (el) =>
-  el && el.nodeType === 1 && !el.hasAttribute(ATTR_MARK) &&
-  el.offsetParent !== null &&            // visible enough
-  el.childNodes.length &&
-  Array.from(el.childNodes).some(n => n.nodeType === 3 && n.nodeValue.trim().length > 8);
-
-function* walkCandidates(root) {
+// 1. Discover meaningful text nodes on any site
+function discoverReadableNodes(root = document.body, limit = 400) {
+  const found = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
     acceptNode(node) {
-      return textish(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-    }
+      const style = window.getComputedStyle(node);
+      if (style.display === "none" || style.visibility === "hidden") return NodeFilter.FILTER_REJECT;
+      const text = node.innerText || "";
+      if (text.length < 60) return NodeFilter.FILTER_SKIP;
+      if (text.length > 5000) return NodeFilter.FILTER_SKIP;
+      if (/(©|cookie|sign in|log in|terms|privacy)/i.test(text)) return NodeFilter.FILTER_SKIP;
+      return NodeFilter.FILTER_ACCEPT;
+    },
   });
   let n;
-  while ((n = walker.nextNode())) yield n;
+  while ((n = walker.nextNode()) && found.length < limit) found.push(n);
+  return found;
 }
 
-// ===== Scoring Batching =====
+// 2. Queue new elements for scoring
+const queue = [];
 function enqueueForScoring(nodes) {
   for (const node of nodes) {
-    node.setAttribute(ATTR_MARK, "1");
-    const text = Array.from(node.childNodes)
-      .filter(n => n.nodeType === 3)
-      .map(n => n.nodeValue.trim())
-      .join(" ")
-      .slice(0, 1000); // cap payload
-    if (text) scoreQueue.push({ text, elPath: getPath(node) });
+    if (seen.has(node)) continue;
+    seen.add(node);
+    const text = node.innerText.trim().slice(0, 1000);
+    if (text) queue.push({ el: node, text, elPath: getPath(node) });
   }
   pumpQueue();
 }
 
+// 3. Send in batches
 function pumpQueue() {
-  while (inflight < MAX_INFLIGHT && scoreQueue.length) {
-    const batch = scoreQueue.splice(0, BATCH_MAX);
-    inflight++;
-    port.postMessage({ type: "TRUSTE_SCORE_BATCH", items: batch });
-  }
+  if (inflight >= MAX_INFLIGHT || queue.length === 0) return;
+  const batch = queue.splice(0, BATCH_SIZE);
+  inflight++;
+  port.postMessage({
+    type: "TRUSTE_SCORE_BATCH",
+    origin: location.hostname,
+    items: batch.map(({ text, elPath }) => ({ text, elPath })),
+  });
 }
 
+// 4. Receive scores + mark nodes
 port.onMessage.addListener((msg) => {
-  if (msg?.type === "TRUSTE_BATCH_RESULT") {
+  if (msg.type === "TRUSTE_BATCH_RESULT") {
     inflight = Math.max(0, inflight - 1);
-    // Example render hook (badge, class, etc.)
     for (const r of msg.results) {
-      // Use dataset path to find node fast without layout reads
       const el = queryPath(r.elPath);
       if (!el) continue;
-      el.classList.toggle("truste-flagged", r.score < 0.35);
-      el.classList.toggle("truste-verified", r.score >= 0.8);
+      if (r.score >= 0.8) el.classList.add("truste-verified");
+      else if (r.score <= 0.35) el.classList.add("truste-flagged");
     }
     pumpQueue();
   }
 });
 
-// ===== Scanning (debounced, no reflow) =====
-const scheduleScan = () => {
-  if (scanScheduled) return;
-  scanScheduled = true;
-  const due = Math.max(0, SCAN_INTERVAL_MS - (performance.now() - lastScan));
-  setTimeout(() => {
-    scanScheduled = false;
-    lastScan = performance.now();
-    const nodes = [...walkCandidates(document.body)].slice(0, 200); // cap per pass
-    dlog("scanning… nodes:", nodes.length);
-    enqueueForScoring(nodes);
-  }, due);
-};
-
-// Initial + mutation-driven scans
-if (document.readyState === "loading") {
-  addEventListener("DOMContentLoaded", scheduleScan, { passive: true, once: true });
-} else {
-  scheduleScan();
-}
-
-const mo = new MutationObserver((muts) => {
-  // If large mutation, rescan once after quiet period
-  scheduleScan();
+// 5. Observe DOM changes (for dynamic pages)
+const observer = new MutationObserver(() => {
+  clearTimeout(observer.debounce);
+  observer.debounce = setTimeout(scanPage, 700);
 });
-mo.observe(document.documentElement, { subtree: true, childList: true, characterData: false });
+observer.observe(document.body, { childList: true, subtree: true });
 
-// ===== Helpers (path without layout reads) =====
+// 6. Initial scan
+function scanPage() {
+  const nodes = discoverReadableNodes();
+  dlog("scanning…", nodes.length, "nodes");
+  enqueueForScoring(nodes);
+}
+scanPage();
+
+// ---- Path helpers ----
 function getPath(el) {
   const path = [];
   let node = el;
   while (node && node.nodeType === 1 && path.length < 10) {
-    let idx = 0;
-    let sib = node.previousElementSibling;
-    while (sib) { if (sib.tagName === node.tagName) idx++; sib = sib.previousElementSibling; }
+    let idx = 0, sib = node.previousElementSibling;
+    while (sib) {
+      if (sib.tagName === node.tagName) idx++;
+      sib = sib.previousElementSibling;
+    }
     path.unshift(node.tagName + ":" + idx);
     node = node.parentElement;
   }
   return path.join("/");
 }
+
 function queryPath(path) {
   try {
     const parts = path.split("/");
@@ -123,8 +126,7 @@ function queryPath(path) {
     for (const p of parts) {
       const [tag, idxStr] = p.split(":");
       const idx = Number(idxStr);
-      let count = -1;
-      let found = null;
+      let count = -1, found = null;
       for (const child of cur.children) {
         if (child.tagName === tag) {
           count++;
@@ -135,9 +137,7 @@ function queryPath(path) {
       cur = found;
     }
     return cur;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
-
-// ===== Quiet down the console =====
-console.debug = DEBUG ? console.debug : () => {};
-console.info  = DEBUG ? console.info  : () => {};
