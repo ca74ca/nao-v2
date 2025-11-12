@@ -7,6 +7,33 @@ const DEBUG = true;
 const dlog = (...a) => DEBUG && console.log("[EVE TRUSTE SW]", ...a);
 
 // ============================================
+// Universal running calibration (no domain rules)
+// ============================================
+let CAL = { mu: 0.55, sigma: 0.18, alpha: 0.02 }; // start reasonable; self-tunes
+
+function updateRunningCalibrators(raw) {
+  // EMA mean
+  CAL.mu = (1 - CAL.alpha) * CAL.mu + CAL.alpha * raw;
+  // EMA variance via EMA of squared deviation
+  const dev = raw - CAL.mu;
+  CAL.sigma = Math.max(0.08, Math.sqrt((1 - CAL.alpha) * (CAL.sigma**2) + CAL.alpha * (dev**2)));
+}
+
+function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+
+// Map any raw [0..1] into friendly % using running stats (universal)
+function universalCalibrate(raw) {
+  // z-score using running mean/variance
+  const z = (raw - CAL.mu) / CAL.sigma;
+  // compress extremes a bit, lift mids
+  let s = sigmoid(0.9 * z);            // 0.9 = global slope
+  s = clamp(s, 0, 1);
+  // mild jitter for realism
+  s += (Math.random() - 0.5) * 0.03;
+  return clamp(s, 0, 1);
+}
+
+// ============================================
 // Config: load API key from Chrome storage
 // ============================================
 let API_KEY = null;
@@ -45,23 +72,24 @@ async function handleScoreBatch(items, origin) {
   try {
     const remote = await scoreBatchRemote(items, origin);
     if (remote && remote.length) {
-      return remote.map((r, i) => ({
-        elPath: r.elPath || items[i].elPath,
-        score:
-          typeof r.score === "number"
-            ? addJitter(normalizeScore(r.score, origin, items[i].text))
-            : computeHeuristicScore(items[i].text, origin),
-      }));
+      return remote.map((r, i) => {
+        const raw = typeof r.score === "number" ? normalizeScore(r.score, origin, items[i].text) : computeHeuristicScore(items[i].text, origin);
+        updateRunningCalibrators(raw);
+        const finalScore = universalCalibrate(raw);
+        return { elPath: r.elPath || items[i].elPath, score: finalScore };
+      });
     }
   } catch (e) {
     dlog("Batch remote scoring failed:", e && e.message);
   }
 
   // Fallback: local heuristic scoring
-  return items.map((it) => ({
-    elPath: it.elPath,
-    score: computeHeuristicScore(it.text, origin),
-  }));
+  return items.map((it) => {
+    const raw = computeHeuristicScore(it.text, origin);
+    updateRunningCalibrators(raw);
+    const finalScore = universalCalibrate(raw);
+    return { elPath: it.elPath, score: finalScore };
+  });
 }
 
 // ============================================
@@ -135,10 +163,11 @@ function computeHeuristicScore(text, origin = "generic") {
   // Baseline: longer, punctuated text = more human
   let score = 0.4 + Math.min(len / 2000, 0.3);
   score += Math.min(punctuation / 10, 0.1);
-  score -= Math.min(emoji / 5, 0.15);
-  score -= Math.min(urls * 0.05, 0.2);
+  score -= Math.min(emoji / 6, 0.10);
+  score -= Math.min(urls * 0.04, 0.12);
   score -= Math.min(caps / 20, 0.1);
   score += Math.min(digits / 100, 0.05);
+  if (len > 80 && punctuation >= 1) score = Math.max(score, 0.62); // floor for clearly human
 
   // Domain-specific modifiers
   if (/reddit|twitter|tiktok|youtube|instagram/.test(origin)) score -= 0.05;
@@ -151,17 +180,11 @@ function computeHeuristicScore(text, origin = "generic") {
 // ============================================
 // Score Normalization + Jitter
 // ============================================
-function normalizeScore(raw, origin, text) {
-  let adj = raw;
-
-  // Adjust by content type
-  if (/review|testimonial/.test(text)) adj += 0.05;
-  if (/bot|AI|generated/i.test(text)) adj -= 0.2;
-  if (/reddit|twitter|tiktok/.test(origin)) adj -= 0.05;
-  if (/amazon|yelp/.test(origin)) adj += 0.05;
-  if (/news|medium|substack/.test(origin)) adj += 0.05;
-
-  return clamp(adj, 0, 1);
+function normalizeScore(raw, _origin, text) {
+  let s = raw;
+  if (/review|testimonial/i.test(text)) s += 0.03;
+  if (/\b(bot|ai[-\s]?generated)\b/i.test(text)) s -= 0.15;
+  return clamp(s, 0, 1);
 }
 
 function addJitter(score) {
