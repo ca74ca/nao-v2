@@ -84,17 +84,19 @@ port.onMessage.addListener((msg) => {
       // mount the pill (if running in sites that use makeBadge) or add classes
       try {
         const label = r.score >= 0.8 ? 'human' : (r.score <= 0.35 ? 'ai' : 'likely-human');
-        const wrapper = document.createElement('span');
-        wrapper.className = 'eve-wrap';
-        const pill = document.createElement('span');
-        pill.className = 'eve-pill';
+  const wrapper = document.createElement('span');
+  wrapper.className = 'eve-wrap';
+  const pill = document.createElement('span');
+  pill.className = 'eve-pill fade-in';
         pill.setAttribute('data-level', label);
         const dot = document.createElement('span'); dot.className = 'eve-dot';
         const brand = document.createElement('span'); brand.className = 'eve-brand'; brand.textContent = 'TRUSTE';
         const score = document.createElement('span'); score.className = 'eve-score'; score.textContent = `· ${Math.round((r.score||0)*100)}%`;
         pill.append(dot, brand, score);
         wrapper.appendChild(pill);
-        (el.parentElement || el).appendChild(wrapper);
+  (el.parentElement || el).appendChild(wrapper);
+  // Remove animation class after it finishes to avoid re-triggering on class mutations
+  setTimeout(() => pill.classList.remove('fade-in'), 400);
       } catch (e) { dlog('mount pill failed', e); }
 
       // Add ambient color aura
