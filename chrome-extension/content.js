@@ -139,6 +139,11 @@ function scan() {
     console.debug("[TRUSTE] site adapter matches:", nodes.length, "on", location.host);
   }
   for (const el of nodes) io.observe(el);
+  // FORCE a first score for what's already on screen (helps confirm end-to-end)
+  if (nodes.length) {
+    console.log("[TRUSTE] forcing first score for", Math.min(nodes.length, 5), "nodes");
+    scoreNodes(nodes.slice(0, 5));
+  }
 }
 
 // Debounced scanning
@@ -162,7 +167,14 @@ function scoreNodes(nodes) {
 
   if (!items.length) return;
 
-  chrome.runtime.sendMessage({ type: "TRUSTE_SCORE_BATCH", items }, ({ ok, results }) => {
+  console.log("[TRUSTE] sending batch", items.length, "→ TRUSTE_SCORE_BATCH");
+  chrome.runtime.sendMessage({ type: "TRUSTE_SCORE_BATCH", items }, (resp) => {
+    if (chrome.runtime.lastError) {
+      console.warn("[TRUSTE] sendMessage error:", chrome.runtime.lastError.message);
+      return;
+    }
+    const { ok, results } = resp || {};
+    console.log("[TRUSTE] batch response:", ok, results && results.length);
     if (!ok || !results) return;
 
     for (const r of results) {
