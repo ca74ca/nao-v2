@@ -1,30 +1,3 @@
-// Inject into PAGE world (not the isolated content-script world)
-(function injectPassiveShim() {
-  const code = `
-  (function(){
-    const origAdd = EventTarget.prototype.addEventListener;
-    const passiveTypes = new Set(['scroll','wheel','touchstart','touchmove']);
-    EventTarget.prototype.addEventListener = function(type, listener, options){
-      try {
-        if (passiveTypes.has(type)) {
-          if (options === undefined) {
-            options = { passive: true };
-          } else if (typeof options === 'boolean') {
-            options = { capture: options, passive: true };
-          } else if (typeof options === 'object' && options !== null && !('passive' in options)) {
-            options = Object.assign({}, options, { passive: true });
-          }
-        }
-      } catch(e){ /* no-op */ }
-      return origAdd.call(this, type, listener, options);
-    };
-  })();`;
-  const s = document.createElement('script');
-  s.textContent = code;
-  (document.documentElement || document.head || document.body).appendChild(s);
-  s.remove();
-})();
-
 // EVE TRUSTE — Content Script
 const DEBUG = false; // flip true while dev
 const dlog = (...a) => DEBUG && console.log("[TRUSTE]", ...a);

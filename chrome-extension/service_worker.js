@@ -22,6 +22,20 @@ chrome.runtime.onConnect.addListener((port) => {
 
   dlog("Port connected");
 
+  // Try to inject page-level passive shim into the main world for this tab.
+  try {
+    const tabId = port.sender?.tab?.id;
+    if (typeof tabId === 'number') {
+      chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['inject-passive-shim.js'],
+        world: 'MAIN'
+      }).then(() => dlog('injected passive shim into tab', tabId)).catch(e => dlog('inject passive shim failed', e));
+    }
+  } catch (e) {
+    dlog('scripting.executeScript not available', e);
+  }
+
   port.onMessage.addListener(async (msg) => {
     if (msg?.type === "TRUSTE_SCORE_BATCH") {
       const origin = new URL(port.sender?.url || location.origin).origin;
