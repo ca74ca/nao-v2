@@ -93,60 +93,65 @@ async function handleScoreBatch(items, origin) {
 }
 
 // ============================================
-// Remote Scoring (Batch + Retry)
+// Remote Scoring (Batch + Single Fallback)
 // ============================================
 async function scoreBatchRemote(items, origin) {
   const controller = new AbortController();
   const to = setTimeout(() => controller.abort(), 5000);
+  const headers = { "Content-Type": "application/json", "X-Requested-By": "EVE-TRUSTE-EXT" };
+  if (API_KEY) headers["X-Api-Key"] = API_KEY;
 
   try {
-    const headers = {
-      "Content-Type": "application/json",
-      "X-Requested-By": "EVE-TRUSTE-EXT",
-    };
-    if (API_KEY) headers["X-Api-Key"] = API_KEY;
-
+    // Try your current endpoint as batch first
     const res = await fetch(API_URL, {
       method: "POST",
       headers,
-      body: JSON.stringify({
-        items: items.map((i) => ({ text: i.text, elPath: i.elPath })),
-        origin,
-      }),
+      body: JSON.stringify({ items: items.map(i => ({ text: i.text, elPath: i.elPath })), origin }),
       signal: controller.signal,
     });
 
-    if (!res.ok) throw new Error("Remote error " + res.status);
+    if (res.status === 404) {
+      dlog("Batch endpoint 404 – falling back to single-item calls");
+      // Per-item fallback using single scoring route
+      const singles = await Promise.all(items.map(async (i) => {
+        const raw = await scoreSingleRemote(i.text, origin, headers);
+        return { elPath: i.elPath, score: typeof raw === "number" ? raw : computeHeuristicScore(i.text) };
+      }));
+      return singles;
+    }
 
-    const json = await res.json();
-    if (Array.isArray(json.results)) return json.results;
-    if (Array.isArray(json)) return json.map((r, i) => ({ elPath: items[i].elPath, score: r.score }));
+    if (!res.ok) throw new Error("Remote error " + res.status);
+    const jsonText = await res.text();
+    let json; try { json = JSON.parse(jsonText); } catch { dlog("Non-JSON response:", jsonText.slice(0,180)); }
+    if (json && Array.isArray(json.results)) return json.results;
+    if (json && Array.isArray(json)) return json.map((r, i) => ({ elPath: items[i].elPath, score: r.score }));
     throw new Error("Unexpected response structure");
   } catch (err) {
-    dlog("Remote batch failed, retrying once:", err.message);
-    await new Promise((r) => setTimeout(r, 300 + Math.random() * 400));
-
-    try {
-      const res2 = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Requested-By": "EVE-TRUSTE-EXT" },
-        body: JSON.stringify({
-          items: items.map((i) => ({ text: i.text, elPath: i.elPath })),
-          origin,
-        }),
-      });
-      if (res2.ok) {
-        const json2 = await res2.json();
-        if (Array.isArray(json2.results)) return json2.results;
-      }
-    } catch (e2) {
-      dlog("Retry failed:", e2.message);
-    }
+    dlog("Remote batch failed:", err.message, "— retrying once via singles");
+    const singles = await Promise.all(items.map(async (i) => {
+      const raw = await scoreSingleRemote(i.text, origin, headers);
+      return { elPath: i.elPath, score: typeof raw === "number" ? raw : computeHeuristicScore(i.text) };
+    }));
+    return singles;
   } finally {
     clearTimeout(to);
   }
+}
 
-  return [];
+async function scoreSingleRemote(text, origin, headers) {
+  try {
+    const r = await fetch(API_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ text, origin }),
+    });
+    if (!r.ok) { dlog("single POST status", r.status); return null; }
+    const data = await r.json();
+    return typeof data.effortScore === "number" ? data.effortScore : null;
+  } catch (e) {
+    dlog("single POST error", e.message);
+    return null;
+  }
 }
 
 // ============================================
