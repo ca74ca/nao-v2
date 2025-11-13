@@ -37,16 +37,38 @@ function discoverReadableNodes(root = document.body, limit = 400) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
     acceptNode(node) {
       const style = window.getComputedStyle(node);
-      if (style.display === "none" || style.visibility === "hidden") return NodeFilter.FILTER_REJECT;
-      const text = node.innerText || "";
-      if (text.length < 60) return NodeFilter.FILTER_SKIP;
-      if (text.length > 5000) return NodeFilter.FILTER_SKIP;
-      if (/(©|cookie|sign in|log in|terms|privacy)/i.test(text)) return NodeFilter.FILTER_SKIP;
+      if (style.display === "none" || style.visibility === "hidden") {
+        return NodeFilter.FILTER_REJECT;
+      }
+
+      const text = (node.innerText || "").trim();
+      const len = text.length;
+
+      // Too short to be meaningful
+      if (len < 8) return NodeFilter.FILTER_SKIP;
+      // Too huge (entire page, huge containers)
+      if (len > 5000) return NodeFilter.FILTER_SKIP;
+
+      // Skip obvious chrome / boilerplate
+      if (/(©|cookie|sign in|log in|terms|privacy|all rights reserved)/i.test(text)) {
+        return NodeFilter.FILTER_SKIP;
+      }
+
+      // Avoid pure numbers / counts like "3.2k", "42", "1,234"
+      if (/^[\d,.\sKkMm%+:-]+$/.test(text)) return NodeFilter.FILTER_SKIP;
+
+      // Require at least a bit of real language (letters)
+      const letters = (text.match(/[A-Za-z]/g) || []).length;
+      if (letters < 4) return NodeFilter.FILTER_SKIP;
+
       return NodeFilter.FILTER_ACCEPT;
     },
   });
+
   let n;
-  while ((n = walker.nextNode()) && found.length < limit) found.push(n);
+  while ((n = walker.nextNode()) && found.length < limit) {
+    found.push(n);
+  }
   return found;
 }
 
