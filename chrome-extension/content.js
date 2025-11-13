@@ -47,6 +47,9 @@ function discoverReadableNodes(root = document.body, limit = 400) {
       const text = (node.innerText || "").trim();
       const len = text.length;
 
+      // If visible area is tiny but text is huge, it's a hidden clone (YouTube/TikTok/X)
+      if (text.length > 80 && rect.height < 30) return NodeFilter.FILTER_SKIP;
+
       // Too short to be meaningful
       if (len < 8) return NodeFilter.FILTER_SKIP;
       // Too huge (entire page, huge containers)
