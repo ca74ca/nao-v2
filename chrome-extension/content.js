@@ -39,6 +39,17 @@ const trusteSeenBlocks = new Map();
 function shouldSkipBlock(el, text, score) {
   const sig = text.slice(0, 120); // lightweight signature
 
+  // --- NEW: skip if parent contains same text block ---
+  const parent = el.parentElement;
+  if (parent) {
+    const parentText = (parent.innerText || "").trim();
+    if (parentText === text) {
+      // unless extreme case
+      if (score >= 0.80 || score <= 0.30) return false;
+      return true; // skip child (duplicate)
+    }
+  }
+
   // First time seeing this text block → claim ownership
   if (!trusteSeenBlocks.has(sig)) {
     trusteSeenBlocks.set(sig, el);
