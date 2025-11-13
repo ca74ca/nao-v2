@@ -49,12 +49,14 @@
   from { opacity: 0; transform: translateY(-4px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
 .eve-pill.fade-in {
   animation: eve-fade-in 280ms ease-out both;
-  /* ==========================================================
+}
+
+/* ==========================================================
    TRUSTE Tooltip System (2026-ready)
    ========================================================== */
-
 .eve-pill {
   position: relative;
   cursor: pointer;
@@ -98,6 +100,4 @@
 .eve-pill:hover::after,
 .eve-pill:hover::before {
   opacity: 1;
-}
-
 }
