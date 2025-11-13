@@ -41,28 +41,6 @@ function discoverReadableNodes(root = document.body, limit = 400) {
         return NodeFilter.FILTER_REJECT;
       }
 
-      // ---- UGC Detection Filter ----
-      // Skip common UI/chrome elements by tag, class, role, or parent context
-      const tag = node.tagName.toLowerCase();
-      const className = node.className || "";
-      const id = node.id || "";
-      const role = node.getAttribute("role") || "";
-      
-      // Skip structural/navigation elements
-      if (["nav", "header", "footer", "aside", "form", "button", "input", "select"].includes(tag)) {
-        return NodeFilter.FILTER_REJECT;
-      }
-      
-      // Skip by role
-      if (/(button|menu|navigation|banner|complementary|contentinfo|search|toolbar)/i.test(role)) {
-        return NodeFilter.FILTER_REJECT;
-      }
-      
-      // Skip common UI class/id patterns
-      if (/(sidebar|topbar|navbar|menu|header|footer|ad|promo|widget|toolbar|breadcrumb|pagination|vote|score|karma|points|upvote|downvote)/i.test(className + " " + id)) {
-        return NodeFilter.FILTER_REJECT;
-      }
-
       const text = (node.innerText || "").trim();
       const len = text.length;
 
@@ -72,7 +50,7 @@ function discoverReadableNodes(root = document.body, limit = 400) {
       if (len > 5000) return NodeFilter.FILTER_SKIP;
 
       // Skip obvious chrome / boilerplate
-      if (/(©|cookie|sign in|log in|terms|privacy|all rights reserved|sponsored|advertisement)/i.test(text)) {
+      if (/(©|cookie|sign in|log in|terms|privacy|all rights reserved)/i.test(text)) {
         return NodeFilter.FILTER_SKIP;
       }
 
@@ -83,24 +61,7 @@ function discoverReadableNodes(root = document.body, limit = 400) {
       const letters = (text.match(/[A-Za-z]/g) || []).length;
       if (letters < 4) return NodeFilter.FILTER_SKIP;
 
-      // ---- Positive UGC signals ----
-      // Look for common UGC container patterns (comment, post, review, etc.)
-      const ugcPattern = /(comment|post|reply|review|message|caption|description|body|content|text|article)/i;
-      const hasUGCClass = ugcPattern.test(className + " " + id);
-      const hasUGCRole = role === "article" || role === "main";
-      const parentHasUGC = node.parentElement && ugcPattern.test((node.parentElement.className || "") + " " + (node.parentElement.id || ""));
-      
-      // If we have positive UGC signals, accept
-      if (hasUGCClass || hasUGCRole || parentHasUGC) {
-        return NodeFilter.FILTER_ACCEPT;
-      }
-      
-      // Otherwise, accept if text is substantial enough and passes basic heuristics
-      if (len >= 40 && letters >= 20) {
-        return NodeFilter.FILTER_ACCEPT;
-      }
-
-      return NodeFilter.FILTER_SKIP;
+      return NodeFilter.FILTER_ACCEPT;
     },
   });
 
