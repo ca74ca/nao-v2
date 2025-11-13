@@ -111,6 +111,14 @@ port.onMessage.addListener((msg) => {
   const pill = document.createElement('span');
   pill.className = 'eve-pill fade-in';
         pill.setAttribute('data-level', label);
+        
+        let tooltipText =
+          label === "human" ? "Trusted Human" :
+          label === "ai" ? "AI / Bot-Like Pattern" :
+          "Likely Human";
+        
+        pill.setAttribute("data-tooltip", tooltipText);
+        
         const dot = document.createElement('span'); dot.className = 'eve-dot';
         const brand = document.createElement('span'); brand.className = 'eve-brand'; brand.textContent = 'TRUSTE';
         const score = document.createElement('span'); score.className = 'eve-score'; score.textContent = `· ${Math.round((r.score||0)*100)}%`;
