@@ -36,6 +36,9 @@ function discoverReadableNodes(root = document.body, limit = 400) {
   const found = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
     acceptNode(node) {
+      const rect = node.getBoundingClientRect();
+      if (rect.width < 60 || rect.height < 20) return NodeFilter.FILTER_SKIP;
+
       const style = window.getComputedStyle(node);
       if (style.display === "none" || style.visibility === "hidden") {
         return NodeFilter.FILTER_REJECT;
