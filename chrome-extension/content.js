@@ -134,6 +134,13 @@ port.onMessage.addListener((msg) => {
     for (const r of msg.results) {
       const el = queryPath(r.elPath);
       if (!el) continue;
+
+      const text = (el.innerText || "").trim();
+      if (!text) continue;
+
+      // MODE D FILTER — skip if this block was already rendered
+      if (shouldSkipBlock(el, text, r.score)) continue;
+
       // mount the pill (if running in sites that use makeBadge) or add classes
       try {
         const label = r.score >= 0.8 ? 'human' : (r.score <= 0.35 ? 'ai' : 'likely-human');
