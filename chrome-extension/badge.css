@@ -51,4 +51,53 @@
 }
 .eve-pill.fade-in {
   animation: eve-fade-in 280ms ease-out both;
+  /* ==========================================================
+   TRUSTE Tooltip System (2026-ready)
+   ========================================================== */
+
+.eve-pill {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Tooltip Base */
+.eve-pill::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.82);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 999999;
+}
+
+/* Tooltip Arrow */
+.eve-pill::before {
+  content: "";
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0,0,0,0.82) transparent transparent transparent;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 999999;
+}
+
+/* Hover activate */
+.eve-pill:hover::after,
+.eve-pill:hover::before {
+  opacity: 1;
+}
+
 }
