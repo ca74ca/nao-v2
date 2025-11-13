@@ -31,6 +31,31 @@ let inflight = 0;
 const MAX_INFLIGHT = 3;
 const BATCH_SIZE = 20;
 
+// === TRUSTE 2026 MODE D — Block-Level Deduplication ===
+const trusteSeenBlocks = new Map(); 
+// key: small text signature
+// value: the element that "owns" the block
+
+function shouldSkipBlock(el, text, score) {
+  const sig = text.slice(0, 120); // lightweight signature
+
+  // First time seeing this text block → claim ownership
+  if (!trusteSeenBlocks.has(sig)) {
+    trusteSeenBlocks.set(sig, el);
+    return false; // do NOT skip
+  }
+
+  const owner = trusteSeenBlocks.get(sig);
+
+  // Extreme-score override (<30% or >80%) → allow child pill
+  if (score < 0.30 || score > 0.80) return false;
+
+  // Otherwise skip children with duplicated text
+  if (owner !== el) return true;
+
+  return false;
+}
+
 // 1. Discover meaningful text nodes on any site
 function discoverReadableNodes(root = document.body, limit = 400) {
   const found = [];
