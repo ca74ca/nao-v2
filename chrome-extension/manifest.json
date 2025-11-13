@@ -6,7 +6,9 @@
   "action": { "default_title": "TRUSTE" },
 
   "permissions": ["storage", "alarms", "scripting"],
-  "host_permissions": ["https://*/*", "http://*/*", "https://nao-sdk-api.onrender.com/*"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
 
   "background": {
     "service_worker": "service_worker.js",
@@ -15,10 +17,10 @@
 
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*"],
+      "matches": ["<all_urls>"],
       "js": ["content.js"],
-      "css": ["badge.css"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
 
