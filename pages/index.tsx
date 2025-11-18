@@ -13,6 +13,15 @@ export async function getServerSideProps() {
   return { props: {} };
 }
 
+const Safe = ({ children }: { children: React.ReactNode }) => {
+  try {
+    return children;
+  } catch (err) {
+    console.error("Component crashed:", err);
+    return null;
+  }
+};
+
 export default function Home() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -118,7 +127,7 @@ const handleSecureClick = () => {
 </div>
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}>
-          <FraudStatsDisplay />
+          <Safe><FraudStatsDisplay /></Safe>
         </div>
 
         {/* CTA */}
@@ -172,13 +181,13 @@ const handleSecureClick = () => {
             zIndex: 1,
           }}
         >
-          <GlobalStats />
-          <RedditFraudTracker />
+          <Safe><GlobalStats /></Safe>
+          <Safe><RedditFraudTracker /></Safe>
           <div style={{ marginTop: "3rem", width: "100%" }}>
-            <EffortNetStatsBox />
+            <Safe><EffortNetStatsBox /></Safe>
           </div>
           <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
-            <LeftColumnLiveFeed />
+            <Safe><LeftColumnLiveFeed /></Safe>
           </div>
         </div>
 
