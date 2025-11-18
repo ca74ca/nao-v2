@@ -9,30 +9,32 @@ function safeNumber(value: any): string {
 
 // Helper function to format currency for millions/thousands
 const formatCurrency = (num: number): string => {
-  if (num >= 1_000_000_000) {
-    return `$${(num / 1_000_000_000).toFixed(2)}B`;
+  const n = num ?? 0;
+  if (n >= 1_000_000_000) {
+    return `$${(n / 1_000_000_000).toFixed(2)}B`;
   }
-  if (num >= 1_000_000) {
-    return `$${(num / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000_000) {
+    return `$${(n / 1_000_000).toFixed(2)}M`;
   }
-  if (num >= 1_000) {
-    return `$${(num / 1_000).toFixed(1)}k`;
+  if (n >= 1_000) {
+    return `$${(n / 1_000).toFixed(1)}k`;
   }
-  return `$${num.toLocaleString('en-US')}`;
+  return `$${n.toLocaleString('en-US')}`;
 };
 
 // Helper function to format large numbers for thousands/millions
 const formatLargeNumber = (num: number): string => {
-  if (num >= 1_000_000_000) {
-    return `${(num / 1_000_000_000).toFixed(2)}B`;
+  const n = num ?? 0;
+  if (n >= 1_000_000_000) {
+    return `${(n / 1_000_000_000).toFixed(2)}B`;
   }
-  if (num >= 1_000_000) {
-    return `${(num / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000_000) {
+    return `${(n / 1_000_000).toFixed(2)}M`;
   }
-  if (num >= 1_000) {
-    return `${(num / 1_000).toFixed(1)}k`;
+  if (n >= 1_000) {
+    return `${(n / 1_000).toFixed(1)}k`;
   }
-  return num.toLocaleString('en-US');
+  return n.toLocaleString('en-US');
 };
 
 // StatBlock component now accepts a 'colorType' prop for dynamic styling
