@@ -25,9 +25,9 @@ export default function FraudTicker() {
   return (
     <div className="w-full overflow-hidden bg-black py-2 border-t border-b border-green-500">
       <div className="animate-marquee text-green-400 font-medium text-sm whitespace-nowrap px-4">
-        ${stats.fraudDollarsSaved.toFixed(2)} saved from fraud&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        {stats.fakeTiktoksBlocked} fake TikToks blocked&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        {stats.viewsPrevented.toLocaleString()} fraudulent views prevented
+        ${(stats.fraudDollarsSaved ?? 0).toFixed(2)} saved from fraud&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+        {stats.fakeTiktoksBlocked ?? 0} fake TikToks blocked&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+        {(stats.viewsPrevented ?? 0).toLocaleString()} fraudulent views prevented
       </div>
     </div>
   );

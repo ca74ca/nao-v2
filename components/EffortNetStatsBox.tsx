@@ -31,14 +31,14 @@ export default function EffortNetStatsBox() {
   if (!stats) return null;
 
   const statBlocks = [
-    { title: "Fraud Dollars Saved", value: `$${stats.fraudDollarsSaved.toLocaleString()}`, icon: "💵" },
-    { title: "Fake TikToks Blocked", value: stats.fakeTiktoksBlocked.toLocaleString(), icon: "📹" },
-    { title: "Fake Reviews Detected", value: stats.fakeReviewsDetected.toLocaleString(), icon: "🛒" },
-    { title: "AI-Spam Comments Blocked", value: stats.aiSpamCommentsBlocked.toLocaleString(), icon: "💬" },
-    { title: "Verified Human Effort", value: stats.verifiedHumanEffort.toLocaleString(), icon: "🧠" },
-    { title: "Cloned Content Flagged", value: stats.clonedContentFlagged.toLocaleString(), icon: "🔁" },
-    { title: "Views Prevented from Fraud", value: stats.viewsPrevented.toLocaleString(), icon: "👁️" },
-    { title: "Effort Scoring Requests", value: stats.effortApiCalls.toLocaleString(), icon: "📈" },
+    { title: "Fraud Dollars Saved", value: `$${(stats.fraudDollarsSaved ?? 0).toLocaleString()}`, icon: "💵" },
+    { title: "Fake TikToks Blocked", value: (stats.fakeTiktoksBlocked ?? 0).toLocaleString(), icon: "📹" },
+    { title: "Fake Reviews Detected", value: (stats.fakeReviewsDetected ?? 0).toLocaleString(), icon: "🛒" },
+    { title: "AI-Spam Comments Blocked", value: (stats.aiSpamCommentsBlocked ?? 0).toLocaleString(), icon: "💬" },
+    { title: "Verified Human Effort", value: (stats.verifiedHumanEffort ?? 0).toLocaleString(), icon: "🧠" },
+    { title: "Cloned Content Flagged", value: (stats.clonedContentFlagged ?? 0).toLocaleString(), icon: "🔁" },
+    { title: "Views Prevented from Fraud", value: (stats.viewsPrevented ?? 0).toLocaleString(), icon: "👁️" },
+    { title: "Effort Scoring Requests", value: (stats.effortApiCalls ?? 0).toLocaleString(), icon: "📈" },
   ];
 
   return (

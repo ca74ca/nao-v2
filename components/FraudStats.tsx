@@ -37,7 +37,7 @@ export default function FraudStats() {
         {stats.fakeTiktoksBlocked} Fake TikToks Blocked
       </div>
       <div className="text-red-500 text-sm">
-        {stats.viewsPrevented.toLocaleString()} Views Prevented from Monetization Fraud
+        {(stats.viewsPrevented ?? 0).toLocaleString()} Views Prevented from Monetization Fraud
       </div>
     </div>
   );

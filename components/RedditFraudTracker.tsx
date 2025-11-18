@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // Helper for safe number formatting with fallback
 function safeNumber(value: any): string {
   return typeof value === "number" && !isNaN(value)
-    ? value.toLocaleString()
+    ? (value ?? 0).toLocaleString()
     : "0";
 }
 
@@ -72,7 +72,7 @@ const StatBlock = ({ label, value, colorType }: { label: string; value: number |
           textShadow: `0 0 10px ${boxShadowColor}`, // Glow matches box shadow
         }}
       >
-      {typeof value === "number" && !isNaN(value) ? value.toLocaleString() : value}
+      {typeof value === "number" && !isNaN(value) ? (value ?? 0).toLocaleString() : value}
     </h2>
     <p style={{ fontSize: "0.75rem", opacity: 0.7, color: '#999', marginBottom: '0.2rem' }}>EVE Tracking</p>
     <p style={{ fontSize: "0.9rem", opacity: 0.85, color: '#cceeff' }}>{label}</p>
