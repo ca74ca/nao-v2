@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import GlobalStats from "../components/GlobalStats";
 import AuthModal from "../components/AuthModal";
-import LeftColumnLiveFeed from "../components/LeftColumnLiveFeed";
-import FraudStatsDisplay from "../components/FraudStatsDisplay";
-import EffortNetStatsBox from "../components/EffortNetStatsBox";
-import RedditFraudTracker from "../components/RedditFraudTracker";
 import { useRouter } from "next/router";
 import { useSession, signIn } from "next-auth/react";
 
@@ -127,7 +122,7 @@ const handleSecureClick = () => {
 </div>
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}>
-          <Safe><FraudStatsDisplay /></Safe>
+          {/* <Safe><FraudStatsDisplay /></Safe> */}
         </div>
 
         {/* CTA */}
@@ -181,14 +176,14 @@ const handleSecureClick = () => {
             zIndex: 1,
           }}
         >
-          <Safe><GlobalStats /></Safe>
-          <Safe><RedditFraudTracker /></Safe>
-          <div style={{ marginTop: "3rem", width: "100%" }}>
+          {/* <Safe><GlobalStats /></Safe> */}
+          {/* <Safe><RedditFraudTracker /></Safe> */}
+          {/* <div style={{ marginTop: "3rem", width: "100%" }}>
             <Safe><EffortNetStatsBox /></Safe>
-          </div>
-          <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
+          </div> */}
+          {/* <div style={{ width: "100%", maxWidth: "400px", margin: "2rem auto" }}>
             <Safe><LeftColumnLiveFeed /></Safe>
-          </div>
+          </div> */}
         </div>
 
         {showModal && <AuthModal onClose={() => setShowModal(false)} />}
